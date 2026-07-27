@@ -145,17 +145,21 @@ export function CVUploadForm() {
     {
       id: 'jd',
       label: 'Job description',
-      hint: 'Optional — add a JD to sharpen role-fit scoring, or skip and start below',
+      hint: 'Optional — add a JD to sharpen role-fit scoring',
       done: jdDone,
-      current: cvDone && !jdDone,
+      current: false,
       optional: true,
     },
     {
       id: 'start',
       label: 'Start practice',
-      hint: 'Begin your personalised practice interview',
+      hint: cvDone
+        ? jdDone
+          ? 'CV + JD ready — begin the interview'
+          : 'CV ready. Add a JD above, or start now'
+        : 'Unlocks after your CV is analysed',
       done: false,
-      current: cvDone && jdDone,
+      current: cvDone,
     },
   ];
 
