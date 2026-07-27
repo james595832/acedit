@@ -1,0 +1,30 @@
+import {Suspense} from 'react';
+import {Section} from '@astryxdesign/core/Section';
+import {Text} from '@astryxdesign/core/Text';
+import {SignInForm} from '@/components/SignInForm';
+import {isSupabaseConfigured} from '@/lib/supabase/config';
+
+export default function LoginPage() {
+  const configured = isSupabaseConfigured();
+
+  return (
+    <>
+      <header className="aced-masthead">
+        <div className="aced-masthead__copy">
+          <p className="aced-masthead__kicker">Account</p>
+          <h1>Sign in</h1>
+          <p className="aced-masthead__lead">
+            Pick up your CVs, sessions, and feedback where you left off.
+          </p>
+        </div>
+      </header>
+      <Section maxWidth={480} variant="transparent" padding={0}>
+        <div className="aced-panel">
+          <Suspense fallback={<Text>Loading…</Text>}>
+            <SignInForm configured={configured} />
+          </Suspense>
+        </div>
+      </Section>
+    </>
+  );
+}
