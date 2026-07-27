@@ -37,7 +37,6 @@ export const acedItTheme = defineTheme({
     '--color-background-card': ['#FFFFFF', '#2A2824'],
     '--color-background-popover': ['#FFFFFF', '#2A2824'],
     '--color-background-muted': ['#F7F7F5', '#1C1B18'],
-    '--color-background-wash': ['#FFFFFF', '#1C1B18'],
 
     // Charcoal primary; terracotta used for accent text/markers
     '--color-accent': ['#1C1B18', '#EFECE6'],
