@@ -3,6 +3,7 @@
 import {useActionState, useState} from 'react';
 import {FormLayout} from '@astryxdesign/core/FormLayout';
 import {TextInput} from '@astryxdesign/core/TextInput';
+import {CheckboxInput} from '@astryxdesign/core/CheckboxInput';
 import {Button} from '@astryxdesign/core/Button';
 import {VStack, HStack} from '@astryxdesign/core/Layout';
 import {Banner} from '@astryxdesign/core/Banner';
@@ -14,13 +15,20 @@ const initialState: AuthActionState = {error: null};
 
 type AuthFormProps = {
   configured: boolean;
+  trialDays?: number;
+  plan?: string;
 };
 
-export function SignUpForm({configured}: AuthFormProps) {
+export function SignUpForm({
+  configured,
+  trialDays = 5,
+  plan = 'pro',
+}: AuthFormProps) {
   const [state, formAction, isPending] = useActionState(signUp, initialState);
   const [fullName, setFullName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [marketingConsent, setMarketingConsent] = useState(false);
 
   return (
     <VStack gap={4}>
@@ -40,7 +48,15 @@ export function SignUpForm({configured}: AuthFormProps) {
         />
       ) : null}
 
+      <Banner
+        status="info"
+        title={`${trialDays}-day Pro trial`}
+        description="After you create your account you’ll enter card details on Stripe. £0 today — cancel anytime in Settings."
+      />
+
       <form action={formAction}>
+        <input type="hidden" name="trial" value={String(trialDays)} />
+        <input type="hidden" name="plan" value={plan} />
         <VStack gap={4}>
           <FormLayout>
             <TextInput
@@ -74,11 +90,20 @@ export function SignUpForm({configured}: AuthFormProps) {
               isDisabled={!configured || isPending}
               description="At least 6 characters"
             />
+            <CheckboxInput
+              label="Email me tips and product updates"
+              description="Optional. You can unsubscribe anytime. We’ll still send essential account and billing emails."
+              htmlName="marketing_consent"
+              value={marketingConsent}
+              onChange={setMarketingConsent}
+              isDisabled={!configured || isPending}
+              isOptional
+            />
           </FormLayout>
 
           <HStack gap={3} align="center" wrap="wrap">
             <Button
-              label="Create account"
+              label="Create account & continue"
               type="submit"
               variant="primary"
               isLoading={isPending}

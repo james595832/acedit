@@ -2,6 +2,32 @@
 
 export type SubscriptionTier = 'free' | 'pro' | 'premium';
 
+export type SubscriptionStatus =
+  | 'none'
+  | 'trialing'
+  | 'active'
+  | 'past_due'
+  | 'canceled'
+  | 'unpaid'
+  | 'incomplete'
+  | 'incomplete_expired'
+  | 'paused';
+
+export type Profile = {
+  id: string;
+  email: string;
+  full_name: string | null;
+  subscription_tier: SubscriptionTier;
+  stripe_customer_id: string | null;
+  stripe_subscription_id: string | null;
+  subscription_status: SubscriptionStatus;
+  trial_ends_at: string | null;
+  current_period_end: string | null;
+  marketing_consent: boolean;
+  created_at: string;
+  updated_at: string;
+};
+
 export type InterviewType = 'practice' | 'faang_stage_1';
 
 export type InterviewStatus = 'in_progress' | 'completed' | 'paused';
@@ -13,15 +39,6 @@ export type QuestionCategory =
   | 'whiteboard'
   | 'communication'
   | 'design_thinking';
-
-export type Profile = {
-  id: string;
-  email: string;
-  full_name: string | null;
-  subscription_tier: SubscriptionTier;
-  created_at: string;
-  updated_at: string;
-};
 
 export type CV = {
   id: string;

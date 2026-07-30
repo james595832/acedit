@@ -74,7 +74,7 @@ function ResultsInner() {
             <Banner
               status="warning"
               title="No session selected"
-              description="Open results from an interview session, or start a new practice run."
+              description="Results show scores from a finished practice run. Start practice from Studio, or open Results from a completed session."
             />
           ) : null}
 

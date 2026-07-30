@@ -35,10 +35,21 @@ export async function updateSession(request: NextRequest) {
 
   const path = request.nextUrl.pathname;
   const isProtected =
-    path.startsWith('/interview') || path.startsWith('/studio');
+    path.startsWith('/interview') ||
+    path.startsWith('/studio') ||
+    path.startsWith('/whiteboard') ||
+    path.startsWith('/api/whiteboard') ||
+    path.startsWith('/settings');
   const isAuthRoute = path === '/login' || path === '/signup';
 
   if (!user && isProtected) {
+    // APIs get JSON 401; pages redirect to login.
+    if (path.startsWith('/api/')) {
+      return NextResponse.json(
+        {error: 'Sign in required', code: 'UNAUTHORIZED'},
+        {status: 401},
+      );
+    }
     const redirectUrl = request.nextUrl.clone();
     redirectUrl.pathname = '/login';
     redirectUrl.searchParams.set('next', path);

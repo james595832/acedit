@@ -2,9 +2,11 @@
 
 import type {ReactNode} from 'react';
 import Image from 'next/image';
-import Link from 'next/link';
 import {usePathname} from 'next/navigation';
 import {AppShell} from '@astryxdesign/core/AppShell';
+import {HStack} from '@astryxdesign/core/Layout';
+import {MobileNav, MobileNavToggle} from '@astryxdesign/core/MobileNav';
+import {SideNavItem} from '@astryxdesign/core/SideNav';
 import {TopNav, TopNavHeading, TopNavItem} from '@astryxdesign/core/TopNav';
 import {AuthNav} from '@/components/AuthNav';
 
@@ -23,44 +25,77 @@ export function AppFrame({
   const isHome = pathname === '/';
 
   if (isHome) {
-    return (
-      <div className="aced-landing" data-theme="dark">
-        <header className="aced-landing__nav">
-          <Link href="/" className="aced-landing__logo" aria-label="ACED-IT home">
-            <Image
-              src="/ACED-IT.svg"
-              alt="ACED-IT"
-              width={120}
-              height={22}
-              className="aced-landing__logo-img"
-              priority
-            />
-          </Link>
-          <nav className="aced-landing__nav-end" aria-label="Landing actions">
-            <Link className="aced-pill aced-pill--solid" href="/studio">
-              Start practice
-            </Link>
-            <Link
-              className="aced-pill aced-pill--ghost"
-              href={userEmail ? '/studio' : '/login'}
-            >
-              {userEmail ? 'Studio' : 'Sign in'}
-            </Link>
-          </nav>
-        </header>
-        {children}
-      </div>
-    );
+    // Marketing landing owns its own chrome.
+    return children;
   }
+
+  const isInterview =
+    pathname.startsWith('/interview') &&
+    !pathname.startsWith('/interview/results');
+
+  const isStudio = pathname === '/studio';
+  const isResults = pathname.startsWith('/interview/results');
+  const isWhiteboard = pathname.startsWith('/whiteboard');
+
+  // Responsive contract:
+  //   > 1024px  logo left · Studio · Practice · Whiteboard · Results + account right
+  //   <= 1024px links hide; burger opens MobileNav drawer
+
+  const navItems = (
+    <>
+      <TopNavItem label="Studio" href="/studio" isSelected={isStudio} />
+      <TopNavItem label="Practice" href="/interview" isSelected={isInterview} />
+      <TopNavItem
+        label="Whiteboard"
+        href="/whiteboard"
+        isSelected={isWhiteboard}
+      />
+      <TopNavItem
+        label="Results"
+        href="/interview/results"
+        isSelected={isResults}
+      />
+    </>
+  );
 
   return (
     <AppShell
       height="auto"
       variant="wash"
-      contentPadding={4}
+      contentPadding={0}
+      mobileNav={{
+        breakpoint: 'lg',
+        hasToggle: false,
+        content: (
+          <MobileNav header="ACED-IT" side="end">
+            <SideNavItem label="Studio" href="/studio" isSelected={isStudio} />
+            <SideNavItem
+              label="Practice"
+              href="/interview"
+              isSelected={isInterview}
+            />
+            <SideNavItem
+              label="Whiteboard"
+              href="/whiteboard"
+              isSelected={isWhiteboard}
+            />
+            <SideNavItem
+              label="Results"
+              href="/interview/results"
+              isSelected={isResults}
+            />
+            <SideNavItem
+              label="Settings"
+              href="/settings"
+              isSelected={pathname.startsWith('/settings')}
+            />
+          </MobileNav>
+        ),
+      }}
       topNav={
         <TopNav
           label="ACED-IT primary navigation"
+          className="aced-top-nav"
           heading={
             <TopNavHeading
               headingHref="/"
@@ -75,35 +110,19 @@ export function AppFrame({
               }
             />
           }
-          startContent={
-            <>
-              <TopNavItem
-                label="Studio"
-                href="/studio"
-                isSelected={pathname === '/studio'}
-              />
-              <TopNavItem
-                label="Interview"
-                href="/interview"
-                isSelected={
-                  pathname.startsWith('/interview') &&
-                  !pathname.startsWith('/interview/results')
-                }
-              />
-              <TopNavItem
-                label="Results"
-                href="/interview/results"
-                isSelected={pathname.startsWith('/interview/results')}
-              />
-            </>
-          }
           endContent={
-            <AuthNav email={userEmail} configured={supabaseConfigured} />
+            <HStack gap={4} align="center" className="aced-nav-end">
+              <HStack gap={4} align="center" className="aced-nav-links">
+                {navItems}
+              </HStack>
+              <AuthNav email={userEmail} configured={supabaseConfigured} />
+              <MobileNavToggle label="Open navigation" />
+            </HStack>
           }
         />
       }
     >
-      {children}
+      <div className="aced-app-page">{children}</div>
     </AppShell>
   );
 }

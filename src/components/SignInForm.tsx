@@ -40,7 +40,7 @@ export function SignInForm({configured}: AuthFormProps) {
         <Banner
           status="success"
           title="Check your email"
-          description="Confirm your address, then sign in here."
+          description="Confirm your address, then sign in — you’ll continue to checkout if you started a trial."
         />
       ) : null}
 

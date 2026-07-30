@@ -41,12 +41,34 @@ Open [http://localhost:3000](http://localhost:3000).
    - Site URL: `http://localhost:3000`
    - Redirect URLs: `http://localhost:3000/auth/callback`
 5. **Authentication → Providers → Email** — enable Email. For fastest local testing, turn **off** “Confirm email”.
-6. **SQL Editor** — run both files in order:
+6. **SQL Editor** — run migration files in order:
    - `supabase/migrations/20260727180000_init.sql`
    - `supabase/migrations/20260727193000_auth_profile_trigger.sql`
+   - `supabase/migrations/20260728210000_stripe_billing.sql`
+   - `supabase/migrations/20260729230000_marketing_consent.sql`
+   - `supabase/migrations/20260730220000_protect_billing_columns.sql`
 7. Open `/signup`, create an account, then `/login`.
 
 Once those env vars are set, `/interview` requires a signed-in user. Without them, the app stays open in local stub mode.
+
+## Stripe billing (trial + cancel)
+
+Flow: **Start free trial** → create account → Stripe Checkout → Studio. Cancel from **Settings**.
+
+**Local setup (no Stripe CLI needed):**
+
+1. Test mode ON in Stripe.
+2. Create product + monthly price → copy `price_…` → `STRIPE_PRICE_ID_PRO`.
+3. Copy **Test** secret key `sk_test_…` → `STRIPE_SECRET_KEY`.
+4. Run billing SQL in Supabase SQL Editor:
+   - `20260728210000_stripe_billing.sql`
+   - `20260730220000_protect_billing_columns.sql` (locks billing columns to service role)
+5. Set `SUPABASE_SERVICE_KEY` (service_role) — required for Stripe → profile sync.
+6. Enable Customer portal (Settings → Billing → Customer portal) with cancel + update card.
+7. Set `NEXT_PUBLIC_APP_URL` to your real origin (add preview URLs via `ALLOWED_APP_ORIGINS` if needed).
+8. Restart `npm run dev` and try the trial flow with card `4242 4242 4242 4242`.
+
+`STRIPE_WEBHOOK_SECRET` is optional locally — membership syncs when Checkout / Portal returns you to the app. **Required in production** for cancel / payment-failure sync.
 
 ## Astryx
 

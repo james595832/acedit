@@ -1,0 +1,585 @@
+import {CHEAP_ANTHROPIC_MODEL, useStubs} from '@/lib/config';
+import type {WhiteboardChallenge} from '@/lib/whiteboard/challenges';
+
+export type ClarifyingMessage = {
+  role: 'user' | 'assistant';
+  content: string;
+};
+
+export type WhiteboardBoard = {
+  framing: string;
+  users: string;
+  flows: string;
+  solution: string;
+  tradeoffs: string;
+};
+
+export type DeliverableStatus = 'met' | 'partial' | 'missed';
+
+export type DeliverableAssessment = {
+  item: string;
+  status: DeliverableStatus;
+  note: string;
+};
+
+export type WhiteboardDebrief = {
+  score: number;
+  /** Did they answer the challenge goal? */
+  againstAsk: string;
+  summary: string;
+  deliverables: DeliverableAssessment[];
+  strengths: string[];
+  improvements: string[];
+  criteriaHit: string[];
+  criteriaMissed: string[];
+  /** How the sketch supports (or fails) the ask. */
+  sketchAssessment: string;
+  stub?: boolean;
+};
+
+function extractJsonObject(text: string): string {
+  const start = text.indexOf('{');
+  const end = text.lastIndexOf('}');
+  if (start >= 0 && end > start) return text.slice(start, end + 1);
+  return text;
+}
+
+function stubClarifyingReply(
+  challenge: WhiteboardChallenge,
+  question: string,
+): string {
+  const q = question.toLowerCase();
+  const matched = challenge.knownFacts.find((fact) => {
+    const keys = fact.toLowerCase().split(/\W+/).filter((w) => w.length > 4);
+    return keys.some((k) => q.includes(k));
+  });
+
+  if (matched) {
+    return `Good question. From what we know today: ${matched} Keep going — I won’t hand you the full solution.`;
+  }
+
+  if (
+    q.includes('metric') ||
+    q.includes('success') ||
+    q.includes('kpi') ||
+    q.includes('measure')
+  ) {
+    return 'I’d like you to propose the success metric. What would convince you the redesign worked in 4–6 weeks?';
+  }
+
+  if (q.includes('user') || q.includes('persona') || q.includes('who')) {
+    return 'Assume a primary user segment that matches the brief. You can name one primary and one secondary — justify the split briefly.';
+  }
+
+  if (q.includes('constraint') || q.includes('timeline') || q.includes('tech')) {
+    return `Constraints I’d flag: ${challenge.knownFacts[0] ?? 'Ship something believable this quarter.'} Engineering capacity is limited — prefer patterns you can phase.`;
+  }
+
+  return `I’ll stay in interviewer mode for “${challenge.title}”. Ask something specific about users, constraints, data, or success criteria — I won’t design it for you.`;
+}
+
+export async function answerClarifyingQuestion(input: {
+  challenge: WhiteboardChallenge;
+  messages: ClarifyingMessage[];
+}): Promise<string> {
+  const lastUser = [...input.messages].reverse().find((m) => m.role === 'user');
+  if (!lastUser) {
+    return 'Ask a clarifying question about the brief when you’re ready.';
+  }
+
+  if (useStubs()) {
+    return stubClarifyingReply(input.challenge, lastUser.content);
+  }
+
+  const apiKey = process.env.ANTHROPIC_API_KEY!;
+  const system = `You are a senior design interviewer running a live whiteboard challenge.
+
+Challenge title: ${input.challenge.title}
+Candidate brief (they can see this):
+${input.challenge.brief}
+
+Facts you may reveal if asked well:
+${input.challenge.knownFacts.map((f) => `- ${f}`).join('\n')}
+
+Internal context (reveal sparingly only if directly asked):
+${input.challenge.hiddenContext.map((f) => `- ${f}`).join('\n')}
+
+Rules:
+- Stay strictly in scope of this challenge. Refuse off-topic requests.
+- Answer like a real interviewer: concise, partial, never the full solution.
+- Do not write their flows, screens, or final recommendation for them.
+- Prefer answering with one useful fact + a nudge to decide.
+- If they ask you to design/solve it, decline and redirect them to the board.
+- Keep replies under 90 words.`;
+
+  const response = await fetch('https://api.anthropic.com/v1/messages', {
+    method: 'POST',
+    headers: {
+      'content-type': 'application/json',
+      'x-api-key': apiKey,
+      'anthropic-version': '2023-06-01',
+    },
+    body: JSON.stringify({
+      model: CHEAP_ANTHROPIC_MODEL,
+      max_tokens: 320,
+      system,
+      messages: input.messages.map((m) => ({
+        role: m.role,
+        content: m.content,
+      })),
+    }),
+  });
+
+  if (!response.ok) {
+    return stubClarifyingReply(input.challenge, lastUser.content);
+  }
+
+  const data = (await response.json()) as {
+    content: Array<{type: string; text?: string}>;
+  };
+  return (
+    data.content.find((c) => c.type === 'text')?.text?.trim() ||
+    stubClarifyingReply(input.challenge, lastUser.content)
+  );
+}
+
+function sectionLooksCovered(text: string, keywords: string[]): boolean {
+  const blob = text.toLowerCase();
+  if (blob.trim().length < 24) return false;
+  return keywords.some((k) => blob.includes(k));
+}
+
+function assessDeliverableLocally(
+  item: string,
+  board: WhiteboardBoard,
+  hasSketch: boolean,
+  clarifyingUsed: number,
+): DeliverableAssessment {
+  const blob = Object.values(board).join('\n').toLowerCase();
+  const lower = item.toLowerCase();
+
+  if (lower.includes('sketch') || lower.includes('screen')) {
+    if (hasSketch && (board.solution.trim().length > 20 || board.flows.trim().length > 20)) {
+      return {
+        item,
+        status: 'met',
+        note: 'Sketch present and solution/flow notes support what you drew.',
+      };
+    }
+    if (hasSketch) {
+      return {
+        item,
+        status: 'partial',
+        note: 'You sketched, but the talk track barely explains the screens/states.',
+      };
+    }
+    if (board.solution.trim().length > 40) {
+      return {
+        item,
+        status: 'partial',
+        note: 'Described a solution in notes, but no canvas sketch was saved.',
+      };
+    }
+    return {
+      item,
+      status: 'missed',
+      note: 'The ask required a sketch of key screens/states — none found.',
+    };
+  }
+
+  if (lower.includes('clarif') || lower.includes('who is affected') || lower.includes('problem')) {
+    const hasUsers = sectionLooksCovered(board.users, [
+      'user',
+      'shopper',
+      'admin',
+      'team',
+      'customer',
+      'patient',
+    ]);
+    const hasFraming = board.framing.trim().length > 30;
+    if ((hasUsers || hasFraming) && clarifyingUsed > 0) {
+      return {
+        item,
+        status: 'met',
+        note: 'You framed the problem and used clarifying questions.',
+      };
+    }
+    if (hasUsers || hasFraming) {
+      return {
+        item,
+        status: 'partial',
+        note: 'Some problem framing exists, but clarifying depth is thin.',
+      };
+    }
+    return {
+      item,
+      status: 'missed',
+      note: 'Little evidence you clarified the problem or affected users.',
+    };
+  }
+
+  if (lower.includes('flow') || lower.includes('sequence') || lower.includes('journey')) {
+    if (
+      sectionLooksCovered(board.flows, [
+        '→',
+        '->',
+        'step',
+        'flow',
+        'then',
+        'current',
+        'proposed',
+      ])
+    ) {
+      return {
+        item,
+        status: 'met',
+        note: 'Flow notes show a sequenced path.',
+      };
+    }
+    return {
+      item,
+      status: board.flows.trim().length > 20 ? 'partial' : 'missed',
+      note:
+        board.flows.trim().length > 20
+          ? 'Flow section started, but current → proposed is unclear.'
+          : 'No clear flow / sequence against the ask.',
+    };
+  }
+
+  if (
+    lower.includes('metric') ||
+    lower.includes('validation') ||
+    lower.includes('risk') ||
+    lower.includes('migration') ||
+    lower.includes('analytics') ||
+    lower.includes('test')
+  ) {
+    if (
+      sectionLooksCovered(board.tradeoffs, [
+        'metric',
+        'measure',
+        'risk',
+        'test',
+        'validate',
+        'kpi',
+        'event',
+        'migrat',
+        '%',
+      ])
+    ) {
+      return {
+        item,
+        status: 'met',
+        note: 'Tradeoffs cover measurement, risk, or next validation.',
+      };
+    }
+    return {
+      item,
+      status: board.tradeoffs.trim().length > 20 ? 'partial' : 'missed',
+      note: 'Missing a concrete metric, risk, or validation plan tied to the goal.',
+    };
+  }
+
+  // Generic keyword overlap against board text
+  const keys = lower
+    .split(/\W+/)
+    .filter((w) => w.length > 4)
+    .slice(0, 5);
+  const hits = keys.filter((k) => blob.includes(k)).length;
+  if (hits >= 2 && blob.length > 160) {
+    return {item, status: 'met', note: 'Covered in your board notes.'};
+  }
+  if (hits >= 1 || blob.length > 220) {
+    return {
+      item,
+      status: 'partial',
+      note: 'Touched lightly — strengthen how this maps to the goal.',
+    };
+  }
+  return {
+    item,
+    status: 'missed',
+    note: 'Not evidenced in the talk track or sketch.',
+  };
+}
+
+function scoreFromDeliverables(deliverables: DeliverableAssessment[]): number {
+  if (deliverables.length === 0) return 40;
+  const points = deliverables.reduce((sum, d) => {
+    if (d.status === 'met') return sum + 1;
+    if (d.status === 'partial') return sum + 0.5;
+    return sum;
+  }, 0);
+  return Math.round((points / deliverables.length) * 100);
+}
+
+function stubDebrief(
+  challenge: WhiteboardChallenge,
+  board: WhiteboardBoard,
+  clarifyingUsed: number,
+  hasSketch: boolean,
+): WhiteboardDebrief {
+  const blob = Object.values(board).join('\n').toLowerCase();
+  const deliverables = challenge.deliverables.map((item) =>
+    assessDeliverableLocally(item, board, hasSketch, clarifyingUsed),
+  );
+
+  const criteriaHit: string[] = [];
+  const criteriaMissed: string[] = [];
+  for (const item of challenge.successCriteria) {
+    const keys = item
+      .toLowerCase()
+      .split(/\W+/)
+      .filter((w) => w.length > 5)
+      .slice(0, 3);
+    const hit = keys.some((k) => blob.includes(k));
+    if (hit && blob.length > 100) criteriaHit.push(item);
+    else criteriaMissed.push(item);
+  }
+
+  const score = Math.min(
+    95,
+    Math.max(
+      18,
+      scoreFromDeliverables(deliverables) * 0.75 +
+        criteriaHit.length * 4 +
+        (hasSketch ? 6 : 0) +
+        (clarifyingUsed > 0 ? 4 : 0),
+    ),
+  );
+
+  const met = deliverables.filter((d) => d.status === 'met').length;
+  const missed = deliverables.filter((d) => d.status === 'missed').length;
+
+  return {
+    score: Math.round(score),
+    againstAsk:
+      missed === 0 && met >= Math.ceil(deliverables.length * 0.6)
+        ? `Mostly addresses the goal: ${challenge.goal}`
+        : missed >= deliverables.length / 2
+          ? `Only partially addresses the goal: ${challenge.goal}. Several required deliverables are missing.`
+          : `You engaged the brief, but the work only partly answers: ${challenge.goal}`,
+    summary:
+      missed === 0
+        ? 'Strong coverage of the ask. Sharpen the weakest deliverable note and make the success metric unmistakable.'
+        : 'Assessed against the challenge deliverables — close the missed items next time so the board clearly answers the ask.',
+    deliverables,
+    strengths:
+      criteriaHit.length > 0
+        ? criteriaHit.slice(0, 3)
+        : deliverables
+            .filter((d) => d.status === 'met')
+            .slice(0, 3)
+            .map((d) => d.item),
+    improvements: (() => {
+      const gaps = deliverables
+        .filter((d) => d.status !== 'met')
+        .slice(0, 3)
+        .map((d) => `${d.item}: ${d.note}`);
+      return gaps.length > 0 ? gaps : criteriaMissed.slice(0, 3);
+    })(),
+    criteriaHit,
+    criteriaMissed,
+    sketchAssessment: hasSketch
+      ? 'Board saved (marker and/or post-its). Check it shows the critical screens/states named in the ask — not only decorative marks.'
+      : 'No board content saved. This ask expected a visual board — sketches and/or labelled post-its.',
+    stub: true,
+  };
+}
+
+function normalizeDebrief(
+  parsed: Partial<WhiteboardDebrief>,
+  challenge: WhiteboardChallenge,
+  board: WhiteboardBoard,
+  clarifyingUsed: number,
+  hasSketch: boolean,
+): WhiteboardDebrief {
+  const fallback = stubDebrief(challenge, board, clarifyingUsed, hasSketch);
+  const deliverables =
+    Array.isArray(parsed.deliverables) && parsed.deliverables.length > 0
+      ? parsed.deliverables.map((d, i) => ({
+          item:
+            typeof d.item === 'string' && d.item.trim()
+              ? d.item
+              : challenge.deliverables[i] ?? `Deliverable ${i + 1}`,
+          status:
+            d.status === 'met' || d.status === 'partial' || d.status === 'missed'
+              ? d.status
+              : 'partial',
+          note:
+            typeof d.note === 'string' && d.note.trim()
+              ? d.note
+              : 'No note provided.',
+        }))
+      : fallback.deliverables;
+
+  return {
+    score:
+      typeof parsed.score === 'number'
+        ? Math.max(0, Math.min(100, Math.round(parsed.score)))
+        : fallback.score,
+    againstAsk:
+      typeof parsed.againstAsk === 'string' && parsed.againstAsk.trim()
+        ? parsed.againstAsk
+        : fallback.againstAsk,
+    summary:
+      typeof parsed.summary === 'string' && parsed.summary.trim()
+        ? parsed.summary
+        : fallback.summary,
+    deliverables,
+    strengths: Array.isArray(parsed.strengths)
+      ? parsed.strengths.map(String)
+      : fallback.strengths,
+    improvements: Array.isArray(parsed.improvements)
+      ? parsed.improvements.map(String)
+      : fallback.improvements,
+    criteriaHit: Array.isArray(parsed.criteriaHit)
+      ? parsed.criteriaHit.map(String)
+      : fallback.criteriaHit,
+    criteriaMissed: Array.isArray(parsed.criteriaMissed)
+      ? parsed.criteriaMissed.map(String)
+      : fallback.criteriaMissed,
+    sketchAssessment:
+      typeof parsed.sketchAssessment === 'string' &&
+      parsed.sketchAssessment.trim()
+        ? parsed.sketchAssessment
+        : fallback.sketchAssessment,
+    stub: false,
+  };
+}
+
+function sketchBase64(dataUrl: string | null | undefined): string | null {
+  if (!dataUrl) return null;
+  const match = /^data:image\/png;base64,(.+)$/.exec(dataUrl);
+  if (!match?.[1] || match[1].length > 6_000_000) return null;
+  return match[1];
+}
+
+export async function debriefWhiteboard(input: {
+  challenge: WhiteboardChallenge;
+  board: WhiteboardBoard;
+  clarifyingUsed: number;
+  sketchDataUrl?: string | null;
+  hasSketch?: boolean;
+}): Promise<WhiteboardDebrief> {
+  const hasSketch = Boolean(input.hasSketch || input.sketchDataUrl);
+
+  if (useStubs()) {
+    return stubDebrief(
+      input.challenge,
+      input.board,
+      input.clarifyingUsed,
+      hasSketch,
+    );
+  }
+
+  const apiKey = process.env.ANTHROPIC_API_KEY!;
+  const imageData = sketchBase64(input.sketchDataUrl);
+
+  const promptText = `You are a senior design interviewer assessing a timed whiteboard practice.
+
+Judge whether the candidate answered THIS ASK — not whether the board looks busy.
+
+Challenge: ${input.challenge.title}
+Goal: ${input.challenge.goal}
+Full brief:
+${input.challenge.brief}
+
+Required deliverables (score each met | partial | missed with a short evidence note):
+${input.challenge.deliverables.map((d, i) => `${i + 1}. ${d}`).join('\n')}
+
+Success criteria (quality bar):
+${input.challenge.successCriteria.map((c) => `- ${c}`).join('\n')}
+
+Clarifying questions used: ${input.clarifyingUsed}/${input.challenge.maxClarifyingQuestions}
+Sketch attached: ${imageData ? 'yes — inspect the image for flows/screens/labels/post-it notes relevant to the ask' : 'no'}
+
+Candidate talk track:
+Framing: ${input.board.framing || '(empty)'}
+Users: ${input.board.users || '(empty)'}
+Flows: ${input.board.flows || '(empty)'}
+Solution: ${input.board.solution || '(empty)'}
+Tradeoffs: ${input.board.tradeoffs || '(empty)'}
+
+Rules:
+- Score primarily on answering the goal + covering deliverables with evidence from notes/sketch.
+- Empty or vague sections should be missed/partial, not charitable meets.
+- If a deliverable requires sketching and there is no useful sketch, mark missed or partial.
+- againstAsk must explicitly say how well they answered the goal.
+- sketchAssessment must say what the sketch shows relative to the ask (or that it was missing).
+- Keep notes concrete and under 25 words each.
+
+Return ONLY JSON:
+{
+  "score": 0-100,
+  "againstAsk": "...",
+  "summary": "...",
+  "deliverables": [{"item":"...","status":"met|partial|missed","note":"..."}],
+  "strengths": ["..."],
+  "improvements": ["..."],
+  "criteriaHit": ["..."],
+  "criteriaMissed": ["..."],
+  "sketchAssessment": "..."
+}`;
+
+  type ContentPart =
+    | {type: 'text'; text: string}
+    | {
+        type: 'image';
+        source: {type: 'base64'; media_type: 'image/png'; data: string};
+      };
+
+  const content: ContentPart[] = [];
+  if (imageData) {
+    content.push({
+      type: 'image',
+      source: {type: 'base64', media_type: 'image/png', data: imageData},
+    });
+  }
+  content.push({type: 'text', text: promptText});
+
+  const response = await fetch('https://api.anthropic.com/v1/messages', {
+    method: 'POST',
+    headers: {
+      'content-type': 'application/json',
+      'x-api-key': apiKey,
+      'anthropic-version': '2023-06-01',
+    },
+    body: JSON.stringify({
+      model: CHEAP_ANTHROPIC_MODEL,
+      max_tokens: 1400,
+      messages: [{role: 'user', content}],
+    }),
+  });
+
+  if (!response.ok) {
+    return stubDebrief(
+      input.challenge,
+      input.board,
+      input.clarifyingUsed,
+      hasSketch,
+    );
+  }
+
+  const data = (await response.json()) as {
+    content: Array<{type: string; text?: string}>;
+  };
+  const text = data.content.find((c) => c.type === 'text')?.text ?? '{}';
+  try {
+    const parsed = JSON.parse(extractJsonObject(text)) as Partial<WhiteboardDebrief>;
+    return normalizeDebrief(
+      parsed,
+      input.challenge,
+      input.board,
+      input.clarifyingUsed,
+      hasSketch,
+    );
+  } catch {
+    return stubDebrief(
+      input.challenge,
+      input.board,
+      input.clarifyingUsed,
+      hasSketch,
+    );
+  }
+}

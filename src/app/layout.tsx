@@ -2,6 +2,8 @@ import type {Metadata} from 'next';
 import {Public_Sans, Space_Grotesk} from 'next/font/google';
 import {Providers} from '@/components/providers';
 import {AppShellServer} from '@/components/AppShellServer';
+import '@astryxdesign/core/reset.css';
+import '@astryxdesign/core/astryx.css';
 import './globals.css';
 
 const publicSans = Public_Sans({
