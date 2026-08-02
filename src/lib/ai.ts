@@ -10,6 +10,7 @@ import {
   buildAnswerCriteria,
   type JobDescriptionAnalysis,
 } from '@/lib/criteria';
+import {evaluateCvEvidence} from '@/lib/cv-evidence';
 
 export async function analyzeCvBuffer(
   fileName: string,
@@ -184,6 +185,8 @@ export async function gradeAnswer(input: {
   questionText: string;
   transcription: string;
   criteria?: import('@/lib/criteria').AnswerCriteria | null;
+  cv?: import('@/lib/cv-parse').CvAnalysis | null;
+  isPersonal?: boolean;
 }): Promise<GradeResult> {
   if (useStubs()) {
     return gradeTranscriptLocally(input);
@@ -191,6 +194,13 @@ export async function gradeAnswer(input: {
 
   const apiKey = process.env.ANTHROPIC_API_KEY!;
   const criteria = input.criteria;
+  const cvTargets =
+    input.cv && input.isPersonal
+      ? [
+          ...input.cv.projects.slice(0, 4),
+          ...input.cv.companies.slice(0, 3),
+        ].join(' | ')
+      : input.cv?.companies.slice(0, 2).join(' | ') ?? '';
   const response = await fetch('https://api.anthropic.com/v1/messages', {
     method: 'POST',
     headers: {
@@ -214,6 +224,8 @@ Must cover: ${(criteria?.mustCover ?? []).join(' | ')}
 Strong signals: ${(criteria?.strongSignals ?? []).join(' | ')}
 Weak signals (penalize): ${(criteria?.weakSignals ?? []).join(' | ')}
 JD keywords: ${(criteria?.roleKeywords ?? []).join(', ')}
+CV evidence to cite (projects / employers): ${cvTargets || 'n/a'}
+Personal question: ${input.isPersonal ? 'yes — penalize generic answers without CV specifics' : 'no'}
 
 Question: ${input.questionText}
 Transcript: ${input.transcription}
@@ -234,7 +246,9 @@ Return ONLY JSON matching:
     "mustCoverMissed": [],
     "strongSignalsHit": [],
     "weakSignalsHit": [],
-    "roleKeywordsHit": []
+    "roleKeywordsHit": [],
+    "cvEvidenceHit": [],
+    "cvEvidenceMissed": []
   }
 }`,
         },
@@ -251,16 +265,16 @@ Return ONLY JSON matching:
   };
   const text = data.content.find((c) => c.type === 'text')?.text ?? '{}';
   const parsed = JSON.parse(text) as GradeResult;
-  return {
-    ...parsed,
-    scoreBreakdown: {
-      designThinking: parsed.scoreBreakdown?.designThinking ?? 5,
-      communication: parsed.scoreBreakdown?.communication ?? 5,
-      depth: parsed.scoreBreakdown?.depth ?? 5,
-      knowledge: parsed.scoreBreakdown?.knowledge ?? 5,
-      roleFit: parsed.scoreBreakdown?.roleFit ?? 5,
-    },
-    evaluatedAgainst: parsed.evaluatedAgainst ?? {
+  const localCvEvidence =
+    input.cv && input.isPersonal !== undefined
+      ? evaluateCvEvidence({
+          transcription: input.transcription,
+          cv: input.cv,
+          isPersonal: input.isPersonal,
+        })
+      : null;
+  const evaluatedAgainst = {
+    ...(parsed.evaluatedAgainst ?? {
       question: input.questionText,
       answerExcerpt: input.transcription.slice(0, 280),
       criteria: [...RUBRIC_CRITERIA],
@@ -270,7 +284,26 @@ Return ONLY JSON matching:
       strongSignalsHit: [],
       weakSignalsHit: [],
       roleKeywordsHit: [],
+    }),
+    cvEvidenceHit:
+      parsed.evaluatedAgainst?.cvEvidenceHit?.length
+        ? parsed.evaluatedAgainst.cvEvidenceHit
+        : (localCvEvidence?.hit ?? []),
+    cvEvidenceMissed:
+      parsed.evaluatedAgainst?.cvEvidenceMissed?.length
+        ? parsed.evaluatedAgainst.cvEvidenceMissed
+        : (localCvEvidence?.missed ?? []),
+  };
+  return {
+    ...parsed,
+    scoreBreakdown: {
+      designThinking: parsed.scoreBreakdown?.designThinking ?? 5,
+      communication: parsed.scoreBreakdown?.communication ?? 5,
+      depth: parsed.scoreBreakdown?.depth ?? 5,
+      knowledge: parsed.scoreBreakdown?.knowledge ?? 5,
+      roleFit: parsed.scoreBreakdown?.roleFit ?? 5,
     },
+    evaluatedAgainst,
     stub: false,
   };
 }

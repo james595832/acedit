@@ -39,17 +39,28 @@ export function demoUserId() {
   return DEMO_USER_ID;
 }
 
-export async function saveCv(input: {
-  file_name: string;
-  file_url: string;
-  parsed_text: string;
-  skills_extracted: string[];
-  experience_years: number;
-}): Promise<CV> {
+function owned<T extends {user_id: string}>(
+  row: T | null,
+  userId: string,
+): T | null {
+  if (!row || row.user_id !== userId) return null;
+  return row;
+}
+
+export async function saveCv(
+  input: {
+    file_name: string;
+    file_url: string;
+    parsed_text: string;
+    skills_extracted: string[];
+    experience_years: number;
+  },
+  userId: string,
+): Promise<CV> {
   const cvs = await readJson<CV[]>('cvs.json', []);
   const cv: CV = {
     id: randomUUID(),
-    user_id: DEMO_USER_ID,
+    user_id: userId,
     file_url: input.file_url,
     file_name: input.file_name,
     parsed_text: input.parsed_text,
@@ -63,26 +74,30 @@ export async function saveCv(input: {
   return cv;
 }
 
-export async function getCv(id: string): Promise<CV | null> {
+export async function getCv(id: string, userId?: string): Promise<CV | null> {
   const cvs = await readJson<CV[]>('cvs.json', []);
-  return cvs.find((c) => c.id === id) ?? null;
+  const cv = cvs.find((c) => c.id === id) ?? null;
+  return userId ? owned(cv, userId) : cv;
 }
 
-export async function saveJobDescription(input: {
-  source_type: JobDescription['source_type'];
-  file_name: string | null;
-  file_url: string | null;
-  raw_text: string;
-  role_title: string | null;
-  company_name: string | null;
-  requirements: string[];
-  responsibilities: string[];
-  keywords: string[];
-}): Promise<JobDescription> {
+export async function saveJobDescription(
+  input: {
+    source_type: JobDescription['source_type'];
+    file_name: string | null;
+    file_url: string | null;
+    raw_text: string;
+    role_title: string | null;
+    company_name: string | null;
+    requirements: string[];
+    responsibilities: string[];
+    keywords: string[];
+  },
+  userId: string,
+): Promise<JobDescription> {
   const rows = await readJson<JobDescription[]>('job_descriptions.json', []);
   const jd: JobDescription = {
     id: randomUUID(),
-    user_id: DEMO_USER_ID,
+    user_id: userId,
     ...input,
     created_at: new Date().toISOString(),
   };
@@ -93,17 +108,22 @@ export async function saveJobDescription(input: {
 
 export async function getJobDescription(
   id: string,
+  userId?: string,
 ): Promise<JobDescription | null> {
   const rows = await readJson<JobDescription[]>('job_descriptions.json', []);
-  return rows.find((j) => j.id === id) ?? null;
+  const jd = rows.find((j) => j.id === id) ?? null;
+  return userId ? owned(jd, userId) : jd;
 }
 
-export async function createSession(input: {
-  cv_id: string;
-  job_description_id?: string | null;
-  interview_type: InterviewSession['interview_type'];
-  questions: GeneratedQuestion[];
-}): Promise<{session: InterviewSession; questions: InterviewQuestion[]}> {
+export async function createSession(
+  input: {
+    cv_id: string;
+    job_description_id?: string | null;
+    interview_type: InterviewSession['interview_type'];
+    questions: GeneratedQuestion[];
+  },
+  userId: string,
+): Promise<{session: InterviewSession; questions: InterviewQuestion[]}> {
   const sessions = await readJson<InterviewSession[]>('sessions.json', []);
   const allQuestions = await readJson<InterviewQuestion[]>(
     'questions.json',
@@ -112,7 +132,7 @@ export async function createSession(input: {
 
   const session: InterviewSession = {
     id: randomUUID(),
-    user_id: DEMO_USER_ID,
+    user_id: userId,
     cv_id: input.cv_id,
     job_description_id: input.job_description_id ?? null,
     interview_type: input.interview_type,
@@ -143,9 +163,18 @@ export async function createSession(input: {
   return {session, questions};
 }
 
-export async function getSession(id: string): Promise<InterviewSession | null> {
+export async function getSession(
+  id: string,
+  userId?: string,
+): Promise<InterviewSession | null> {
   const sessions = await readJson<InterviewSession[]>('sessions.json', []);
-  return sessions.find((s) => s.id === id) ?? null;
+  const session = sessions.find((s) => s.id === id) ?? null;
+  return userId ? owned(session, userId) : session;
+}
+
+export async function listSessions(userId: string): Promise<InterviewSession[]> {
+  const sessions = await readJson<InterviewSession[]>('sessions.json', []);
+  return sessions.filter((s) => s.user_id === userId);
 }
 
 export async function getSessionQuestions(
@@ -157,17 +186,31 @@ export async function getSessionQuestions(
     .sort((a, b) => a.question_order - b.question_order);
 }
 
-export async function saveAnswer(input: {
-  question_id: string;
-  audio_url: string | null;
-  transcription: string;
-  duration_seconds: number | null;
-}): Promise<UserAnswer> {
+export async function getQuestionForUserSession(
+  questionId: string,
+  userId: string,
+): Promise<{question: InterviewQuestion; session: InterviewSession} | null> {
+  const question = await getQuestion(questionId);
+  if (!question) return null;
+  const session = await getSession(question.session_id, userId);
+  if (!session) return null;
+  return {question, session};
+}
+
+export async function saveAnswer(
+  input: {
+    question_id: string;
+    audio_url: string | null;
+    transcription: string;
+    duration_seconds: number | null;
+  },
+  userId: string,
+): Promise<UserAnswer> {
   const answers = await readJson<UserAnswer[]>('answers.json', []);
   const answer: UserAnswer = {
     id: randomUUID(),
     question_id: input.question_id,
-    user_id: DEMO_USER_ID,
+    user_id: userId,
     audio_url: input.audio_url,
     transcription: input.transcription,
     answer_text: input.transcription,
@@ -184,6 +227,14 @@ export async function saveAnswer(input: {
 export async function getAnswer(id: string): Promise<UserAnswer | null> {
   const answers = await readJson<UserAnswer[]>('answers.json', []);
   return answers.find((a) => a.id === id) ?? null;
+}
+
+export async function getAnswerForUser(
+  answerId: string,
+  userId: string,
+): Promise<UserAnswer | null> {
+  const answer = await getAnswer(answerId);
+  return owned(answer, userId);
 }
 
 export async function updateAnswerGrade(

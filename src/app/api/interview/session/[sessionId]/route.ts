@@ -1,12 +1,16 @@
 import {NextResponse} from 'next/server';
+import {requireInterviewUser} from '@/lib/interview/auth';
 import {getSession, getSessionQuestions} from '@/lib/store';
 
 type Params = {params: Promise<{sessionId: string}>};
 
 export async function GET(_request: Request, {params}: Params) {
+  const auth = await requireInterviewUser();
+  if (auth.response) return auth.response;
+
   try {
     const {sessionId} = await params;
-    const session = await getSession(sessionId);
+    const session = await getSession(sessionId, auth.userId);
     if (!session) {
       return NextResponse.json(
         {error: 'Session not found', code: 'NOT_FOUND'},

@@ -3,6 +3,8 @@ import {promises as fs} from 'fs';
 import path from 'path';
 import {analyzeJobDescriptionText} from '@/lib/criteria';
 import {extractPdfText} from '@/lib/cv-parse';
+import {requireInterviewUser} from '@/lib/interview/auth';
+import {recommendWhiteboardFromJd} from '@/lib/interview/format';
 import {ocrImageToText} from '@/lib/ocr';
 import {saveJobDescription} from '@/lib/store';
 
@@ -10,6 +12,9 @@ export const runtime = 'nodejs';
 export const maxDuration = 60;
 
 export async function POST(request: Request) {
+  const auth = await requireInterviewUser();
+  if (auth.response) return auth.response;
+
   try {
     const form = await request.formData();
     const file = form.get('file');
@@ -65,17 +70,21 @@ export async function POST(request: Request) {
     }
 
     const analysis = analyzeJobDescriptionText(rawText);
-    const jd = await saveJobDescription({
-      source_type: sourceType,
-      file_name: fileName,
-      file_url: fileUrl,
-      raw_text: analysis.raw_text,
-      role_title: analysis.role_title,
-      company_name: analysis.company_name,
-      requirements: analysis.requirements,
-      responsibilities: analysis.responsibilities,
-      keywords: analysis.keywords,
-    });
+    const whiteboard = recommendWhiteboardFromJd(analysis);
+    const jd = await saveJobDescription(
+      {
+        source_type: sourceType,
+        file_name: fileName,
+        file_url: fileUrl,
+        raw_text: analysis.raw_text,
+        role_title: analysis.role_title,
+        company_name: analysis.company_name,
+        requirements: analysis.requirements,
+        responsibilities: analysis.responsibilities,
+        keywords: analysis.keywords,
+      },
+      auth.userId,
+    );
 
     return NextResponse.json({
       job_description_id: jd.id,
@@ -86,6 +95,7 @@ export async function POST(request: Request) {
       keywords: jd.keywords,
       source_type: jd.source_type,
       excerpt: jd.raw_text.slice(0, 400),
+      whiteboard_recommendation: whiteboard,
     });
   } catch (error) {
     console.error(error);

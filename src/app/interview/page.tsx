@@ -1,9 +1,13 @@
+import Link from 'next/link';
 import {Section} from '@astryxdesign/core/Section';
 import {CVUploadForm} from '@/components/CVUploadForm';
 
 export default function InterviewPage() {
   return (
     <>
+      <nav className="aced-crumb" aria-label="Breadcrumb">
+        <Link href="/studio">← Studio</Link>
+      </nav>
       <header className="aced-masthead">
         <div className="aced-masthead__copy">
           <p className="aced-masthead__kicker">Practice · Prep</p>

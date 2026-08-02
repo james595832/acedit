@@ -1,4 +1,5 @@
 import {NextResponse} from 'next/server';
+import {requireInterviewUser} from '@/lib/interview/auth';
 import {getSession, getSessionQuestions} from '@/lib/store';
 import {promises as fs} from 'fs';
 import path from 'path';
@@ -7,9 +8,12 @@ import type {UserAnswer} from '@/lib/types';
 type Params = {params: Promise<{sessionId: string}>};
 
 export async function GET(_request: Request, {params}: Params) {
+  const auth = await requireInterviewUser();
+  if (auth.response) return auth.response;
+
   try {
     const {sessionId} = await params;
-    const session = await getSession(sessionId);
+    const session = await getSession(sessionId, auth.userId);
     if (!session) {
       return NextResponse.json(
         {error: 'Session not found', code: 'NOT_FOUND'},
@@ -21,7 +25,9 @@ export async function GET(_request: Request, {params}: Params) {
     const answers = await readAnswers();
 
     const questionRows = questions.map((question) => {
-      const answer = answers.find((a) => a.question_id === question.id);
+      const answer = answers.find(
+        (a) => a.question_id === question.id && a.user_id === auth.userId,
+      );
       let feedback = answer?.feedback ?? null;
       let score = answer?.score ?? null;
       if (feedback) {

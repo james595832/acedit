@@ -2,11 +2,15 @@ import {NextResponse} from 'next/server';
 import {promises as fs} from 'fs';
 import path from 'path';
 import {hasDeepgram} from '@/lib/config';
-import {saveAnswer} from '@/lib/store';
+import {requireInterviewUser} from '@/lib/interview/auth';
+import {getSession, getQuestion, saveAnswer} from '@/lib/store';
 
 export const runtime = 'nodejs';
 
 export async function POST(request: Request) {
+  const auth = await requireInterviewUser();
+  if (auth.response) return auth.response;
+
   try {
     const form = await request.formData();
     const audio = form.get('audio');
@@ -21,6 +25,22 @@ export async function POST(request: Request) {
           code: 'VALIDATION_ERROR',
         },
         {status: 400},
+      );
+    }
+
+    const session = await getSession(sessionId, auth.userId);
+    if (!session) {
+      return NextResponse.json(
+        {error: 'Session not found', code: 'NOT_FOUND'},
+        {status: 404},
+      );
+    }
+
+    const question = await getQuestion(questionId);
+    if (!question || question.session_id !== sessionId) {
+      return NextResponse.json(
+        {error: 'Question not found in session', code: 'NOT_FOUND'},
+        {status: 404},
       );
     }
 
@@ -86,12 +106,15 @@ export async function POST(request: Request) {
       );
     }
 
-    const answer = await saveAnswer({
-      question_id: questionId,
-      audio_url: audioUrl,
-      transcription,
-      duration_seconds: null,
-    });
+    const answer = await saveAnswer(
+      {
+        question_id: questionId,
+        audio_url: audioUrl,
+        transcription,
+        duration_seconds: null,
+      },
+      auth.userId,
+    );
 
     return NextResponse.json({
       transcription: answer.transcription,

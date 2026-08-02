@@ -116,6 +116,17 @@ export function SignUpForm({
               </Link>
             </Text>
           </HStack>
+          <Text type="supporting" color="secondary" as="p">
+            By creating an account you agree to our{' '}
+            <Link href="/terms" hasUnderline>
+              Terms &amp; Conditions
+            </Link>{' '}
+            and{' '}
+            <Link href="/privacy" hasUnderline>
+              Privacy Policy
+            </Link>
+            .
+          </Text>
         </VStack>
       </form>
     </VStack>

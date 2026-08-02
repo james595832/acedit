@@ -9,6 +9,8 @@ import {MobileNav, MobileNavToggle} from '@astryxdesign/core/MobileNav';
 import {SideNavItem} from '@astryxdesign/core/SideNav';
 import {TopNav, TopNavHeading, TopNavItem} from '@astryxdesign/core/TopNav';
 import {AuthNav} from '@/components/AuthNav';
+import {SiteFooter} from '@/components/SiteFooter';
+import {FeedbackWidget} from '@/components/FeedbackWidget';
 
 type AppFrameProps = {
   children: ReactNode;
@@ -33,6 +35,7 @@ export function AppFrame({
     pathname.startsWith('/interview') &&
     !pathname.startsWith('/interview/results');
 
+  const isPortfolio = pathname.startsWith('/portfolio');
   const isStudio = pathname === '/studio';
   const isResults = pathname.startsWith('/interview/results');
   const isWhiteboard = pathname.startsWith('/whiteboard');
@@ -45,6 +48,11 @@ export function AppFrame({
     <>
       <TopNavItem label="Studio" href="/studio" isSelected={isStudio} />
       <TopNavItem label="Practice" href="/interview" isSelected={isInterview} />
+      <TopNavItem
+        label="Portfolio"
+        href="/portfolio"
+        isSelected={isPortfolio}
+      />
       <TopNavItem
         label="Whiteboard"
         href="/whiteboard"
@@ -73,6 +81,11 @@ export function AppFrame({
               label="Practice"
               href="/interview"
               isSelected={isInterview}
+            />
+            <SideNavItem
+              label="Portfolio"
+              href="/portfolio"
+              isSelected={isPortfolio}
             />
             <SideNavItem
               label="Whiteboard"
@@ -123,6 +136,8 @@ export function AppFrame({
       }
     >
       <div className="aced-app-page">{children}</div>
+      <FeedbackWidget userEmail={userEmail} />
+      <SiteFooter variant="app" />
     </AppShell>
   );
 }

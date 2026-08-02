@@ -31,10 +31,11 @@ const TIMELINE = [
 ] as const;
 
 const FEATURES = [
-  'CV + job-description personalised questions',
-  'Voice answers scored on process, craft & role fit',
-  'Clear strong / weak criteria after every take',
-  'Unlimited practice during your membership',
+  'Built for design interviews only — not engineering',
+  'Practice interviews from your CV',
+  'Answer out loud and get clear feedback',
+  'Design whiteboard challenges in one place',
+  'Cancel anytime before or after trial',
 ] as const;
 
 export function PricingTrialDialog({
@@ -112,8 +113,17 @@ export function PricingTrialDialog({
               Continue to create account
             </Link>
             <p className="aced-trial-fineprint">
-              Stripe Checkout collects your card after account setup. You won’t
-              be charged today — cancel anytime in Settings.
+              Stripe Checkout collects your card after account setup. You won&apos;t
+              be charged today — cancel anytime in Settings. By continuing you
+              agree to our{' '}
+              <Link href="/terms" onClick={() => onOpenChange(false)}>
+                Terms
+              </Link>{' '}
+              and{' '}
+              <Link href="/privacy" onClick={() => onOpenChange(false)}>
+                Privacy Policy
+              </Link>
+              .
             </p>
           </div>
         </VStack>

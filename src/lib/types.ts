@@ -163,6 +163,9 @@ export type GradeResult = {
     strongSignalsHit: string[];
     weakSignalsHit: string[];
     roleKeywordsHit: string[];
+    /** CV projects, companies, or skills explicitly referenced in the answer */
+    cvEvidenceHit?: string[];
+    cvEvidenceMissed?: string[];
   };
   stub?: boolean;
 };

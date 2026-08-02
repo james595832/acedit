@@ -52,20 +52,44 @@ const SKILL_LEXICON = [
 ] as const;
 
 export async function extractPdfText(bytes: Buffer): Promise<string> {
-  // pdf-parse v2 exposes PDFParse class; fall back to default export shapes.
-  const mod = (await import('pdf-parse')) as {
+  const result = await extractPdfContent(bytes);
+  return result.text;
+}
+
+export type PdfExtractResult = {
+  text: string;
+  pageCount: number | null;
+};
+
+export async function extractPdfContent(bytes: Buffer): Promise<PdfExtractResult> {
+  const mod = (await import('pdf-parse')) as unknown as {
     PDFParse?: new (opts: {data: Buffer}) => {
       getText: () => Promise<{text: string}>;
+      getInfo?: () => Promise<{pages?: unknown[]; total?: number}>;
       destroy?: () => Promise<void>;
     };
-    default?: (data: Buffer) => Promise<{text: string}>;
+    default?: (data: Buffer) => Promise<{text: string; numpages?: number}>;
   };
 
   if (typeof mod.PDFParse === 'function') {
     const parser = new mod.PDFParse({data: bytes});
     try {
       const result = await parser.getText();
-      return cleanCvText(result.text ?? '');
+      let pageCount: number | null = null;
+      try {
+        const info = await parser.getInfo?.();
+        if (Array.isArray(info?.pages)) {
+          pageCount = info.pages.length;
+        } else if (typeof info?.total === 'number') {
+          pageCount = info.total;
+        }
+      } catch {
+        pageCount = null;
+      }
+      return {
+        text: cleanCvText(result.text ?? ''),
+        pageCount,
+      };
     } finally {
       await parser.destroy?.();
     }
@@ -73,7 +97,10 @@ export async function extractPdfText(bytes: Buffer): Promise<string> {
 
   if (typeof mod.default === 'function') {
     const result = await mod.default(bytes);
-    return cleanCvText(result.text ?? '');
+    return {
+      text: cleanCvText(result.text ?? ''),
+      pageCount: result.numpages ?? null,
+    };
   }
 
   throw new Error('pdf-parse API not recognized');

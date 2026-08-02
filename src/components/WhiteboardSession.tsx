@@ -176,6 +176,21 @@ export function WhiteboardSession({challenge}: WhiteboardSessionProps) {
 
   const debrief = result?.debrief ?? null;
 
+  const talkSections = [
+    {key: 'framing' as const, filled: board.framing.trim().length > 20},
+    {key: 'users' as const, filled: board.users.trim().length > 20},
+    {key: 'flows' as const, filled: board.flows.trim().length > 20},
+    {key: 'solution' as const, filled: board.solution.trim().length > 20},
+    {key: 'tradeoffs' as const, filled: board.tradeoffs.trim().length > 20},
+  ];
+  const talkFilled = talkSections.filter((s) => s.filled).length;
+
+  function jumpTo(id: string) {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.scrollIntoView({behavior: 'smooth', block: 'start'});
+  }
+
   return (
     <div className="aced-wb">
       <header className="aced-wb__top">
@@ -243,73 +258,91 @@ export function WhiteboardSession({challenge}: WhiteboardSessionProps) {
             />
           ) : null}
 
-          <section className="aced-wb__sketch-panel" aria-label="Marker canvas">
-            <div className="aced-wb__board-head">
-              <h2>Sketch canvas</h2>
-              <p>
-                Marker for flows and boxes; post-its for typed labels and
-                concepts. The whole board is saved when you end the challenge.
-              </p>
+          <div className="aced-wb__rail" aria-label="Session guide">
+            <div className="aced-wb__rail-ask">
+              <p className="aced-wb__rail-kicker">The ask</p>
+              <p className="aced-wb__rail-goal">{challenge.goal}</p>
             </div>
-            <WhiteboardCanvas
-              canvasRef={sketchRef}
-              disabled={Boolean(result)}
-              onInkChange={setHasSketchInk}
-            />
-          </section>
+            <nav className="aced-wb__rail-nav" aria-label="Jump to section">
+              <button
+                type="button"
+                className="aced-wb__rail-link"
+                onClick={() => jumpTo('wb-canvas')}
+              >
+                Canvas
+              </button>
+              <button
+                type="button"
+                className="aced-wb__rail-link"
+                onClick={() => jumpTo('wb-chat')}
+              >
+                Ask interviewer
+              </button>
+              <button
+                type="button"
+                className="aced-wb__rail-link"
+                onClick={() => jumpTo('wb-talk')}
+              >
+                Talk track
+              </button>
+              <button
+                type="button"
+                className="aced-wb__rail-link"
+                onClick={() => jumpTo('wb-finish')}
+              >
+                Finish
+              </button>
+            </nav>
+            <ul className="aced-wb__rail-status" aria-label="Progress">
+              <li>
+                Talk track · {talkFilled}/5
+              </li>
+              <li>
+                Clarifying Qs left · {questionsRemaining}
+              </li>
+              <li>
+                Board · {hasSketchInk ? 'sketched' : 'empty'}
+              </li>
+            </ul>
+            <details className="aced-wb__rail-details">
+              <summary>Assessed on</summary>
+              <ol>
+                {challenge.deliverables.map((item) => (
+                  <li key={item}>{item}</li>
+                ))}
+              </ol>
+            </details>
+          </div>
 
-          <div className="aced-wb__grid">
-            <section className="aced-wb__board" aria-label="Practice board">
+          <div className="aced-wb__workspace">
+            <section
+              id="wb-canvas"
+              className="aced-wb__sketch-panel"
+              aria-label="Marker canvas"
+            >
               <div className="aced-wb__board-head">
-                <h2>Talk track</h2>
+                <h2>1 · Sketch canvas</h2>
                 <p>
-                  Capture the narrative you’d say out loud while sketching —
-                  framing through tradeoffs.
+                  Focal board — marker for flows, post-its for labels. Keep the
+                  ask in mind while you draw.
                 </p>
               </div>
-
-              <TextArea
-                label="1 · Problem framing"
-                description="What’s broken, for whom, and why it matters now?"
-                value={board.framing}
-                onChange={(v) => updateBoard('framing', v)}
-                rows={3}
-              />
-              <TextArea
-                label="2 · Users & context"
-                description="Primary user, jobs-to-be-done, constraints you learned."
-                value={board.users}
-                onChange={(v) => updateBoard('users', v)}
-                rows={3}
-              />
-              <TextArea
-                label="3 · Flows / IA"
-                description="Current → proposed steps. Call out key states."
-                value={board.flows}
-                onChange={(v) => updateBoard('flows', v)}
-                rows={4}
-              />
-              <TextArea
-                label="4 · Solution notes"
-                description="What the sketch is arguing — key screens and decisions."
-                value={board.solution}
-                onChange={(v) => updateBoard('solution', v)}
-                rows={4}
-              />
-              <TextArea
-                label="5 · Tradeoffs & validation"
-                description="Risks, metrics, what you’d test next."
-                value={board.tradeoffs}
-                onChange={(v) => updateBoard('tradeoffs', v)}
-                rows={3}
+              <WhiteboardCanvas
+                canvasRef={sketchRef}
+                disabled={Boolean(result)}
+                onInkChange={setHasSketchInk}
               />
             </section>
 
-            <aside className="aced-wb__chat" aria-label="Clarifying questions">
+            <aside
+              id="wb-chat"
+              className="aced-wb__chat"
+              aria-label="Clarifying questions"
+            >
               <div className="aced-wb__chat-head">
-                <h2>Ask the interviewer</h2>
+                <h2>2 · Ask the interviewer</h2>
                 <p>
-                  Limited scope: this challenge only. Questions left:{' '}
+                  Clarifying questions only — this challenge. Left:{' '}
                   <strong>{questionsRemaining}</strong>
                 </p>
               </div>
@@ -351,9 +384,70 @@ export function WhiteboardSession({challenge}: WhiteboardSessionProps) {
                 density="compact"
               />
             </aside>
+
+            <section
+              id="wb-talk"
+              className="aced-wb__board"
+              aria-label="Talk track"
+            >
+              <div className="aced-wb__board-head">
+                <h2>3 · Talk track</h2>
+                <p>
+                  What you’d say out loud while pointing at the board. Assessed
+                  with your sketch — {talkFilled} of 5 sections started.
+                </p>
+              </div>
+
+              <div className="aced-wb__talk-progress" aria-hidden="true">
+                {talkSections.map((section, index) => (
+                  <span
+                    key={section.key}
+                    className={`aced-wb__talk-dot${section.filled ? ' is-filled' : ''}`}
+                  >
+                    {index + 1}
+                  </span>
+                ))}
+              </div>
+
+              <TextArea
+                label="1 · Problem framing"
+                description="What’s broken, for whom, and why it matters now?"
+                value={board.framing}
+                onChange={(v) => updateBoard('framing', v)}
+                rows={3}
+              />
+              <TextArea
+                label="2 · Users & context"
+                description="Primary user, jobs-to-be-done, constraints you learned."
+                value={board.users}
+                onChange={(v) => updateBoard('users', v)}
+                rows={3}
+              />
+              <TextArea
+                label="3 · Flows / IA"
+                description="Current → proposed steps. Call out key states."
+                value={board.flows}
+                onChange={(v) => updateBoard('flows', v)}
+                rows={4}
+              />
+              <TextArea
+                label="4 · Solution notes"
+                description="What the sketch is arguing — key screens and decisions."
+                value={board.solution}
+                onChange={(v) => updateBoard('solution', v)}
+                rows={4}
+              />
+              <TextArea
+                label="5 · Tradeoffs & validation"
+                description="Risks, metrics, what you’d test next."
+                value={board.tradeoffs}
+                onChange={(v) => updateBoard('tradeoffs', v)}
+                rows={3}
+              />
+            </section>
           </div>
 
-          <section className="aced-wb__footer">
+          <section id="wb-finish" className="aced-wb__footer">
             {debriefError ? (
               <Banner
                 status="error"

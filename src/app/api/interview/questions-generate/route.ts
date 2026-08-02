@@ -1,8 +1,12 @@
 import {NextResponse} from 'next/server';
 import {generateQuestions} from '@/lib/ai';
+import {requireInterviewUser} from '@/lib/interview/auth';
 import {getCv} from '@/lib/store';
 
 export async function POST(request: Request) {
+  const auth = await requireInterviewUser();
+  if (auth.response) return auth.response;
+
   try {
     const body = (await request.json()) as {
       cv_id?: string;
@@ -17,7 +21,7 @@ export async function POST(request: Request) {
       );
     }
 
-    const cv = await getCv(body.cv_id);
+    const cv = await getCv(body.cv_id, auth.userId);
     if (!cv) {
       return NextResponse.json(
         {error: 'CV not found', code: 'NOT_FOUND'},

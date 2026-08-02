@@ -1,6 +1,7 @@
 'use client';
 
 import {useState} from 'react';
+import Link from 'next/link';
 import {useRouter} from 'next/navigation';
 import {FileInput} from '@astryxdesign/core/FileInput';
 import {TextArea} from '@astryxdesign/core/TextArea';
@@ -11,6 +12,10 @@ import {Heading} from '@astryxdesign/core/Heading';
 import {Banner} from '@astryxdesign/core/Banner';
 import {Divider} from '@astryxdesign/core/Divider';
 import {PrepStepper} from '@/components/PrepStepper';
+import {CVAtsReport} from '@/components/CVAtsReport';
+import {CVWritingReport} from '@/components/CVWritingReport';
+import type {AtsAuditResult} from '@/lib/cv-ats';
+import type {WritingAuditResult} from '@/lib/cv-writing-audit';
 
 type CvPreview = {
   cv_id: string;
@@ -20,6 +25,14 @@ type CvPreview = {
   companies: string[];
   roles: string[];
   text_extracted: boolean;
+  ats: AtsAuditResult;
+  writing: WritingAuditResult;
+};
+
+type WhiteboardRecommendation = {
+  recommended: boolean;
+  reason: string | null;
+  matchedTerms: string[];
 };
 
 type JdPreview = {
@@ -29,6 +42,7 @@ type JdPreview = {
   requirements: string[];
   keywords: string[];
   source_type: string;
+  whiteboard_recommendation?: WhiteboardRecommendation;
 };
 
 export function CVUploadForm() {
@@ -42,6 +56,8 @@ export function CVUploadForm() {
   const [error, setError] = useState<string | null>(null);
   const [preview, setPreview] = useState<CvPreview | null>(null);
   const [jdPreview, setJdPreview] = useState<JdPreview | null>(null);
+  const [whiteboardHint, setWhiteboardHint] =
+    useState<WhiteboardRecommendation | null>(null);
 
   async function handleAnalyzeCv() {
     if (!file) {
@@ -64,6 +80,8 @@ export function CVUploadForm() {
         companies: data.companies ?? [],
         roles: data.roles ?? [],
         text_extracted: Boolean(data.text_extracted),
+        ats: data.ats as AtsAuditResult,
+        writing: data.writing as WritingAuditResult,
       });
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Something went wrong');
@@ -93,7 +111,9 @@ export function CVUploadForm() {
         requirements: data.requirements ?? [],
         keywords: data.keywords ?? [],
         source_type: data.source_type,
+        whiteboard_recommendation: data.whiteboard_recommendation,
       });
+      setWhiteboardHint(data.whiteboard_recommendation ?? null);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Something went wrong');
     } finally {
@@ -121,6 +141,9 @@ export function CVUploadForm() {
       const startData = await startRes.json();
       if (!startRes.ok) {
         throw new Error(startData.error ?? 'Could not start interview');
+      }
+      if (startData.whiteboard_recommendation?.recommended) {
+        setWhiteboardHint(startData.whiteboard_recommendation);
       }
       router.push(
         `/interview/start?session_id=${startData.session_id}&question_id=${startData.question_id}`,
@@ -179,7 +202,7 @@ export function CVUploadForm() {
       </header>
       <FileInput
         label="Design CV (PDF)"
-        description="We extract text and personalise questions + scoring criteria from your work."
+        description="We extract text, check ATS readability and writing tone, then personalise interview questions."
         accept="application/pdf,.pdf"
         maxSize={10 * 1024 * 1024}
         mode="dropzone"
@@ -201,15 +224,17 @@ export function CVUploadForm() {
       />
 
       {preview ? (
-        <VStack gap={2}>
+        <VStack gap={3}>
+          {preview.ats ? <CVAtsReport audit={preview.ats} /> : null}
+          {preview.writing ? <CVWritingReport audit={preview.writing} /> : null}
           <Banner
             status={preview.text_extracted ? 'success' : 'warning'}
             title={
               preview.text_extracted
-                ? 'CV text extracted'
+                ? 'CV text extracted for practice'
                 : 'Little CV text extracted'
             }
-            description={`Skills: ${preview.skills.join(', ')}`}
+            description={`Skills spotted: ${preview.skills.join(', ')}`}
           />
           {preview.projects.length > 0 ? (
             <Text as="p" color="secondary">
@@ -291,7 +316,32 @@ export function CVUploadForm() {
               Keywords: {jdPreview.keywords.slice(0, 8).join(', ')}
             </Text>
           ) : null}
+          {jdPreview.whiteboard_recommendation?.recommended ? (
+            <Banner
+              status="info"
+              title="This role likely includes a live design exercise"
+              description={
+                jdPreview.whiteboard_recommendation.reason ??
+                'Practice on the timed whiteboard before verbal Q&A alone.'
+              }
+            />
+          ) : null}
         </VStack>
+      ) : null}
+
+      {whiteboardHint?.recommended && !jdPreview?.whiteboard_recommendation?.recommended ? (
+        <Banner
+          status="info"
+          title="Whiteboard practice recommended"
+          description={whiteboardHint.reason ?? 'Add a timed canvas run to your prep.'}
+        />
+      ) : null}
+
+      {jdPreview?.whiteboard_recommendation?.recommended ||
+      whiteboardHint?.recommended ? (
+        <Link href="/whiteboard" className="aced-orient__cta">
+          Open timed whiteboard practice →
+        </Link>
       ) : null}
 
       <Divider />

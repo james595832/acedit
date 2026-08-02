@@ -1,6 +1,7 @@
 'use client';
 
 import {useEffect, useMemo, useState, Suspense} from 'react';
+import Link from 'next/link';
 import {useRouter, useSearchParams} from 'next/navigation';
 import {VStack, HStack} from '@astryxdesign/core/Layout';
 import {Heading} from '@astryxdesign/core/Heading';
@@ -121,6 +122,11 @@ function InterviewStartInner() {
 
   return (
     <>
+      <nav className="aced-crumb" aria-label="Breadcrumb">
+        <Link href="/studio">← Studio</Link>
+        <span aria-hidden="true">/</span>
+        <Link href="/interview">Practice interview</Link>
+      </nav>
       <header className="aced-masthead aced-masthead--question">
         {questions.length > 0 ? (
           <SessionProgress
@@ -150,10 +156,10 @@ function InterviewStartInner() {
           {criteria ? (
             <div className="aced-panel aced-panel--soft">
               <Collapsible
-                defaultIsOpen={false}
+                defaultIsOpen
                 trigger={
                   <Text type="label">
-                    What a strong answer includes — open before you speak
+                    What a strong answer includes — read before you speak
                   </Text>
                 }
               >
@@ -270,7 +276,9 @@ function InterviewStartInner() {
 
 export default function InterviewStartPage() {
   return (
-    <Suspense fallback={<Text>Loading interview…</Text>}>
+    <Suspense
+      fallback={<p className="aced-loading">Setting up your question…</p>}
+    >
       <InterviewStartInner />
     </Suspense>
   );

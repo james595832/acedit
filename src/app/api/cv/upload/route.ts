@@ -2,13 +2,19 @@ import {NextResponse} from 'next/server';
 import {promises as fs} from 'fs';
 import path from 'path';
 import {analyzeCvBuffer} from '@/lib/ai';
-import {extractPdfText} from '@/lib/cv-parse';
+import {extractPdfContent} from '@/lib/cv-parse';
+import {auditCvForAts} from '@/lib/cv-ats';
+import {auditCvWriting} from '@/lib/cv-writing-audit';
+import {requireInterviewUser} from '@/lib/interview/auth';
 import {saveCv} from '@/lib/store';
 import {hasBlob} from '@/lib/config';
 
 export const runtime = 'nodejs';
 
 export async function POST(request: Request) {
+  const auth = await requireInterviewUser();
+  if (auth.response) return auth.response;
+
   try {
     const form = await request.formData();
     const file = form.get('file');
@@ -52,21 +58,34 @@ export async function POST(request: Request) {
     }
 
     let pdfText = '';
+    let pageCount: number | null = null;
     try {
-      pdfText = await extractPdfText(bytes);
+      const extracted = await extractPdfContent(bytes);
+      pdfText = extracted.text;
+      pageCount = extracted.pageCount;
     } catch (err) {
       console.error('PDF extract failed', err);
       pdfText = '';
     }
 
     const analysis = await analyzeCvBuffer(file.name, pdfText);
-    const cv = await saveCv({
-      file_name: file.name,
-      file_url: fileUrl,
-      parsed_text: analysis.parsed_text,
-      skills_extracted: analysis.skills_extracted,
-      experience_years: analysis.experience_years ?? 0,
+    const ats = auditCvForAts({
+      text: pdfText,
+      fileName: file.name,
+      fileSizeBytes: file.size,
+      pageCount,
     });
+    const writing = await auditCvWriting(pdfText);
+    const cv = await saveCv(
+      {
+        file_name: file.name,
+        file_url: fileUrl,
+        parsed_text: analysis.parsed_text,
+        skills_extracted: analysis.skills_extracted,
+        experience_years: analysis.experience_years ?? 0,
+      },
+      auth.userId,
+    );
 
     return NextResponse.json({
       cv_id: cv.id,
@@ -77,6 +96,8 @@ export async function POST(request: Request) {
       companies: analysis.companies,
       roles: analysis.roles,
       text_extracted: Boolean(pdfText.trim()),
+      ats,
+      writing,
       stub: !process.env.ANTHROPIC_API_KEY || process.env.USE_STUBS === 'true',
     });
   } catch (error) {

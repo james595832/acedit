@@ -2,10 +2,15 @@ import {NextResponse} from 'next/server';
 import {generateQuestions} from '@/lib/ai';
 import {analyzeCvLocally} from '@/lib/cv-parse';
 import {analyzeJobDescriptionText} from '@/lib/criteria';
+import {requireInterviewUser} from '@/lib/interview/auth';
+import {recommendWhiteboardFromJd} from '@/lib/interview/format';
 import {createSession, getCv, getJobDescription} from '@/lib/store';
 import type {InterviewType} from '@/lib/types';
 
 export async function POST(request: Request) {
+  const auth = await requireInterviewUser();
+  if (auth.response) return auth.response;
+
   try {
     const body = (await request.json()) as {
       cv_id?: string;
@@ -22,7 +27,7 @@ export async function POST(request: Request) {
       );
     }
 
-    const cv = await getCv(body.cv_id);
+    const cv = await getCv(body.cv_id, auth.userId);
     if (!cv) {
       return NextResponse.json(
         {error: 'CV not found', code: 'NOT_FOUND'},
@@ -31,14 +36,23 @@ export async function POST(request: Request) {
     }
 
     const jdRow = body.job_description_id
-      ? await getJobDescription(body.job_description_id)
+      ? await getJobDescription(body.job_description_id, auth.userId)
       : null;
+
+    if (body.job_description_id && !jdRow) {
+      return NextResponse.json(
+        {error: 'Job description not found', code: 'NOT_FOUND'},
+        {status: 404},
+      );
+    }
 
     const jd = jdRow
       ? analyzeJobDescriptionText(jdRow.raw_text)
       : null;
 
-    const questions = await generateQuestions({
+    const whiteboard = recommendWhiteboardFromJd(jd);
+
+    let questions = await generateQuestions({
       cvText: cv.parsed_text,
       analysis: analyzeCvLocally(cv.parsed_text ?? ''),
       company: body.company ?? jdRow?.company_name ?? undefined,
@@ -56,12 +70,19 @@ export async function POST(request: Request) {
         : null,
     });
 
-    const {session, questions: stored} = await createSession({
-      cv_id: body.cv_id,
-      job_description_id: body.job_description_id ?? null,
-      interview_type: body.interview_type ?? 'practice',
-      questions,
-    });
+    if (whiteboard.recommended) {
+      questions = questions.filter((q) => q.category !== 'whiteboard');
+    }
+
+    const {session, questions: stored} = await createSession(
+      {
+        cv_id: body.cv_id,
+        job_description_id: body.job_description_id ?? null,
+        interview_type: body.interview_type ?? 'practice',
+        questions,
+      },
+      auth.userId,
+    );
 
     return NextResponse.json({
       session_id: session.id,
@@ -69,6 +90,7 @@ export async function POST(request: Request) {
       question_id: stored[0]?.id ?? null,
       question_count: stored.length,
       tailored_to_jd: Boolean(jdRow),
+      whiteboard_recommendation: whiteboard,
     });
   } catch (error) {
     console.error(error);

@@ -53,6 +53,9 @@ function ResultsInner() {
 
   return (
     <>
+      <nav className="aced-crumb" aria-label="Breadcrumb">
+        <Link href="/studio">← Studio</Link>
+      </nav>
       <header className="aced-masthead">
         <div className="aced-masthead__copy">
           <p className="aced-masthead__kicker">Session review</p>
@@ -82,13 +85,29 @@ function ResultsInner() {
             <p className="aced-score-hero__kicker">Overall</p>
             {overall !== null ? (
               <>
-                <p
-                  className="aced-score-hero__value"
-                  aria-label={`${overall.toFixed(0)} out of 100`}
+                {tone === 'strong' ? (
+                  <p className="aced-score-hero__celebrate" role="status">
+                    <span
+                      className="aced-score-hero__celebrate-check"
+                      aria-hidden="true"
+                    >
+                      ✓
+                    </span>
+                    Strong session — keep this pace.
+                  </p>
+                ) : null}
+                <div
+                  className="aced-score-hero__ring"
+                  style={{'--score-pct': overall} as React.CSSProperties}
                 >
-                  {overall.toFixed(0)}
-                  <span className="aced-score-hero__denom">/100</span>
-                </p>
+                  <p
+                    className="aced-score-hero__value"
+                    aria-label={`${overall.toFixed(0)} out of 100`}
+                  >
+                    {overall.toFixed(0)}
+                    <span className="aced-score-hero__denom">/100</span>
+                  </p>
+                </div>
                 <ProgressBar
                   label="Overall session score"
                   isLabelHidden
@@ -196,7 +215,7 @@ function ResultsInner() {
 
 export default function ResultsPage() {
   return (
-    <Suspense fallback={<Text>Loading results…</Text>}>
+    <Suspense fallback={<p className="aced-loading">Pulling your scores…</p>}>
       <ResultsInner />
     </Suspense>
   );

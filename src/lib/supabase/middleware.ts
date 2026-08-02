@@ -36,9 +36,14 @@ export async function updateSession(request: NextRequest) {
   const path = request.nextUrl.pathname;
   const isProtected =
     path.startsWith('/interview') ||
+    path.startsWith('/portfolio') ||
     path.startsWith('/studio') ||
     path.startsWith('/whiteboard') ||
     path.startsWith('/api/whiteboard') ||
+    path.startsWith('/api/interview') ||
+    path.startsWith('/api/portfolio') ||
+    path.startsWith('/api/cv') ||
+    path.startsWith('/api/jd') ||
     path.startsWith('/settings');
   const isAuthRoute = path === '/login' || path === '/signup';
 

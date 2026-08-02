@@ -1,5 +1,7 @@
 import type {GradeResult} from '@/lib/types';
 import type {AnswerCriteria} from '@/lib/criteria';
+import type {CvAnalysis} from '@/lib/cv-parse';
+import {evaluateCvEvidence} from '@/lib/cv-evidence';
 
 export const RUBRIC_CRITERIA = [
   'Design thinking — problem framing, options, decision to ship',
@@ -35,12 +37,22 @@ export function gradeTranscriptLocally(input: {
   questionText: string;
   transcription: string;
   criteria?: AnswerCriteria | null;
+  cv?: CvAnalysis | null;
+  isPersonal?: boolean;
 }): GradeResult {
   const answer = input.transcription.trim();
   const lower = answer.toLowerCase();
   const words = answer.split(/\s+/).filter(Boolean);
   const wordCount = words.length;
   const criteria = input.criteria;
+  const cvEvidence =
+    input.cv && input.isPersonal !== undefined
+      ? evaluateCvEvidence({
+          transcription: answer,
+          cv: input.cv,
+          isPersonal: input.isPersonal,
+        })
+      : {hit: [] as string[], missed: [] as string[]};
 
   const emptyEvaluated = {
     question: input.questionText,
@@ -52,6 +64,8 @@ export function gradeTranscriptLocally(input: {
     strongSignalsHit: [] as string[],
     weakSignalsHit: [] as string[],
     roleKeywordsHit: [] as string[],
+    cvEvidenceHit: cvEvidence.hit,
+    cvEvidenceMissed: cvEvidence.missed,
   };
 
   if (wordCount < 12) {
@@ -128,8 +142,12 @@ export function gradeTranscriptLocally(input: {
       : roleKeywordsHit.length / Math.max(1, Math.min(4, criteria.roleKeywords.length));
   let roleFit = Math.round(3 + mustRatio * 4 + roleKeywordRatio * 3);
   roleFit = Math.max(2, Math.min(10, roleFit));
-  // Penalize weak-signal hits
   roleFit = Math.max(2, roleFit - weakSignalsHit.length);
+  if (input.isPersonal && cvEvidence.hit.length) {
+    roleFit = Math.min(10, roleFit + Math.min(2, cvEvidence.hit.length));
+  } else if (input.isPersonal && cvEvidence.missed.length >= 2) {
+    roleFit = Math.max(2, roleFit - 2);
+  }
 
   let score = Math.round(
     ((designThinking + communication + depth + knowledge + roleFit) / 50) * 100,
@@ -151,11 +169,19 @@ export function gradeTranscriptLocally(input: {
   if (roleKeywordsHit.length) {
     strengths.push(`Tied to JD terms: ${roleKeywordsHit.slice(0, 3).join(', ')}`);
   }
+  if (cvEvidence.hit.length) {
+    strengths.push(`CV evidence cited: ${cvEvidence.hit.slice(0, 2).join('; ')}`);
+  }
   if (mustCoverMissed.length) {
     improvements.push(`Still missing: ${mustCoverMissed[0]}`);
   }
   if (weakSignalsHit.length) {
     improvements.push(`Watch for weak pattern: ${weakSignalsHit[0]}`);
+  }
+  if (input.isPersonal && cvEvidence.missed.length) {
+    improvements.push(
+      `Name a CV project or employer: ${cvEvidence.missed.slice(0, 2).join(' or ')}`,
+    );
   }
   if (depth < 7) {
     improvements.push('Add a concrete artifact, metric, or timeline');
@@ -194,6 +220,8 @@ export function gradeTranscriptLocally(input: {
       strongSignalsHit,
       weakSignalsHit,
       roleKeywordsHit,
+      cvEvidenceHit: cvEvidence.hit,
+      cvEvidenceMissed: cvEvidence.missed,
     },
     stub: true,
   };

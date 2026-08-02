@@ -1,6 +1,5 @@
 import {Suspense} from 'react';
 import {Section} from '@astryxdesign/core/Section';
-import {Text} from '@astryxdesign/core/Text';
 import {SignInForm} from '@/components/SignInForm';
 import {isSupabaseConfigured} from '@/lib/supabase/config';
 
@@ -20,7 +19,7 @@ export default function LoginPage() {
       </header>
       <Section maxWidth={480} variant="transparent" padding={0}>
         <div className="aced-panel">
-          <Suspense fallback={<Text>Loading…</Text>}>
+          <Suspense fallback={<p className="aced-loading">One moment…</p>}>
             <SignInForm configured={configured} />
           </Suspense>
         </div>

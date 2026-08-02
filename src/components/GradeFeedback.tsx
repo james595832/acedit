@@ -33,6 +33,14 @@ export function GradeFeedback({grade}: GradeFeedbackProps) {
     <VStack gap={4}>
       <section className={`aced-score-hero aced-score-hero--${tone}`}>
         <p className="aced-score-hero__kicker">Answer score</p>
+        {tone === 'strong' ? (
+          <p className="aced-score-hero__celebrate" role="status">
+            <span className="aced-score-hero__celebrate-check" aria-hidden="true">
+              ✓
+            </span>
+            Strong answer — this would land in the room.
+          </p>
+        ) : null}
         <p className="aced-score-hero__value" aria-label={`${grade.score} out of 100`}>
           {grade.score}
           <span className="aced-score-hero__denom">/100</span>
@@ -96,6 +104,22 @@ export function GradeFeedback({grade}: GradeFeedbackProps) {
           <Text as="p" color="secondary">
             JD keywords hit: {ev.roleKeywordsHit.join(', ')}
           </Text>
+        ) : null}
+        {(ev.cvEvidenceHit?.length ?? 0) > 0 ||
+        (ev.cvEvidenceMissed?.length ?? 0) > 0 ? (
+          <VStack gap={1}>
+            <Text type="label">CV evidence</Text>
+            {(ev.cvEvidenceHit ?? []).map((item) => (
+              <Text key={`hit-${item}`} as="p" color="secondary">
+                ✓ Referenced: {item}
+              </Text>
+            ))}
+            {(ev.cvEvidenceMissed ?? []).slice(0, 3).map((item) => (
+              <Text key={`miss-${item}`} as="p" color="secondary">
+                ○ Not cited: {item}
+              </Text>
+            ))}
+          </VStack>
         ) : null}
       </VStack>
 

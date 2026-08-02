@@ -20,9 +20,25 @@ const spaceGrotesk = Space_Grotesk({
 });
 
 export const metadata: Metadata = {
-  title: 'ACED-IT — Design interview prep',
+  title: 'ACED-IT — Interview practice built for designers',
   description:
-    'Practice design interviews with CV-aware questions, voice answers, and actionable feedback.',
+    'Interview prep built exclusively for designers — practice out loud, whiteboard under pressure, and get clear feedback. Not another engineering platform.',
+  icons: {
+    icon: [
+      // Self-adapting SVG first; explicit variants for browsers that honor media
+      {url: '/img/favicon.svg', type: 'image/svg+xml'},
+      {
+        url: '/img/favicon-light.svg',
+        type: 'image/svg+xml',
+        media: '(prefers-color-scheme: light)',
+      },
+      {
+        url: '/img/favicon-dark.svg',
+        type: 'image/svg+xml',
+        media: '(prefers-color-scheme: dark)',
+      },
+    ],
+  },
 };
 
 export default function RootLayout({
