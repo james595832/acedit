@@ -16,7 +16,7 @@ export default async function SignUpPage({searchParams}: SignUpPageProps) {
   const plan = params.plan === 'pro' ? 'pro' : 'pro';
 
   return (
-    <>
+    <div className="aced-auth">
       <header className="aced-masthead">
         <div className="aced-masthead__copy">
           <p className="aced-masthead__kicker">Account</p>
@@ -27,7 +27,7 @@ export default async function SignUpPage({searchParams}: SignUpPageProps) {
           </p>
         </div>
       </header>
-      <Section maxWidth={480} variant="transparent" padding={0}>
+      <Section variant="transparent" padding={0}>
         <div className="aced-panel">
           <SignUpForm
             configured={configured}
@@ -36,6 +36,6 @@ export default async function SignUpPage({searchParams}: SignUpPageProps) {
           />
         </div>
       </Section>
-    </>
+    </div>
   );
 }

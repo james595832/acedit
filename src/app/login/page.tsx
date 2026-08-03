@@ -7,7 +7,7 @@ export default function LoginPage() {
   const configured = isSupabaseConfigured();
 
   return (
-    <>
+    <div className="aced-auth">
       <header className="aced-masthead">
         <div className="aced-masthead__copy">
           <p className="aced-masthead__kicker">Account</p>
@@ -17,13 +17,13 @@ export default function LoginPage() {
           </p>
         </div>
       </header>
-      <Section maxWidth={480} variant="transparent" padding={0}>
+      <Section variant="transparent" padding={0}>
         <div className="aced-panel">
           <Suspense fallback={<p className="aced-loading">One moment…</p>}>
             <SignInForm configured={configured} />
           </Suspense>
         </div>
       </Section>
-    </>
+    </div>
   );
 }

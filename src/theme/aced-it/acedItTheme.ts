@@ -11,8 +11,8 @@ export const acedItTheme = defineTheme({
   name: 'aced-it',
   extends: neutralTheme,
 
-  // Sharper geometry for editorial / poster-like structure
-  radius: {base: 2, multiplier: 0.5},
+  // Soft product geometry (Deel/Stripe-style rounding) — inherits the
+  // neutral radius tokens: 10px elements, 12px containers.
 
   motion: {fast: 150, medium: 280, ratio: 0.75},
 
@@ -24,15 +24,15 @@ export const acedItTheme = defineTheme({
         'ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif',
     },
     heading: {
-      family: 'var(--font-aced-heading), Space Grotesk',
+      family: 'var(--font-aced-heading), Raleway',
       fallbacks: 'ui-sans-serif, system-ui, sans-serif',
-      weights: {1: '700', 2: '700', 3: '700', 4: '700'},
+      weights: {1: '600', 2: '600', 3: '600', 4: '600'},
     },
   },
 
   tokens: {
-    // Clean white surfaces
-    '--color-background-body': ['#FFFFFF', '#1C1B18'],
+    // Warm paper canvas so white cards read as lifted surfaces
+    '--color-background-body': ['#F6F4F0', '#1C1B18'],
     '--color-background-surface': ['#FFFFFF', '#2A2824'],
     '--color-background-card': ['#FFFFFF', '#2A2824'],
     '--color-background-popover': ['#FFFFFF', '#2A2824'],

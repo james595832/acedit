@@ -201,11 +201,13 @@ function ResultsInner() {
           </VStack>
 
           {!sessionId ? (
-            <Button
-              label="Start practice"
-              variant="primary"
-              href="/interview"
-            />
+            <HStack gap={2}>
+              <Button
+                label="Start practice"
+                variant="primary"
+                href="/interview"
+              />
+            </HStack>
           ) : null}
         </VStack>
       </Section>

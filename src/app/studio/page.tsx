@@ -158,6 +158,21 @@ export default async function StudioPage({searchParams}: StudioPageProps) {
               questions, answer out loud, and see strong vs weak criteria.
             </p>
           </div>
+          <div className="aced-orient__art" aria-hidden="true">
+            <span className="aced-art-voice">
+              <span className="aced-art-voice__mic" />
+              <span className="aced-art-voice__bars">
+                <i />
+                <i />
+                <i />
+                <i />
+                <i />
+                <i />
+                <i />
+              </span>
+              <span className="aced-art-voice__time">0:42</span>
+            </span>
+          </div>
           <Link className="aced-pill aced-pill--studio" href="/interview">
             {practiceRuns > 0 ? 'Practice again' : 'Start practice'}
           </Link>
