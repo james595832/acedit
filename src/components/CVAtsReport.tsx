@@ -10,7 +10,7 @@ const TONE: Record<
 > = {
   strong: {label: 'Strong ATS readiness', className: 'aced-ats--strong'},
   good: {label: 'Good ATS readiness', className: 'aced-ats--good'},
-  fair: {label: 'Fair — some ATS risk', className: 'aced-ats--fair'},
+  fair: {label: 'Fair, some ATS risk', className: 'aced-ats--fair'},
   poor: {label: 'Poor ATS readiness', className: 'aced-ats--poor'},
 };
 
@@ -95,7 +95,7 @@ export function CVAtsReport({audit}: CVAtsReportProps) {
       ) : null}
 
       <p className="aced-ats__note">
-        This mimics common ATS text extraction — not a guarantee any specific
+        This mimics common ATS text extraction, not a guarantee any specific
         employer system will score you the same way. Use a clean PDF for
         applications; keep a designed version for your portfolio.
       </p>

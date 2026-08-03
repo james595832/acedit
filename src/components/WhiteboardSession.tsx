@@ -53,7 +53,7 @@ export function WhiteboardSession({challenge}: WhiteboardSessionProps) {
   const [messages, setMessages] = useState<ClarifyingMessage[]>([
     {
       role: 'assistant',
-      content: `I’m your interviewer for “${challenge.title}”. You have ${challenge.maxClarifyingQuestions} clarifying questions. Ask about users, constraints, data, or success — I won’t solve the board for you.`,
+      content: `I’m your interviewer for “${challenge.title}”. You have ${challenge.maxClarifyingQuestions} clarifying questions. Ask about users, constraints, data, or success. I won’t solve the board for you.`,
     },
   ]);
   const [draft, setDraft] = useState('');
@@ -237,7 +237,7 @@ export function WhiteboardSession({challenge}: WhiteboardSessionProps) {
               AI interviewer
             </li>
             <li>
-              Marker + post-its on the canvas, plus talk track — judged against
+              Marker + post-its on the canvas, plus talk track, judged against
               the ask
             </li>
           </ul>
@@ -254,7 +254,7 @@ export function WhiteboardSession({challenge}: WhiteboardSessionProps) {
             <Banner
               status="warning"
               title="Timer finished"
-              description="You can still tidy notes and run a debrief — treat this like wrapping up in the room."
+              description="You can still tidy notes and run a debrief. Treat this like wrapping up in the room."
             />
           ) : null}
 
@@ -323,8 +323,8 @@ export function WhiteboardSession({challenge}: WhiteboardSessionProps) {
               <div className="aced-wb__board-head">
                 <h2>1 · Sketch canvas</h2>
                 <p>
-                  Focal board — marker for flows, post-its for labels. Keep the
-                  ask in mind while you draw.
+                  Marker for flows, post-its for labels. Keep the ask in mind
+                  while you draw.
                 </p>
               </div>
               <WhiteboardCanvas
@@ -342,7 +342,7 @@ export function WhiteboardSession({challenge}: WhiteboardSessionProps) {
               <div className="aced-wb__chat-head">
                 <h2>2 · Ask the interviewer</h2>
                 <p>
-                  Clarifying questions only — this challenge. Left:{' '}
+                  Clarifying questions only for this challenge. Left:{' '}
                   <strong>{questionsRemaining}</strong>
                 </p>
               </div>
@@ -394,7 +394,7 @@ export function WhiteboardSession({challenge}: WhiteboardSessionProps) {
                 <h2>3 · Talk track</h2>
                 <p>
                   What you’d say out loud while pointing at the board. Assessed
-                  with your sketch — {talkFilled} of 5 sections started.
+                  with your sketch. {talkFilled} of 5 sections started.
                 </p>
               </div>
 
@@ -432,7 +432,7 @@ export function WhiteboardSession({challenge}: WhiteboardSessionProps) {
               />
               <TextArea
                 label="4 · Solution notes"
-                description="What the sketch is arguing — key screens and decisions."
+                description="What the sketch is arguing: key screens and decisions."
                 value={board.solution}
                 onChange={(v) => updateBoard('solution', v)}
                 rows={4}

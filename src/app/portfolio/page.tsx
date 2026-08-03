@@ -13,10 +13,10 @@ export default function PortfolioPage() {
           <p className="aced-masthead__kicker">Prep · Portfolio</p>
           <h1>Portfolio review</h1>
           <p className="aced-masthead__lead">
-            We check whether your case studies tell a hiring-manager-ready story
-            — process, role, outcomes — and optionally how that lines up with a
-            job description. No grade unless we can read enough to stand behind
-            it.
+            We check whether your case studies tell a story a hiring manager
+            can follow: process, role, and outcomes. Add a job description and
+            we check the match too. No grade unless we can read enough to stand
+            behind it.
           </p>
         </div>
       </header>

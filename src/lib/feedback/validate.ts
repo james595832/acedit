@@ -50,7 +50,7 @@ export function validateFeedbackInput(
   if (message.length < 10) {
     return {
       ok: false,
-      error: 'Tell us a bit more — at least 10 characters',
+      error: 'Tell us a bit more, at least 10 characters',
       code: 'VALIDATION_ERROR',
     };
   }

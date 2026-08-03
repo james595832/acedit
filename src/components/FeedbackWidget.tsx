@@ -83,8 +83,8 @@ export function FeedbackWidget({userEmail}: FeedbackWidgetProps) {
 
       handleOpenChange(false);
       const note = userEmail
-        ? `Thanks — we’ll read this at ${userEmail}.`
-        : 'Thanks — we received your note.';
+        ? `Thanks! We’ll reply to ${userEmail} if needed.`
+        : 'Thanks! We got your note.';
       setSentBanner(note);
       window.setTimeout(() => setSentBanner(null), 5000);
     } catch (err) {
@@ -127,7 +127,7 @@ export function FeedbackWidget({userEmail}: FeedbackWidgetProps) {
           title={step === 'pick' ? 'Send us feedback' : categoryMeta?.label ?? 'Feedback'}
           subtitle={
             step === 'pick'
-              ? 'Feature ideas, bugs, performance — we actively read these.'
+              ? 'Feature ideas, bugs, slow bits. We read every one.'
               : categoryMeta?.hint
           }
           onOpenChange={handleOpenChange}
@@ -157,7 +157,7 @@ export function FeedbackWidget({userEmail}: FeedbackWidgetProps) {
               })}
             </ul>
             <Text type="supporting" color="secondary" as="p">
-              Screenshots help — paste a link in your message (Loom, Drive, etc.).
+              Screenshots help. Paste a link in your message (Loom, Drive, etc.).
             </Text>
           </VStack>
         ) : (

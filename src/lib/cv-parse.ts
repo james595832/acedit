@@ -262,7 +262,7 @@ export function buildQuestionsFromCv(
         is_personal: true,
       },
       {
-        text: `Your CV highlights ${skill}. Tell me about a decision where ${skill} materially changed the outcome — what alternatives did you reject?`,
+        text: `Your CV highlights ${skill}. Tell me about a decision where ${skill} really changed the outcome. What alternatives did you reject?`,
         category: 'design_thinking',
         is_personal: true,
       },
@@ -285,7 +285,7 @@ export function buildQuestionsFromCv(
       },
       {
         text: jd
-          ? `For ${role}, describe how you would approach the first 90 days — what would you learn, make, and measure?`
+          ? `For ${role}, describe how you would approach the first 90 days. What would you learn, make, and measure?`
           : `Describe how you would use ${skill2} when redesigning a dense enterprise form without losing data completeness.`,
         category: 'interaction',
         is_personal: Boolean(jd),

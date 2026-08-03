@@ -127,7 +127,7 @@ export function auditCvForAts(input: {
         'no-text',
         'critical',
         'No readable text found',
-        'This PDF looks image-only or heavily graphical — most ATS parsers will see a blank file.',
+        'This PDF looks image-only or heavily graphical. Most ATS parsers will see a blank file.',
         'Export a text-based PDF from Word, Google Docs, or Figma (not a flattened screenshot).',
       ),
     );
@@ -147,7 +147,7 @@ export function auditCvForAts(input: {
         'text-ok',
         'pass',
         'Text is extractable',
-        'We could read your CV like a typical ATS would — a good baseline.',
+        'We could read your CV like a typical ATS would. A good baseline.',
         'Keep using a text-based PDF for applications.',
       ),
     );
@@ -171,7 +171,7 @@ export function auditCvForAts(input: {
         'column-noise',
         'warning',
         'Possible multi-column layout',
-        'Lots of short fragmented lines — common when two-column CVs get read out of order by ATS.',
+        'Lots of short fragmented lines. Common when two-column CVs get read out of order by ATS.',
         'Switch to one column for applications, or put critical details (role, company, dates) on their own lines.',
       ),
     );
@@ -183,7 +183,7 @@ export function auditCvForAts(input: {
         'repeated-header',
         'info',
         'Repeated lines detected',
-        'The same phrase appears multiple times — often page headers/footers that ATS may duplicate or drop.',
+        'The same phrase appears multiple times. Often page headers or footers that ATS may duplicate or drop.',
         'Remove running headers/footers from the application version of your CV.',
       ),
     );
@@ -195,7 +195,7 @@ export function auditCvForAts(input: {
         'no-email',
         'warning',
         'No email address detected',
-        'Most ATS workflows match candidates by email — missing contact info can break tracking.',
+        'Most ATS workflows match candidates by email. Missing contact info can break tracking.',
         'Add a plain-text email near the top (not inside an icon or image).',
       ),
     );
@@ -229,7 +229,7 @@ export function auditCvForAts(input: {
         'no-linkedin',
         'info',
         'No LinkedIn URL detected',
-        'Recruiters often cross-check profiles — a full linkedin.com/in/… URL parses best.',
+        'Recruiters often cross-check profiles. A full linkedin.com/in/… URL parses best.',
         'Add your LinkedIn as plain text, not only as a hyperlink icon.',
       ),
     );
@@ -253,7 +253,7 @@ export function auditCvForAts(input: {
         'no-skills-heading',
         'warning',
         'No “Skills” section heading',
-        'Keyword matching often relies on a dedicated skills block — easy to miss in design CVs.',
+        'Keyword matching often relies on a dedicated skills block. Easy to miss in design CVs.',
         'Add a Skills or Tools section with Figma, research methods, etc. as text.',
       ),
     );
@@ -277,7 +277,7 @@ export function auditCvForAts(input: {
         'no-dates',
         'warning',
         'No clear employment dates',
-        'ATS timelines usually need dates (e.g. Jan 2022 – Present or 2020–2024).',
+        'ATS timelines usually need dates (like Jan 2022 to Present).',
         'Add month/year or year ranges for each role.',
       ),
     );
@@ -289,7 +289,7 @@ export function auditCvForAts(input: {
         'no-design-keywords',
         'info',
         'Few design-tool keywords',
-        'No obvious Figma/research/prototyping terms — keyword filters may rank you lower for design roles.',
+        'No obvious Figma, research, or prototyping terms. Keyword filters may rank you lower for design roles.',
         'Spell out tools and methods in text (not only logos).',
       ),
     );
@@ -335,12 +335,12 @@ export function auditCvForAts(input: {
 
   const summary =
     readiness === 'strong'
-      ? 'Strong ATS readability — your CV should parse cleanly for most systems.'
+      ? 'Strong ATS readability. Your CV should parse cleanly for most systems.'
       : readiness === 'good'
-        ? 'Mostly ATS-friendly — a few tweaks will reduce parsing risk.'
+        ? 'Mostly ATS-friendly. A few tweaks will reduce parsing risk.'
         : readiness === 'fair'
-          ? 'Mixed ATS readiness — fix warnings before mass-applying.'
-          : 'High risk for ATS — re-export or simplify layout before applying.';
+          ? 'Mixed ATS readiness. Fix warnings before mass-applying.'
+          : 'High risk for ATS. Re-export or simplify layout before applying.';
 
   return {
     score,

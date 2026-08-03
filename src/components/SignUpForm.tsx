@@ -51,7 +51,7 @@ export function SignUpForm({
       <Banner
         status="info"
         title={`${trialDays}-day Pro trial`}
-        description="After you create your account you’ll enter card details on Stripe. £0 today — cancel anytime in Settings."
+        description="After you create your account you’ll enter card details on Stripe. £0 today. Cancel any time in Settings."
       />
 
       <form action={formAction}>

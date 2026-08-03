@@ -269,7 +269,7 @@ export function VoiceRecorder({
 
         <Text type="supporting" color="secondary" as="p">
           {isRecording
-            ? 'Speak your answer aloud. Stop when you’re finished — we grade the transcript.'
+            ? 'Speak your answer aloud. Stop when you’re finished and we grade the transcript.'
             : 'We listen live in the browser. Audio is saved; the transcript is what gets graded.'}
         </Text>
 
@@ -291,7 +291,7 @@ export function VoiceRecorder({
               max={100}
               hasValueLabel
               formatValueLabel={(value) =>
-                value < 8 ? 'Quiet — speak up' : `${value}% input`
+                value < 8 ? 'Quiet. Speak up!' : `${value}% input`
               }
               variant={level < 8 ? 'warning' : 'success'}
             />

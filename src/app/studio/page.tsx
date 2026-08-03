@@ -45,7 +45,7 @@ export default async function StudioPage({searchParams}: StudioPageProps) {
       ) {
         try {
           await syncBillingFromCheckoutSession(params.session_id, user.id);
-          billingBanner = 'Trial started — you’re on Pro. Welcome in.';
+          billingBanner = 'Trial started. You’re on Pro. Welcome in!';
         } catch (error) {
           console.error('[studio] billing sync', error);
           billingBanner =
@@ -96,8 +96,8 @@ export default async function StudioPage({searchParams}: StudioPageProps) {
           <p className="aced-masthead__kicker">Studio · Home</p>
           <h1>You’re signed in, {firstName}.</h1>
           <p className="aced-masthead__lead">
-            Studio is your home base. Start a practice run when you’re ready —
-            prep, speak, then review scores in Results.
+            Studio is your home base. Start a practice run when you’re ready.
+            Prep, speak, then review your scores in Results.
           </p>
           {billingBanner ? (
             <p className="aced-masthead__note" role="status">
@@ -111,7 +111,7 @@ export default async function StudioPage({searchParams}: StudioPageProps) {
         <section className="aced-studio-hello" aria-label="Getting started">
           <p className="aced-studio-hello__kicker">New here?</p>
           <p className="aced-studio-hello__copy">
-            Start with a practice interview — upload your CV, answer five
+            Start with a practice interview. Upload your CV, answer five
             questions out loud, and see your first scores in about 15 minutes.
           </p>
         </section>
@@ -174,7 +174,7 @@ export default async function StudioPage({searchParams}: StudioPageProps) {
                 <h2>Portfolio review</h2>
                 <p>
                   Check whether your case studies are hire-ready and match a
-                  target job — before you apply.
+                  target job, before you apply.
                 </p>
                 <Link className="aced-orient__cta" href="/portfolio">
                   Review portfolio →
@@ -189,8 +189,8 @@ export default async function StudioPage({searchParams}: StudioPageProps) {
               <div className="aced-orient__body">
                 <h2>Whiteboard challenges</h2>
                 <p>
-                  Timed design prompts with a marker canvas and a limited AI
-                  interviewer for clarifying questions — practice under
+                  Timed design prompts with a marker canvas and an AI
+                  interviewer for clarifying questions. Practice under
                   pressure, then review your boards.
                 </p>
                 <Link className="aced-orient__cta" href="/whiteboard">

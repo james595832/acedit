@@ -1,5 +1,5 @@
 import type {Metadata} from 'next';
-import {Public_Sans, Space_Grotesk} from 'next/font/google';
+import {Public_Sans, Raleway} from 'next/font/google';
 import {Providers} from '@/components/providers';
 import {AppShellServer} from '@/components/AppShellServer';
 import '@astryxdesign/core/reset.css';
@@ -12,17 +12,17 @@ const publicSans = Public_Sans({
   display: 'swap',
 });
 
-const spaceGrotesk = Space_Grotesk({
+const raleway = Raleway({
   subsets: ['latin'],
   variable: '--font-aced-heading',
-  weight: ['500', '600', '700'],
+  weight: ['500', '600', '700', '800'],
   display: 'swap',
 });
 
 export const metadata: Metadata = {
-  title: 'ACED-IT — Interview practice built for designers',
+  title: 'ACED-IT | Ace your design interview',
   description:
-    'Interview prep built exclusively for designers — practice out loud, whiteboard under pressure, and get clear feedback. Not another engineering platform.',
+    'Interview practice made just for designers. Answer real questions out loud, sketch on a timed whiteboard, and get clear feedback.',
   icons: {
     icon: [
       // Self-adapting SVG first; explicit variants for browsers that honor media
@@ -49,7 +49,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${publicSans.variable} ${spaceGrotesk.variable}`}
+      className={`${publicSans.variable} ${raleway.variable}`}
     >
       <body className={publicSans.className}>
         <Providers>

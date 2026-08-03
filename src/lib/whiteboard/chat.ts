@@ -55,7 +55,7 @@ function stubClarifyingReply(
   });
 
   if (matched) {
-    return `Good question. From what we know today: ${matched} Keep going — I won’t hand you the full solution.`;
+    return `Good question. From what we know today: ${matched} Keep going. I won’t hand you the full solution.`;
   }
 
   if (
@@ -64,18 +64,18 @@ function stubClarifyingReply(
     q.includes('kpi') ||
     q.includes('measure')
   ) {
-    return 'I’d like you to propose the success metric. What would convince you the redesign worked in 4–6 weeks?';
+    return 'I’d like you to propose the success metric. What would convince you the redesign worked in 4 to 6 weeks?';
   }
 
   if (q.includes('user') || q.includes('persona') || q.includes('who')) {
-    return 'Assume a primary user segment that matches the brief. You can name one primary and one secondary — justify the split briefly.';
+    return 'Assume a primary user segment that matches the brief. You can name one primary and one secondary. Justify the split briefly.';
   }
 
   if (q.includes('constraint') || q.includes('timeline') || q.includes('tech')) {
-    return `Constraints I’d flag: ${challenge.knownFacts[0] ?? 'Ship something believable this quarter.'} Engineering capacity is limited — prefer patterns you can phase.`;
+    return `Constraints I’d flag: ${challenge.knownFacts[0] ?? 'Ship something believable this quarter.'} Engineering capacity is limited, so prefer patterns you can phase.`;
   }
 
-  return `I’ll stay in interviewer mode for “${challenge.title}”. Ask something specific about users, constraints, data, or success criteria — I won’t design it for you.`;
+  return `I’ll stay in interviewer mode for “${challenge.title}”. Ask something specific about users, constraints, data, or success criteria. I won’t design it for you.`;
 }
 
 export async function answerClarifyingQuestion(input: {
@@ -183,7 +183,7 @@ function assessDeliverableLocally(
     return {
       item,
       status: 'missed',
-      note: 'The ask required a sketch of key screens/states — none found.',
+      note: 'The ask required a sketch of key screens or states. None found.',
     };
   }
 
@@ -293,7 +293,7 @@ function assessDeliverableLocally(
     return {
       item,
       status: 'partial',
-      note: 'Touched lightly — strengthen how this maps to the goal.',
+      note: 'Touched lightly. Strengthen how this maps to the goal.',
     };
   }
   return {
@@ -362,7 +362,7 @@ function stubDebrief(
     summary:
       missed === 0
         ? 'Strong coverage of the ask. Sharpen the weakest deliverable note and make the success metric unmistakable.'
-        : 'Assessed against the challenge deliverables — close the missed items next time so the board clearly answers the ask.',
+        : 'Assessed against the challenge deliverables. Close the missed items next time so the board clearly answers the ask.',
     deliverables,
     strengths:
       criteriaHit.length > 0
@@ -381,8 +381,8 @@ function stubDebrief(
     criteriaHit,
     criteriaMissed,
     sketchAssessment: hasSketch
-      ? 'Board saved (marker and/or post-its). Check it shows the critical screens/states named in the ask — not only decorative marks.'
-      : 'No board content saved. This ask expected a visual board — sketches and/or labelled post-its.',
+      ? 'Board saved (marker and/or post-its). Check it shows the critical screens and states named in the ask, not only decorative marks.'
+      : 'No board content saved. This ask expected a visual board with sketches and/or labelled post-its.',
     stub: true,
   };
 }

@@ -93,7 +93,7 @@ function ResultsInner() {
                     >
                       ✓
                     </span>
-                    Strong session — keep this pace.
+                    Strong session. Keep this pace!
                   </p>
                 ) : null}
                 <div

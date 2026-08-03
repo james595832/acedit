@@ -194,7 +194,7 @@ export function BillingSettings({
             ) : null}
             {!isSubscribed ? (
               <Text size="sm" color="secondary">
-                Start a 5-day Pro trial — card required, £0 today.
+                Start a 5-day Pro trial. Card required, £0 today.
               </Text>
             ) : null}
           </VStack>
@@ -261,7 +261,7 @@ export function BillingSettings({
                 const link = invoice.hostedInvoiceUrl ?? invoice.invoicePdf;
                 const period =
                   invoice.periodStart && invoice.periodEnd
-                    ? `${formatDate(invoice.periodStart)} – ${formatDate(invoice.periodEnd)}`
+                    ? `${formatDate(invoice.periodStart)} to ${formatDate(invoice.periodEnd)}`
                     : formatDate(invoice.createdAt);
 
                 return (

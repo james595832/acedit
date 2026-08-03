@@ -75,7 +75,7 @@ export function PortfolioReviewForm() {
 
   async function handleAnalysePaste() {
     if (!pastedText.trim()) {
-      setError('Paste at least one case study — problem, process, outcome.');
+      setError('Paste at least one case study: problem, process, outcome.');
       return;
     }
     await runAnalyse(true);
@@ -90,7 +90,7 @@ export function PortfolioReviewForm() {
       <Banner
         status="info"
         title="Honest review only"
-        description="We score what we can actually read. If a site blocks us or has too little text, we won’t invent a grade — paste your case study copy instead."
+        description="We score what we can actually read. If a site blocks us or has too little text, we won’t invent a grade. Paste your case study copy instead."
       />
 
       <header className="aced-section-head aced-section-head--active">
@@ -99,7 +99,7 @@ export function PortfolioReviewForm() {
       </header>
       <Text as="p" color="secondary">
         Link to your public portfolio or a single case study page. Password-protected
-        or JS-only sites may not work — use paste below if needed.
+        or JS-only sites may not work. Use paste below if needed.
       </Text>
       <TextInput
         label="Portfolio URL"
@@ -136,8 +136,9 @@ export function PortfolioReviewForm() {
         <Heading level={3}>Paste case study text</Heading>
       </header>
       <Text as="p" color="secondary">
-        Best results: paste 2–3 case studies with problem, your role, process,
-        and outcomes. This avoids scrape limits and matches what interviewers read.
+        Best results: paste 2 or 3 case studies with problem, your role,
+        process, and outcomes. This avoids scrape limits and matches what
+        interviewers read.
       </Text>
       <TextArea
         label="Case study copy"
@@ -155,7 +156,7 @@ export function PortfolioReviewForm() {
         <Heading level={3}>Target job description</Heading>
       </header>
       <Text as="p" color="secondary">
-        Paste the role you are applying for — we check whether your portfolio
+        Paste the role you are applying for and we check whether your portfolio
         evidence matches (only shown when the read quality is high enough).
       </Text>
       <TextArea

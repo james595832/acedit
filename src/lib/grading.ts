@@ -4,11 +4,11 @@ import type {CvAnalysis} from '@/lib/cv-parse';
 import {evaluateCvEvidence} from '@/lib/cv-evidence';
 
 export const RUBRIC_CRITERIA = [
-  'Design thinking — problem framing, options, decision to ship',
-  'Communication — clear structure a hiring manager can follow',
-  'Depth — specific examples vs generic platitudes',
-  'Design knowledge — craft, research, accessibility, collaboration',
-  'Role fit — connects answer to the target job description',
+  'Design thinking: problem framing, options, decision to ship',
+  'Communication: clear structure a hiring manager can follow',
+  'Depth: specific examples vs generic platitudes',
+  'Design knowledge: craft, research, accessibility, collaboration',
+  'Role fit: connects answer to the target job description',
 ] as const;
 
 function scoreAxis(hits: number, maxHits: number, base = 4): number {
@@ -194,7 +194,7 @@ export function gradeTranscriptLocally(input: {
       ? 'You hit most must-cover points for this question.'
       : 'Several must-cover points for this question were missing.',
     weakSignalsHit.length
-      ? 'Some weak-answer patterns showed up — tighten with specifics.'
+      ? 'Some weak answer patterns showed up. Tighten with specifics.'
       : 'Avoided the worst weak-answer patterns.',
   ];
 

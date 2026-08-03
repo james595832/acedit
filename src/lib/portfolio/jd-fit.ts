@@ -108,7 +108,7 @@ export function auditPortfolioJdFit(input: {
       ? `Evidence for JD themes: ${aligned.slice(0, 4).join(', ')}.`
       : null,
     gaps.length
-      ? `Still weak on: ${gaps.slice(0, 3).join(', ')} — address in a case study or cover letter.`
+      ? `Still weak on: ${gaps.slice(0, 3).join(', ')}. Cover these in a case study or cover letter.`
       : null,
   ].filter(Boolean);
 
@@ -118,6 +118,6 @@ export function auditPortfolioJdFit(input: {
     aligned: [...new Set([...domainOverlap, ...aligned])].slice(0, 10),
     gaps,
     summary: summaryParts.join(' ') ||
-      `Moderate fit for ${role} — strengthen project evidence before applying.`,
+      `Moderate fit for ${role}. Strengthen project evidence before applying.`,
   };
 }

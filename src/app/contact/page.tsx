@@ -3,7 +3,7 @@ import Link from 'next/link';
 import {SUPPORT_EMAIL} from '@/components/SiteFooter';
 
 export const metadata: Metadata = {
-  title: 'Contact — ACED-IT',
+  title: 'Contact | ACED-IT',
   description: 'Contact ACED-IT support at support@acedit.app.',
 };
 
@@ -15,7 +15,7 @@ export default function ContactPage() {
           <p className="aced-masthead__kicker">Help · Contact</p>
           <h1>Contact us</h1>
           <p className="aced-masthead__lead">
-            Account, billing, privacy, or product questions — we read every
+            Account, billing, privacy, or product questions. We read every
             message.
           </p>
         </div>
@@ -39,7 +39,7 @@ export default function ContactPage() {
           <h2>In-app feedback</h2>
           <p>
             Signed in? Use the <strong>Feedback</strong> button at the bottom
-            right of the app — feature ideas, bugs, and performance notes go
+            right of the app. Feature ideas, bugs, and performance notes go
             straight to the team.
           </p>
         </section>
@@ -58,15 +58,16 @@ export default function ContactPage() {
           <h2>Other enquiries</h2>
           <ul>
             <li>
-              <strong>Privacy &amp; data rights</strong> — see our{' '}
+              <strong>Privacy &amp; data rights:</strong> see our{' '}
               <Link href="/privacy">Privacy Policy</Link> or email us with
               “Privacy request” in the subject line.
             </li>
             <li>
-              <strong>Terms of use</strong> — <Link href="/terms">Terms &amp; Conditions</Link>
+              <strong>Terms of use:</strong>{' '}
+              <Link href="/terms">Terms &amp; Conditions</Link>
             </li>
             <li>
-              <strong>Cancel or manage subscription</strong> — Settings in the
+              <strong>Cancel or manage subscription:</strong> Settings in the
               app, or email us if you cannot access your account.
             </li>
           </ul>

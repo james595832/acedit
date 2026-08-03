@@ -187,7 +187,7 @@ export function buildAnswerCriteria(input: {
 
   if (jd) {
     mustCover.push(
-      `Show fit for ${role}${jdReq ? ` — especially: ${truncate(jdReq, 70)}` : ''}`,
+      `Show fit for ${role}${jdReq ? `, especially: ${truncate(jdReq, 70)}` : ''}`,
     );
   }
 
@@ -228,7 +228,7 @@ export function buildAnswerCriteria(input: {
   ];
 
   const summary = jd
-    ? `Strong answers prove you can do this question well for ${role} at ${company}, using real CV evidence — not generic design talk.`
+    ? `Strong answers prove you can do this question well for ${role} at ${company}, using real CV evidence, not generic design talk.`
     : `Strong answers use your CV evidence on “${truncate(questionText, 70)}” with clear process, specifics, and tradeoffs.`;
 
   return {

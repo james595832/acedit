@@ -2,7 +2,7 @@ import type {Metadata} from 'next';
 import {LegalPage, LegalSection} from '@/components/LegalPage';
 
 export const metadata: Metadata = {
-  title: 'Privacy Policy — ACED-IT',
+  title: 'Privacy Policy | ACED-IT',
   description:
     'How ACED-IT collects, uses, and protects your personal data when you use acedit.app.',
 };
@@ -40,38 +40,38 @@ export default function PrivacyPage() {
         <p>We may collect the following categories of personal data:</p>
         <ul>
           <li>
-            <strong>Account data</strong> — name, email address, password
+            <strong>Account data:</strong> name, email address, password
             (stored in hashed form by our authentication provider), and optional
             marketing preferences.
           </li>
           <li>
-            <strong>Profile &amp; billing data</strong> — subscription status,
+            <strong>Profile &amp; billing data:</strong> subscription status,
             trial dates, Stripe customer identifiers, and invoice metadata. We do
             not store full payment card numbers; card details are handled by
             Stripe.
           </li>
           <li>
-            <strong>CV &amp; job description content</strong> — files and text
+            <strong>CV &amp; job description content:</strong> files and text
             you upload so we can generate practice questions and tailor feedback
             to your experience and target role.
           </li>
           <li>
-            <strong>Practice session data</strong> — interview questions,
+            <strong>Practice session data:</strong> interview questions,
             voice recordings, transcripts, scores, feedback, session timestamps,
             and related metadata.
           </li>
           <li>
-            <strong>Whiteboard data</strong> — sketches, post-it notes, talk-track
+            <strong>Whiteboard data:</strong> sketches, post-it notes, talk-track
             text, clarifying chat with the AI interviewer, debrief scores, and
             saved board images.
           </li>
           <li>
-            <strong>Technical &amp; usage data</strong> — IP address, browser
+            <strong>Technical &amp; usage data:</strong> IP address, browser
             type, device information, pages viewed, and diagnostic logs needed
             to operate and secure the Service.
           </li>
           <li>
-            <strong>Communications</strong> — messages you send to{' '}
+            <strong>Communications:</strong> messages you send to{' '}
             <a href="mailto:support@acedit.app">support@acedit.app</a> and
             essential service emails (account verification, billing, security).
           </li>
@@ -99,7 +99,7 @@ export default function PrivacyPage() {
           Under UK GDPR, our lawful bases typically include:{' '}
           <strong>contract</strong> (to deliver the Service you signed up for),{' '}
           <strong>legitimate interests</strong> (security, analytics, product
-          improvement — balanced against your rights),{' '}
+          improvement, balanced against your rights),{' '}
           <strong>consent</strong> (optional marketing), and{' '}
           <strong>legal obligation</strong> (tax and accounting records).
         </p>
@@ -127,25 +127,25 @@ export default function PrivacyPage() {
         </p>
         <ul>
           <li>
-            <strong>Supabase</strong> — authentication and profile storage;
+            <strong>Supabase:</strong> authentication and profile storage;
           </li>
           <li>
-            <strong>Stripe</strong> — payments, subscriptions, and invoicing;
+            <strong>Stripe:</strong> payments, subscriptions, and invoicing;
           </li>
           <li>
-            <strong>Anthropic</strong> — AI analysis, question generation, grading,
+            <strong>Anthropic:</strong> AI analysis, question generation, grading,
             and whiteboard chat/debrief;
           </li>
           <li>
-            <strong>Deepgram</strong> (where enabled) — speech-to-text for voice
+            <strong>Deepgram</strong> (where enabled): speech-to-text for voice
             answers;
           </li>
           <li>
-            <strong>Vercel</strong> (or equivalent hosting) — application hosting
+            <strong>Vercel</strong> (or equivalent hosting): application hosting
             and delivery;
           </li>
           <li>
-            <strong>Email providers</strong> — transactional and, if opted in,
+            <strong>Email providers:</strong> transactional and, if opted in,
             marketing messages.
           </li>
         </ul>
@@ -168,21 +168,21 @@ export default function PrivacyPage() {
       <LegalSection id="retention" title="7. How long we keep data">
         <ul>
           <li>
-            <strong>Account &amp; billing records</strong> — for as long as your
+            <strong>Account &amp; billing records:</strong> for as long as your
             account is active and for up to seven years thereafter where needed
             for tax, accounting, or legal claims.
           </li>
           <li>
-            <strong>Practice content</strong> — until you delete it, delete your
+            <strong>Practice content:</strong> until you delete it, delete your
             account, or ask us to erase it, subject to backup cycles (typically up
             to 30 days).
           </li>
           <li>
-            <strong>Marketing preferences</strong> — until you withdraw consent or
+            <strong>Marketing preferences:</strong> until you withdraw consent or
             we no longer use the list.
           </li>
           <li>
-            <strong>Support emails</strong> — as long as needed to resolve your
+            <strong>Support emails:</strong> as long as needed to resolve your
             request and maintain a reasonable support history.
           </li>
         </ul>

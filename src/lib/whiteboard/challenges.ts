@@ -56,7 +56,7 @@ Deliver:
     hiddenContext: [
       'Average order value is £64.',
       'Apple Pay / Google Pay are not offered yet.',
-      'Marketing wants a post-purchase upsell modal — product is skeptical.',
+      'Marketing wants a post-purchase upsell modal. Product is skeptical.',
     ],
     successCriteria: [
       'Asks useful clarifying questions before designing',
@@ -145,7 +145,7 @@ Deliver:
     ],
     hiddenContext: [
       'There is a phone booking fallback staff prefer to push.',
-      'Brand insists on a terracotta accent colour — check contrast.',
+      'Brand insists on a terracotta accent colour. Check contrast.',
       'Some services require a referral code.',
     ],
     successCriteria: [
@@ -159,7 +159,7 @@ Deliver:
     id: 'design-system-conflict',
     title: 'Resolve a design-system conflict',
     summary:
-      'Two product teams shipped divergent patterns — align them without a rewrite.',
+      'Two product teams shipped divergent patterns. Align them without a rewrite.',
     goal:
       'Propose a unified pattern decision and migration plan that unblocks shipping this quarter.',
     deliverables: [
@@ -204,7 +204,7 @@ Deliver:
     id: 'notifications-overload',
     title: 'Fix notification overload',
     summary:
-      'Users mute the product — redesign alerts so important events still surface.',
+      'Users mute the product. Redesign alerts so important events still surface.',
     goal:
       'Redesign how in-app, email, and push work together for a collaboration tool.',
     deliverables: [
@@ -233,7 +233,7 @@ Deliver:
     ],
     hiddenContext: [
       'Push is disabled in the EU build pending legal review.',
-      'Sales wants a “weekly wins” marketing email in the same system — product prefers separation.',
+      'Sales wants a “weekly wins” marketing email in the same system. Product prefers separation.',
     ],
     successCriteria: [
       'Defines urgency tiers',

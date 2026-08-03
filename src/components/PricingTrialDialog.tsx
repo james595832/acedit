@@ -16,7 +16,7 @@ const TIMELINE = [
   {
     day: 'Today',
     title: 'Start free',
-    detail: 'Full access. Practice interviews with your CV — £0 today.',
+    detail: 'Full access. Practice interviews with your CV. £0 today.',
   },
   {
     day: 'Day 4',
@@ -26,16 +26,16 @@ const TIMELINE = [
   {
     day: 'Day 5',
     title: 'Membership begins',
-    detail: '£7.50 / month (or $9.99). Cancel anytime before then.',
+    detail: '£7.50 a month (or $9.99). Cancel any time before then.',
   },
 ] as const;
 
 const FEATURES = [
-  'Built for design interviews only — not engineering',
-  'Practice interviews from your CV',
+  'Made for design interviews only, not coding',
+  'Questions built from your CV',
   'Answer out loud and get clear feedback',
   'Design whiteboard challenges in one place',
-  'Cancel anytime before or after trial',
+  'Cancel any time, before or after the trial',
 ] as const;
 
 export function PricingTrialDialog({
@@ -71,7 +71,7 @@ export function PricingTrialDialog({
               </HStack>
             </HStack>
             <Text size="sm" color="secondary">
-              Or $9.99 / month · Billed after trial · Cancel anytime
+              Or $9.99 a month · Billed after the trial · Cancel any time
             </Text>
             <Divider />
             <VStack gap={2} as="ul" className="aced-price-features">
@@ -94,7 +94,7 @@ export function PricingTrialDialog({
                 </span>
                 <VStack gap={1}>
                   <Text size="sm" weight="semibold">
-                    {step.day} — {step.title}
+                    {step.day}: {step.title}
                   </Text>
                   <Text size="sm" color="secondary">
                     {step.detail}
@@ -113,9 +113,9 @@ export function PricingTrialDialog({
               Continue to create account
             </Link>
             <p className="aced-trial-fineprint">
-              Stripe Checkout collects your card after account setup. You won&apos;t
-              be charged today — cancel anytime in Settings. By continuing you
-              agree to our{' '}
+              Stripe Checkout collects your card after account setup. You
+              won&apos;t be charged today, and you can cancel any time in
+              Settings. By continuing you agree to our{' '}
               <Link href="/terms" onClick={() => onOpenChange(false)}>
                 Terms
               </Link>{' '}

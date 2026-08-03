@@ -12,8 +12,9 @@ export default function WhiteboardIndexPage() {
           <p className="aced-masthead__kicker">Practice · Whiteboard</p>
           <h1>Whiteboard challenges</h1>
           <p className="aced-masthead__lead">
-            Timed design prompts, a marker canvas, and limited AI clarifying
-            questions — practice like a real onsite, then review your boards.
+            Timed design prompts, a marker canvas, and an AI interviewer for
+            clarifying questions. Practice like a real onsite, then review your
+            boards.
           </p>
         </div>
       </header>

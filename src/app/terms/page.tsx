@@ -2,7 +2,7 @@ import type {Metadata} from 'next';
 import {LegalPage, LegalSection} from '@/components/LegalPage';
 
 export const metadata: Metadata = {
-  title: 'Terms & Conditions — ACED-IT',
+  title: 'Terms & Conditions | ACED-IT',
   description:
     'Terms and conditions for using ACED-IT design interview prep at acedit.app.',
 };
@@ -79,31 +79,31 @@ export default function TermsPage() {
       <LegalSection id="trial-billing" title="5. Free trial, subscription &amp; billing">
         <ul>
           <li>
-            <strong>Free trial</strong> — New Pro memberships may include a
+            <strong>Free trial:</strong> New Pro memberships may include a
             5-day free trial with full access. You will not be charged during the
             trial if you cancel before it ends.
           </li>
           <li>
-            <strong>After trial</strong> — Unless cancelled, your subscription
+            <strong>After trial:</strong> Unless cancelled, your subscription
             renews automatically at the price shown at checkout (currently £7.50
             per month GBP or $9.99 per month USD, or equivalent as processed by
             Stripe).
           </li>
           <li>
-            <strong>Payment</strong> — Payments are processed by Stripe. By
+            <strong>Payment:</strong> Payments are processed by Stripe. By
             subscribing, you authorise recurring charges to your payment method.
           </li>
           <li>
-            <strong>Reminder</strong> — We may email you before your trial ends
+            <strong>Reminder:</strong> We may email you before your trial ends
             (for example on day four) so you can cancel if you do not wish to
             continue.
           </li>
           <li>
-            <strong>Taxes</strong> — Prices may exclude VAT or other taxes where
+            <strong>Taxes:</strong> Prices may exclude VAT or other taxes where
             applicable; Stripe will show the final amount at checkout.
           </li>
           <li>
-            <strong>Manage billing</strong> — Update payment details, view
+            <strong>Manage billing:</strong> Update payment details, view
             invoices, or cancel in Settings or via the Stripe customer portal.
           </li>
         </ul>

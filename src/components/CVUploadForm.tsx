@@ -168,7 +168,7 @@ export function CVUploadForm() {
     {
       id: 'jd',
       label: 'Job description',
-      hint: 'Optional — add a JD to sharpen role-fit scoring',
+      hint: 'Optional. Add a JD to sharpen role-fit scoring',
       done: jdDone,
       current: false,
       optional: true,
@@ -178,7 +178,7 @@ export function CVUploadForm() {
       label: 'Start practice',
       hint: cvDone
         ? jdDone
-          ? 'CV + JD ready — begin the interview'
+          ? 'CV + JD ready. Begin the interview'
           : 'CV ready. Add a JD above, or start now'
         : 'Unlocks after your CV is analysed',
       done: false,
@@ -357,8 +357,8 @@ export function CVUploadForm() {
           <Text type="label">
             {preview
               ? jdPreview
-                ? 'CV + JD ready — start when you are'
-                : 'CV ready — JD is optional but sharpens scoring'
+                ? 'CV + JD ready. Start when you are'
+                : 'CV ready. A JD is optional but sharpens scoring'
               : 'Analyse a CV to unlock practice'}
           </Text>
           <Text type="supporting" color="secondary" as="p">

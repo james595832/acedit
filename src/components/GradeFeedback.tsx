@@ -38,7 +38,7 @@ export function GradeFeedback({grade}: GradeFeedbackProps) {
             <span className="aced-score-hero__celebrate-check" aria-hidden="true">
               ✓
             </span>
-            Strong answer — this would land in the room.
+            Strong answer. This would land in the room.
           </p>
         ) : null}
         <p className="aced-score-hero__value" aria-label={`${grade.score} out of 100`}>
@@ -66,7 +66,7 @@ export function GradeFeedback({grade}: GradeFeedbackProps) {
       <VStack gap={2}>
         <Heading level={3}>Must-cover checklist</Heading>
         <Text as="p" color="secondary">
-          Scored against the rubric for this question — not a secret model essay.
+          Scored against the rubric for this question, not a secret model essay.
         </Text>
         <ul className="aced-check">
           {ev.mustCover.map((item) => {
@@ -126,7 +126,7 @@ export function GradeFeedback({grade}: GradeFeedbackProps) {
       <Divider />
 
       <VStack gap={3}>
-        <Heading level={3}>Score breakdown (0–10)</Heading>
+        <Heading level={3}>Score breakdown (0 to 10)</Heading>
         {AXIS_LABELS.map(({key, label}) => (
           <VStack key={key} gap={1}>
             <HStack justify="between" align="center">
@@ -172,7 +172,7 @@ export function GradeFeedback({grade}: GradeFeedbackProps) {
         <Banner
           status="info"
           title="Local grader"
-          description="Running without Anthropic — criteria still come from your CV + JD."
+          description="Running without Anthropic. Criteria still come from your CV + JD."
         />
       ) : null}
     </VStack>

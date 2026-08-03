@@ -202,8 +202,8 @@ export function auditPortfolioHeuristic(input: {
         'no-case-studies',
         'critical',
         'No clear case studies detected',
-        'Recruiters scan for named projects with a story — we could not find distinct project titles.',
-        'Add 2–3 case studies with clear titles (client or product name) on the page or in pasted text.',
+        'Recruiters scan for named projects with a story. We could not find distinct project titles.',
+        'Add 2 or 3 case studies with clear titles (client or product name) on the page or in pasted text.',
       ),
     );
   } else if (caseStudies.length === 1) {
@@ -223,7 +223,7 @@ export function auditPortfolioHeuristic(input: {
         'pass',
         'Case studies identified',
         `Spotted ${caseStudies.length} likely project${caseStudies.length === 1 ? '' : 's'}: ${caseStudies.slice(0, 3).join(', ')}.`,
-        'Keep titles scannable — outcome or domain in the headline helps.',
+        'Keep titles easy to scan. An outcome or domain in the headline helps.',
       ),
     );
   }
@@ -246,7 +246,7 @@ export function auditPortfolioHeuristic(input: {
         'thin-process',
         'critical',
         'Design process is hard to see',
-        'Little evidence of research, exploration, iteration, or collaboration — reads like outcomes only.',
+        'Little evidence of research, exploration, iteration, or collaboration. It reads like outcomes only.',
         'Show how you worked: research, options considered, tradeoffs, and what you shipped.',
       ),
     );
@@ -268,8 +268,8 @@ export function auditPortfolioHeuristic(input: {
         'no-metrics',
         'warning',
         'No measurable outcomes',
-        'No metrics, user counts, or before/after results — hard to judge impact in a 30-second scan.',
-        'Add 1–2 numbers you can defend in interview (% improvement, users, time saved, etc.).',
+        'No metrics, user counts, or before/after results. Hard to judge impact in a 30-second scan.',
+        'Add 1 or 2 numbers you can defend in interview (% improvement, users, time saved, etc.).',
       ),
     );
   } else if (metricMentions >= 2) {
@@ -278,7 +278,7 @@ export function auditPortfolioHeuristic(input: {
         'metrics-present',
         'pass',
         'Outcomes quantified',
-        'Impact appears with numbers or clear results — strong signal for recruiters.',
+        'Impact appears with numbers or clear results. Strong signal for recruiters.',
         'Ensure metrics tie to design decisions you made, not only team OKRs.',
       ),
     );
@@ -291,7 +291,7 @@ export function auditPortfolioHeuristic(input: {
         'warning',
         'Your role is unclear',
         'Team credits are good, but reviewers need to know what you personally owned.',
-        'Add “My role: …” — research, IA, UI, prototyping, stakeholder workshops, etc.',
+        'Add “My role: …” with research, IA, UI, prototyping, stakeholder workshops, etc.',
       ),
     );
   }
@@ -326,7 +326,7 @@ export function auditPortfolioHeuristic(input: {
         'no-craft-signals',
         'info',
         'Craft / tooling not mentioned',
-        'For design roles, reviewers expect hints of craft — tools, systems, or UI decisions.',
+        'For design roles, reviewers expect hints of craft: tools, systems, or UI decisions.',
         'Mention artifacts: flows, components, prototypes, or accessibility choices.',
       ),
     );
@@ -348,14 +348,14 @@ export function auditPortfolioHeuristic(input: {
 
   const summary =
     !canScore && input.confidence === 'low'
-      ? 'Partial read only — paste full case study text for a score you can trust.'
+      ? 'Partial read only. Paste full case study text for a score you can trust.'
       : readiness === 'strong'
         ? 'Portfolio reads interview-ready: clear projects, process, and evidence a hiring manager can probe.'
         : readiness === 'good'
-          ? 'Solid foundation — a few gaps to fix before you apply to competitive roles.'
+          ? 'Solid foundation. A few gaps to fix before you apply to competitive roles.'
           : readiness === 'fair'
-            ? 'Needs work — recruiters may pass in a quick scan. Tighten story and evidence first.'
-            : 'Not ready to send — address critical gaps before applying.';
+            ? 'Needs work. Recruiters may pass in a quick scan. Tighten story and evidence first.'
+            : 'Not ready to send. Fix the critical gaps before applying.';
 
   return {
     confidence: input.confidence,

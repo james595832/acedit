@@ -82,7 +82,7 @@ export function CVWritingReport({audit}: CVWritingReportProps) {
       ) : null}
 
       <p className="aced-ats__note">
-        This is <strong>not</strong> forensic AI detection — no tool can prove
+        This is <strong>not</strong> forensic AI detection. No tool can prove
         who wrote a CV. We flag generic, template-like language recruiters
         often associate with AI polish. Use your judgment.
       </p>

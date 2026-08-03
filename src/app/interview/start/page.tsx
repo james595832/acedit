@@ -159,7 +159,7 @@ function InterviewStartInner() {
                 defaultIsOpen
                 trigger={
                   <Text type="label">
-                    What a strong answer includes — read before you speak
+                    What a strong answer includes. Read before you speak
                   </Text>
                 }
               >
@@ -217,7 +217,7 @@ function InterviewStartInner() {
                 <VStack gap={2}>
                   <Heading level={3}>Captured transcript</Heading>
                   <Text type="supporting" color="secondary" as="p">
-                    Source: {transcriptSource ?? 'browser'} — graded against the
+                    Source: {transcriptSource ?? 'browser'}. Graded against the
                     criteria above.
                   </Text>
                   <div className="aced-record__transcript">

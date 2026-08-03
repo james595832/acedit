@@ -18,7 +18,7 @@ type MarketingLandingProps = {
 
 const SECTION_LINKS = [
   {id: 'who', label: 'Who it’s for'},
-  {id: 'why', label: 'Why ACED-IT'},
+  {id: 'why', label: 'How it works'},
   {id: 'pricing', label: 'Pricing'},
 ] as const;
 
@@ -43,25 +43,25 @@ const HERO_PROMPTS = [
   },
 ] as const;
 
-// Placeholder quotes — replace with real user feedback before wide launch.
+// Placeholder quotes. Replace with real user feedback before wide launch.
 const TESTIMONIALS = [
   {
     quote:
-      'I stopped rehearsing in my head and started answering out loud. The difference in my real interviews was immediate.',
+      'I stopped practicing in my head and started saying answers out loud. My real interviews felt easy after that.',
     name: 'Amara',
     role: 'Product Designer',
   },
   {
     quote:
-      'The whiteboard timer is brutal in the best way. My first onsite after practicing here felt familiar instead of terrifying.',
+      'The whiteboard timer scared me at first. By my real interview it just felt normal.',
     name: 'Dan',
     role: 'UX Designer',
   },
   {
     quote:
-      'Questions generated from my actual CV meant I practiced the stories I’d really be asked about.',
+      'My questions came from my actual CV, so I practiced the exact stories interviewers asked about.',
     name: 'Priya',
-    role: 'Career switcher → design',
+    role: 'New to design',
   },
 ] as const;
 
@@ -263,12 +263,12 @@ export function MarketingLanding({userEmail}: MarketingLandingProps) {
               ACED-IT
             </p>
             <h1 className="aced-mkt-hero__title">
-              Interview practice built for designers.
+              Ace your design interview.
             </h1>
             <p className="aced-mkt-hero__lead">
-              Most prep tools are built for engineers. This one speaks design —
-              portfolio stories, critique, whiteboard challenges. Practice out
-              loud, get clear feedback, walk in ready.
+              Practice real questions out loud. Sketch on a timed whiteboard.
+              Get a score that shows you what to fix. All of it made just{' '}
+              for designers.
             </p>
             <div className="aced-mkt-hero__actions">
               <button
@@ -276,7 +276,7 @@ export function MarketingLanding({userEmail}: MarketingLandingProps) {
                 className="aced-mkt__btn aced-mkt__btn--primary aced-mkt__btn--lg"
                 onClick={() => setPricingOpen(true)}
               >
-                Start 5-day free trial
+                Start your 5 free days
               </button>
               <a
                 className="aced-mkt__btn aced-mkt__btn--ghost aced-mkt__btn--lg"
@@ -287,7 +287,7 @@ export function MarketingLanding({userEmail}: MarketingLandingProps) {
               </a>
             </div>
             <p className="aced-mkt-hero__note">
-              £0 today · Then £7.50 / mo · Cancel anytime
+              £0 today · Then £7.50 a month · Cancel any time
             </p>
           </div>
 
@@ -323,97 +323,148 @@ export function MarketingLanding({userEmail}: MarketingLandingProps) {
         <section id="who" className="aced-mkt-section">
           <p className="aced-mkt-kicker">Who it’s for</p>
           <h2 className="aced-mkt-h2">
-            Designers getting ready for interviews.
+            Made for designers chasing their next{'\u00A0'}job.
           </h2>
           <p className="aced-mkt-lead">
-            If you’re applying for product or UX roles and want proper practice
-            — not a LeetCode grinder with a design tab bolted on — this is for
-            you.
+            Design interviews ask you to talk about your work, sketch ideas
+            live, and stay calm while people watch. That is a skill. Skills{' '}
+            get better with{'\u00A0'}practice.
           </p>
           <ul className="aced-mkt-audience">
             <li>
-              <strong>Product &amp; UX designers</strong>
+              <strong>Product and UX designers</strong>
               <span>
-                Practice portfolio, process, and behavioural questions before
-                the real panel.
+                Rehearse the questions real interviewers love to ask, before
+                the big{'\u00A0'}day.
               </span>
             </li>
             <li>
               <strong>People switching into design</strong>
               <span>
-                Learn how to talk about your work the way hiring managers
-                expect.
+                Learn to tell the story of your work so hiring managers get{' '}
+                it{'\u00A0'}fast.
               </span>
             </li>
             <li>
-              <strong>Anyone who’s been “prepping” in chaos</strong>
+              <strong>Anyone prepping in chaos</strong>
               <span>
-                One place for practice, whiteboards, and feedback — not
-                scattered notes.
+                One tidy place to practice, sketch, and improve. No more{' '}
+                sticky notes{'\u00A0'}everywhere.
               </span>
             </li>
           </ul>
         </section>
 
         <section id="why" className="aced-mkt-section aced-mkt-section--tint">
-          <p className="aced-mkt-kicker">Why ACED-IT</p>
-          <h2 className="aced-mkt-h2">
-            Design interviews aren’t engineering interviews.
-          </h2>
+          <p className="aced-mkt-kicker">How it works</p>
+          <h2 className="aced-mkt-h2">Practice like it's the real{'\u00A0'}thing.</h2>
           <p className="aced-mkt-lead">
-            The big prep platforms were built for engineers — algorithm drills
-            and system design, with design as an afterthought. But your
-            interview is portfolio stories, critique, process, and a marker in
-            your hand. ACED-IT practices exactly that — so you’re not winging
-            it with tools made for someone else’s job.
+            Four simple steps. No boring theory. Just doing the thing until{' '}it
+            feels{'\u00A0'}normal.
           </p>
-          <ol className="aced-mkt-steps">
-            <li>
-              <span className="aced-mkt-steps__n">01</span>
-              <div>
-                <h3>Questions from your CV</h3>
-                <p>
-                  Upload your CV and optional job description. Practice
-                  questions match your experience and the role you want.
-                </p>
+          <div className="aced-mkt-bento">
+            <article className="aced-mkt-bento__card">
+              <div
+                className="aced-mkt-bento__art aced-mkt-bento__art--cv"
+                aria-hidden="true"
+              >
+                <span className="aced-art-cv">
+                  <i />
+                  <i />
+                  <i />
+                  <i />
+                </span>
+                <span className="aced-art-cv__bubble">
+                  Tell me about the checkout flow you redesigned…
+                </span>
               </div>
-            </li>
-            <li>
-              <span className="aced-mkt-steps__n">02</span>
-              <div>
-                <h3>Speak your answers</h3>
-                <p>
-                  Answer out loud, like you will on the day. Typing in a doc
-                  doesn’t train that muscle.
-                </p>
+              <h3>Your CV becomes your{'\u00A0'}questions</h3>
+              <p>
+                Upload your CV and the job ad. We write questions about your
+                real projects, not random ones from a{'\u00A0'}list.
+              </p>
+            </article>
+
+            <article className="aced-mkt-bento__card">
+              <div
+                className="aced-mkt-bento__art aced-mkt-bento__art--voice"
+                aria-hidden="true"
+              >
+                <span className="aced-art-voice">
+                  <span className="aced-art-voice__mic" />
+                  <span className="aced-art-voice__bars">
+                    <i />
+                    <i />
+                    <i />
+                    <i />
+                    <i />
+                    <i />
+                    <i />
+                  </span>
+                  <span className="aced-art-voice__time">0:42</span>
+                </span>
               </div>
-            </li>
-            <li>
-              <span className="aced-mkt-steps__n">03</span>
-              <div>
-                <h3>Get clear feedback</h3>
-                <p>
-                  See what’s strong, what’s weak, and what to fix next —
-                  process, craft, and role fit.
-                </p>
+              <h3>You answer out{'\u00A0'}loud</h3>
+              <p>
+                Talking is the part everyone fumbles. Practice it out loud,
+                exactly like the real{'\u00A0'}day.
+              </p>
+            </article>
+
+            <article className="aced-mkt-bento__card">
+              <div
+                className="aced-mkt-bento__art aced-mkt-bento__art--score"
+                aria-hidden="true"
+              >
+                <span className="aced-art-score">
+                  <span className="aced-art-score__num">
+                    78<small>/100</small>
+                  </span>
+                  <span className="aced-art-score__row aced-art-score__row--a">
+                    <em>Story</em>
+                    <i />
+                  </span>
+                  <span className="aced-art-score__row aced-art-score__row--b">
+                    <em>Craft</em>
+                    <i />
+                  </span>
+                  <span className="aced-art-score__row aced-art-score__row--c">
+                    <em>Fit</em>
+                    <i />
+                  </span>
+                </span>
               </div>
-            </li>
-            <li>
-              <span className="aced-mkt-steps__n">04</span>
-              <div>
-                <h3>Whiteboard when you need it</h3>
-                <p>
-                  Timed challenges with a marker board and clarifying
-                  questions — same room energy, less guesswork.
-                </p>
+              <h3>You get a clear{'\u00A0'}score</h3>
+              <p>
+                Right after you finish, see what was strong and what to{' '}
+                fix next{'\u00A0'}time.
+              </p>
+            </article>
+
+            <article className="aced-mkt-bento__card">
+              <div
+                className="aced-mkt-bento__art aced-mkt-bento__art--board"
+                aria-hidden="true"
+              >
+                <span className="aced-art-board">
+                  <span className="aced-art-board__timer">29:59</span>
+                  <i className="aced-art-board__stroke aced-art-board__stroke--a" />
+                  <i className="aced-art-board__stroke aced-art-board__stroke--b" />
+                  <i className="aced-art-board__stroke aced-art-board__stroke--c" />
+                </span>
               </div>
-            </li>
-          </ol>
+              <h3>You sketch against the{'\u00A0'}clock</h3>
+              <p>
+                Timed whiteboard challenges. Scary the first time. Easy by{' '}
+                the{'\u00A0'}fifth.
+              </p>
+            </article>
+          </div>
         </section>
 
         <section className="aced-mkt-section">
-          <p className="aced-mkt-kicker">Why not the big prep platforms?</p>
-          <h2 className="aced-mkt-h2">Engineering tools vs a design studio</h2>
+          <p className="aced-mkt-kicker">Why not the big prep sites?</p>
+          <h2 className="aced-mkt-h2">Coder tools vs your design{'\u00A0'}studio</h2>
           <div
             className="aced-mkt-compare"
             role="table"
@@ -428,16 +479,12 @@ export function MarketingLanding({userEmail}: MarketingLandingProps) {
               <span role="columnheader">ACED-IT</span>
             </div>
             {[
-              ['Built for', 'Engineers first', 'Designers only'],
-              ['Questions from your CV', 'Generic question banks', 'Automatic'],
-              ['Practice out loud', 'Sometimes', 'Built in'],
-              [
-                'Whiteboard challenges',
-                'System design diagrams',
-                'Design prompts + marker canvas',
-              ],
-              ['Feedback after each take', 'Pass/fail vibes', 'Clear scores'],
-              ['Price', '$79/mo territory', '£7.50/mo'],
+              ['Made for', 'Coders first', 'Designers only'],
+              ['Questions about your work', 'Generic lists', 'Built from your CV'],
+              ['Practice speaking', 'Sometimes', 'Every session'],
+              ['Whiteboard', 'Boxes and arrows', 'Real design prompts'],
+              ['Feedback', 'Pass or fail vibes', 'Clear scores and tips'],
+              ['Price', 'About $79 a month', '£7.50 a month'],
             ].map(([label, diy, aced]) => (
               <div key={label} className="aced-mkt-compare__row" role="row">
                 <span role="rowheader">{label}</span>
@@ -452,7 +499,7 @@ export function MarketingLanding({userEmail}: MarketingLandingProps) {
 
         <section className="aced-mkt-section aced-mkt-section--tint">
           <p className="aced-mkt-kicker">From practice rooms</p>
-          <h2 className="aced-mkt-h2">Designers who stopped winging it</h2>
+          <h2 className="aced-mkt-h2">Designers who stopped winging{'\u00A0'}it</h2>
           <ul className="aced-mkt-quotes">
             {TESTIMONIALS.map(({quote, name, role}) => (
               <li key={name} className="aced-mkt-quotes__item">
@@ -468,11 +515,11 @@ export function MarketingLanding({userEmail}: MarketingLandingProps) {
 
         <section id="pricing" className="aced-mkt-section aced-mkt-section--pricing">
           <p className="aced-mkt-kicker">Pricing</p>
-          <h2 className="aced-mkt-h2">Simple plan. Five days free.</h2>
+          <h2 className="aced-mkt-h2">One plan. Five free days.</h2>
           <p className="aced-mkt-lead">
-            Try the full practice studio. Cancel before day five if it’s not
-            for you — you won’t be charged. Engineering-first platforms charge
-            $79 a month; this is a fraction of that, built only for design.
+            Try everything free for five days. If it’s not for you, cancel and
+            pay nothing. The big coder platforms charge about $79 a month.
+            This is £7.50, built only for design.
           </p>
 
           <div className="aced-mkt-plan">
@@ -485,11 +532,11 @@ export function MarketingLanding({userEmail}: MarketingLandingProps) {
               <p className="aced-mkt-plan__alt">or $9.99 / month after trial</p>
             </div>
             <ul className="aced-mkt-plan__list">
-              <li>5-day free trial · £0 today</li>
-              <li>Practice interviews from your CV</li>
-              <li>Voice answers + clear feedback</li>
-              <li>Design whiteboard challenges</li>
-              <li>Cancel anytime in Settings</li>
+              <li>Five free days · £0 today</li>
+              <li>Questions built from your CV</li>
+              <li>Speak your answers and get scores</li>
+              <li>Timed whiteboard challenges</li>
+              <li>Cancel any time in Settings</li>
             </ul>
             <button
               type="button"
@@ -500,31 +547,29 @@ export function MarketingLanding({userEmail}: MarketingLandingProps) {
             </button>
             <ol className="aced-mkt-plan__timeline">
               <li>
-                <strong>Today</strong> — Full access, nothing charged
+                <strong>Today:</strong> full access, nothing charged
               </li>
               <li>
-                <strong>Day 4</strong> — Reminder email
+                <strong>Day 4:</strong> we send a friendly reminder
               </li>
               <li>
-                <strong>Day 5</strong> — Membership starts at £7.50 / $9.99
+                <strong>Day 5:</strong> membership starts at £7.50 or $9.99
               </li>
             </ol>
           </div>
         </section>
 
         <section className="aced-mkt-cta">
-          <h2 className="aced-mkt-h2">
-            Made for designers. Priced for job seekers.
-          </h2>
+          <h2 className="aced-mkt-h2">Walk in ready. Walk out{'\u00A0'}smiling.</h2>
           <p className="aced-mkt-lead">
-            Five free days to prep properly — then keep it only if it helps.
+            Five free days to practice properly. Keep it only if it{'\u00A0'}helps.
           </p>
           <button
             type="button"
             className="aced-mkt__btn aced-mkt__btn--primary aced-mkt__btn--lg"
             onClick={() => setPricingOpen(true)}
           >
-            Start 5-day free trial
+            Start your 5 free days
           </button>
         </section>
       </main>

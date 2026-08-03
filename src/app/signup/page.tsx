@@ -22,7 +22,7 @@ export default async function SignUpPage({searchParams}: SignUpPageProps) {
           <p className="aced-masthead__kicker">Account</p>
           <h1>Create account</h1>
           <p className="aced-masthead__lead">
-            {trialDays}-day free trial of Pro — £0 today, then £7.50 / mo
+            {trialDays} free days of Pro. £0 today, then £7.50 a month
             ($9.99). You’ll add a card on the next step, then start practice.
           </p>
         </div>

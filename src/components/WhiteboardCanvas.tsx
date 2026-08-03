@@ -581,7 +581,7 @@ export function WhiteboardCanvas({
           {tool === 'note'
             ? 'Click the board to drop a post-it · drag to place · type to label'
             : hasContent
-              ? 'Marker + post-its — sketch flows, label concepts'
+              ? 'Marker + post-its. Sketch flows, label concepts'
               : 'Hover for the marker · or switch to Post-it for typed notes'}
         </p>
       </div>

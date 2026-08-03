@@ -68,6 +68,6 @@ export function recommendWhiteboardFromJd(
   return {
     recommended: true,
     matchedTerms,
-    reason: `This JD${role} mentions ${matchedTerms.slice(0, 2).join(' / ')} — practice on the timed whiteboard, not only verbal Q&A.`,
+    reason: `This JD${role} mentions ${matchedTerms.slice(0, 2).join(' / ')}. Practice on the timed whiteboard, not just talking.`,
   };
 }

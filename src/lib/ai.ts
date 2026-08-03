@@ -21,7 +21,7 @@ export async function analyzeCvBuffer(
   if (!pdfText.trim()) {
     return {
       ...local,
-      parsed_text: `Could not extract text from ${fileName}. The PDF may be image-only — try a text-based export.`,
+      parsed_text: `Could not extract text from ${fileName}. The PDF may be image-only. Try a text-based export.`,
       skills_extracted: local.skills_extracted,
     };
   }

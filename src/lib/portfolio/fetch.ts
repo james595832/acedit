@@ -117,7 +117,7 @@ function assessConfidence(text: string): {
     return {
       confidence: 'insufficient',
       blockedReason:
-        'This site needs a full browser to render. Paste your case study text below instead — you’ll get the same review.',
+        'This site needs a full browser to render. Paste your case study text below instead and you’ll get the same review.',
     };
   }
   if (words < 120) {
@@ -131,7 +131,7 @@ function assessConfidence(text: string): {
     return {
       confidence: 'low',
       blockedReason:
-        'Only a partial read — scores are indicative. Paste full case study text for a stronger review.',
+        'Only a partial read, so scores are a rough guide. Paste full case study text for a stronger review.',
     };
   }
   if (words < 750) {

@@ -136,7 +136,7 @@ export function auditCvWritingHeuristic(text: string): WritingAuditResult {
       authenticityScore: 50,
       polishRisk: 'medium',
       summary:
-        'Not enough text to assess writing style — fix ATS extraction first.',
+        'Not enough text to assess writing style. Fix ATS extraction first.',
       flags: [],
       stats: {buzzwordHits, aiPhraseHits, metricMentions, properNounHints},
       llmNote: null,
@@ -150,7 +150,7 @@ export function auditCvWritingHeuristic(text: string): WritingAuditResult {
         'warning',
         'Reads like generic AI-polished copy',
         `Found ${aiPhraseHits} common AI/template phrases (e.g. “results-driven”, “leveraged”, “fast-paced”). Recruiters notice this pattern.`,
-        'Rewrite in your voice: name the product, metric, and decision — drop filler adjectives.',
+        'Rewrite in your voice: name the product, metric, and decision. Drop filler adjectives.',
       ),
     );
   } else if (aiPhraseHits >= 1) {
@@ -171,7 +171,7 @@ export function auditCvWritingHeuristic(text: string): WritingAuditResult {
         'buzzword-heavy',
         'warning',
         'Heavy buzzword density',
-        `${buzzwordHits} generic buzzwords with little evidence — reads like padding.`,
+        `${buzzwordHits} generic buzzwords with little evidence. Reads like padding.`,
         'Replace adjectives with outcomes: what shipped, for whom, and what changed.',
       ),
     );
@@ -183,8 +183,8 @@ export function auditCvWritingHeuristic(text: string): WritingAuditResult {
         'no-metrics',
         'warning',
         'No quantified outcomes',
-        'Long CV with no numbers, percentages, or scale — a hallmark of vague or AI-generated bullets.',
-        'Add 2–3 real metrics (conversion, time saved, users researched, NPS, etc.).',
+        'Long CV with no numbers, percentages, or scale. A hallmark of vague or AI-generated bullets.',
+        'Add 2 or 3 real metrics (conversion, time saved, users researched, NPS, etc.).',
       ),
     );
   } else if (metricMentions >= 2) {
@@ -205,7 +205,7 @@ export function auditCvWritingHeuristic(text: string): WritingAuditResult {
         'few-specifics',
         'info',
         'Few specific names or products',
-        'Little mention of companies, products, or tools by name — copy may feel interchangeable.',
+        'Little mention of companies, products, or tools by name. The copy may feel interchangeable.',
         'Name the app, client type, or platform you actually worked on.',
       ),
     );
@@ -218,7 +218,7 @@ export function auditCvWritingHeuristic(text: string): WritingAuditResult {
         'repetitive-starters',
         'info',
         'Repetitive bullet pattern',
-        `Many lines start with “${dominantStarter}…” — uniform structure can read auto-generated.`,
+        `Many lines start with “${dominantStarter}…”. Uniform structure can read auto-generated.`,
         'Vary how bullets open; lead with outcome, constraint, or user insight.',
       ),
     );
@@ -230,7 +230,7 @@ export function auditCvWritingHeuristic(text: string): WritingAuditResult {
         'ai-disclosure',
         'warning',
         'AI disclosure text detected',
-        'The CV text mentions AI generation — remove before sending to employers.',
+        'The CV text mentions AI generation. Remove that before sending to employers.',
         'Edit out any meta AI wording; keep only your professional history.',
       ),
     );
@@ -248,7 +248,7 @@ export function auditCvWritingHeuristic(text: string): WritingAuditResult {
         'pass',
         'Specific, evidence-led tone',
         'Bullets lean concrete rather than template-heavy.',
-        'You’re in good shape — keep names, metrics, and tradeoffs visible.',
+        'You’re in good shape. Keep names, metrics, and tradeoffs visible.',
       ),
     );
   }
@@ -266,10 +266,10 @@ export function auditCvWritingHeuristic(text: string): WritingAuditResult {
 
   const summary =
     polishRisk === 'low'
-      ? 'Reads specific and human — low risk of sounding AI-templated.'
+      ? 'Reads specific and human. Low risk of sounding AI-templated.'
       : polishRisk === 'medium'
-        ? 'Some generic phrasing — worth tightening before you apply widely.'
-        : 'High template/AI-polish signals — recruiters may read this as copy-paste.';
+        ? 'Some generic phrasing. Worth tightening before you apply widely.'
+        : 'High template/AI-polish signals. Recruiters may read this as copy-paste.';
 
   flags.sort((a, b) => {
     const order = {warning: 0, info: 1, pass: 2};

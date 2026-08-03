@@ -20,8 +20,8 @@ const TONE: Record<
   {label: string; className: string}
 > = {
   strong: {label: 'Interview-ready portfolio', className: 'aced-ats--strong'},
-  good: {label: 'Good — minor gaps', className: 'aced-ats--good'},
-  fair: {label: 'Fair — tighten before applying', className: 'aced-ats--fair'},
+  good: {label: 'Good, minor gaps', className: 'aced-ats--good'},
+  fair: {label: 'Fair, tighten before applying', className: 'aced-ats--fair'},
   poor: {label: 'Not ready to send', className: 'aced-ats--poor'},
 };
 
@@ -47,8 +47,9 @@ export function PortfolioReport({
     <section className="aced-portfolio-report" aria-label="Portfolio review">
       {extract.confidence === 'low' ? (
         <p className="aced-ats__note" role="status">
-          Partial read ({extract.wordCount.toLocaleString()} words) — score is
-          indicative. Paste full case study text for a review you can trust.
+          Partial read ({extract.wordCount.toLocaleString()} words), so the
+          score is a rough guide. Paste full case study text for a review you
+          can trust.
         </p>
       ) : null}
 
@@ -169,7 +170,7 @@ export function PortfolioReport({
 
       {stub ? (
         <p className="aced-ats__note">
-          Heuristic review only — add Anthropic API key for a hiring-manager
+          Heuristic review only. Add an Anthropic API key for a hiring-manager
           advisory pass on top of these checks.
         </p>
       ) : null}

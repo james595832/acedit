@@ -34,6 +34,6 @@ export const FEEDBACK_CATEGORY_LABELS: Record<
   },
   general: {
     label: 'General feedback',
-    hint: 'Anything else — we read every note',
+    hint: 'Anything else. We read every note',
   },
 };
