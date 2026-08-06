@@ -1538,6 +1538,221 @@ body:has(.aced-app-page),
   margin: 0;
 }
 
+/* ——— Public roadmap (Now / Next / Later board) ——— */
+.aced-roadmap {
+  display: grid;
+  gap: 1.75rem;
+}
+
+.aced-roadmap__tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin: -0.35rem 0 0.25rem;
+}
+
+.aced-roadmap__tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.45rem 0.85rem;
+  border: 1px solid rgba(28, 27, 24, 0.1);
+  border-radius: 999px;
+  background: #fff;
+  color: var(--aced-ink);
+  text-decoration: none;
+  font-family: var(--font-aced-heading), 'Raleway', sans-serif;
+  font-size: 0.82rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  transition:
+    border-color var(--duration-fast, 150ms) ease,
+    background-color var(--duration-fast, 150ms) ease;
+}
+
+.aced-roadmap__tab:hover {
+  border-color: rgba(28, 27, 24, 0.22);
+  background: #faf9f6;
+}
+
+.aced-roadmap__dot {
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 999px;
+  background: var(--aced-mute);
+}
+
+.aced-roadmap__dot--live {
+  background: #2a6f97;
+}
+
+.aced-roadmap__dot--next {
+  background: var(--aced-terra);
+}
+
+.aced-roadmap__dot--building {
+  background: var(--aced-ochre);
+}
+
+.aced-roadmap__dot--later {
+  background: #9c978c;
+}
+
+.aced-roadmap__board {
+  display: grid;
+  gap: 1rem;
+  align-items: start;
+}
+
+@media (min-width: 720px) {
+  .aced-roadmap__board {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 1100px) {
+  .aced-roadmap__board {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+.aced-roadmap__column {
+  display: grid;
+  gap: 0.85rem;
+  min-width: 0;
+  padding: 1rem;
+  border: 1px solid rgba(28, 27, 24, 0.07);
+  border-radius: 1rem;
+  background: #faf9f6;
+}
+
+.aced-roadmap__column-head {
+  display: grid;
+  gap: 0.35rem;
+  padding: 0.15rem 0.15rem 0.5rem;
+}
+
+.aced-roadmap__status {
+  margin: 0;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--aced-mute);
+}
+
+.aced-roadmap__status--live {
+  color: #2a6f97;
+}
+
+.aced-roadmap__status--next {
+  color: var(--aced-terra);
+}
+
+.aced-roadmap__status--building {
+  color: #b07a18;
+}
+
+.aced-roadmap__status--later {
+  color: #7a756c;
+}
+
+.aced-roadmap__column-head h2 {
+  margin: 0;
+  font-family: var(--font-aced-heading), 'Raleway', sans-serif;
+  font-size: 1.2rem;
+  font-weight: 600;
+  letter-spacing: -0.03em;
+  line-height: 1.2;
+}
+
+.aced-roadmap__column-head p {
+  margin: 0;
+  color: var(--aced-mute);
+  font-size: 0.92rem;
+  line-height: 1.45;
+}
+
+.aced-roadmap__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.75rem;
+}
+
+.aced-roadmap__card {
+  display: grid;
+  gap: 0.4rem;
+  padding: 1rem 1.05rem;
+  border: 1px solid rgba(28, 27, 24, 0.07);
+  border-radius: 0.85rem;
+  background: #ffffff;
+  box-shadow: 0 1px 2px rgba(28, 27, 24, 0.03);
+}
+
+.aced-roadmap__tag {
+  justify-self: start;
+  padding: 0.15rem 0.5rem;
+  border-radius: 999px;
+  background: #f0eeea;
+  color: var(--aced-mute);
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.aced-roadmap__card h3 {
+  margin: 0;
+  font-family: var(--font-aced-heading), 'Raleway', sans-serif;
+  font-size: 1.02rem;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  line-height: 1.25;
+}
+
+.aced-roadmap__card p {
+  margin: 0;
+  color: var(--aced-mute);
+  font-size: 0.92rem;
+  line-height: 1.5;
+}
+
+.aced-roadmap__why {
+  border: 1px solid rgba(28, 27, 24, 0.07);
+  border-radius: 1rem;
+  background: #ffffff;
+  padding: clamp(1.35rem, 3vw, 1.85rem);
+  box-shadow:
+    0 1px 2px rgba(28, 27, 24, 0.03),
+    0 12px 32px -18px rgba(28, 27, 24, 0.12);
+  display: grid;
+  gap: 0.75rem;
+  max-width: 46rem;
+}
+
+.aced-roadmap__why h2 {
+  margin: 0;
+  font-family: var(--font-aced-heading), 'Raleway', sans-serif;
+  font-size: 1.25rem;
+  font-weight: 600;
+  letter-spacing: -0.03em;
+}
+
+.aced-roadmap__why p {
+  margin: 0;
+  color: var(--aced-mute);
+  line-height: 1.55;
+  max-width: 58ch;
+}
+
+.aced-roadmap__why a {
+  color: var(--aced-blue);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
 .aced-legal {
   max-width: 46rem;
 }
@@ -2803,45 +3018,63 @@ dialog.aced-trial-dialog::backdrop {
   margin-top: 0;
 }
 
-/* Floating feedback (Mobbin-style: Navattic picker + Amie compose + toast) */
-.aced-feedback-fab {
+/* Right-edge feedback tab (Hotjar / Sprig style): out of the way of CTAs and canvas */
+.aced-feedback-tab {
   position: fixed;
-  right: 1.25rem;
-  bottom: 1.25rem;
+  right: 0;
+  top: 50%;
   z-index: 40;
-  display: inline-flex;
-  align-items: center;
-  gap: 0.45rem;
-  padding: 0.65rem 0.95rem;
-  border: 1px solid var(--aced-rule);
-  border-radius: 999px;
-  background: var(--aced-surface, #fff);
-  box-shadow: 0 8px 28px rgb(0 0 0 / 12%);
-  font: inherit;
-  font-size: 0.82rem;
+  transform: translateY(-50%);
+  writing-mode: vertical-rl;
+  text-orientation: mixed;
+  rotate: 180deg;
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0.85rem 0.45rem;
+  border: 1px solid rgba(28, 27, 24, 0.12);
+  border-right: 0;
+  border-radius: 0.55rem 0 0 0.55rem;
+  background: var(--aced-ink, #1c1b18);
+  color: #fff;
+  font-family: var(--font-aced-heading), 'Raleway', sans-serif;
+  font-size: 0.72rem;
   font-weight: 600;
-  color: var(--aced-ink, #111);
-  cursor: pointer;
-  transition: transform 0.15s ease, box-shadow 0.15s ease;
-}
-
-.aced-feedback-fab:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 10px 32px rgb(0 0 0 / 16%);
-}
-
-.aced-feedback-fab__icon {
-  font-size: 1rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
   line-height: 1;
+  cursor: pointer;
+  box-shadow: -4px 0 16px rgba(28, 27, 24, 0.08);
+  transition:
+    background-color var(--duration-fast, 150ms) ease,
+    padding var(--duration-fast, 150ms) ease;
 }
 
-.aced-feedback-fab__label {
-  display: none;
+.aced-feedback-tab:hover {
+  background: #000;
+  padding-inline: 0.55rem;
 }
 
-@media (min-width: 640px) {
-  .aced-feedback-fab__label {
-    display: inline;
+.aced-feedback-tab:focus-visible {
+  outline: 2px solid var(--aced-terra);
+  outline-offset: 2px;
+}
+
+@media (max-width: 640px) {
+  .aced-feedback-tab {
+    top: auto;
+    bottom: 5.5rem;
+    transform: none;
+    writing-mode: horizontal-tb;
+    rotate: none;
+    text-orientation: mixed;
+    letter-spacing: 0.06em;
+    padding: 0.55rem 0.7rem;
+    border-right: 1px solid rgba(28, 27, 24, 0.12);
+    border-radius: 0.55rem 0 0 0.55rem;
+  }
+
+  .aced-feedback-tab:hover {
+    padding-inline: 0.7rem;
   }
 }
 
@@ -2913,7 +3146,7 @@ dialog.aced-trial-dialog::backdrop {
 .aced-feedback-toast {
   position: fixed;
   right: 1.25rem;
-  bottom: 4.5rem;
+  bottom: 1.25rem;
   z-index: 41;
   max-width: min(20rem, calc(100vw - 2.5rem));
   margin: 0;

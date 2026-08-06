@@ -1,0 +1,48 @@
+Brandon Hale
+Bristol, UK - brandon.hale.design@example.com - linkedin.com/in/brandon-hale-demo
+Portfolio: https://brandon-hale-demo.example.com
+
+Lead Product Designer / Design Manager
+
+SUMMARY
+Design leader with 11 years across product design and team leadership. Currently Lead Product Designer managing a pod of 3 designers at a Series C SaaS company. Seeking Head of Design or Design Manager roles where I can scale craft, hiring, and product influence.
+
+EXPERIENCE
+Lead Product Designer - Helio Cloud - Mar 2021-Present
+- Manage 3 product designers (hiring, 1:1s, growth plans, performance)
+- Set design quality bar across platform and growth squads
+- Partner with VP Product on quarterly roadmap themes and investment bets
+- Led redesign of admin permissions model used by enterprise customers
+- Built critique rituals and a hiring loop (portfolio screen + design exercise)
+- Reduced time-to-first-critique for new joiners from 3 weeks to 5 days
+
+Senior Product Designer - Arcadia Health - 2017-2021
+- Owned clinician workflow redesign for a care coordination product
+- Collaborated with research on diary studies and shadowing
+- Established early design system foundations later adopted company-wide
+- Mentored two mid-level designers into senior-ready portfolios
+
+Product Designer - Studio North - 2014-2017
+- Delivered end-to-end digital products for retail and civic clients
+- Facilitated discovery workshops with stakeholders
+- Shipped responsive web and mobile experiences
+
+EDUCATION
+MA Interaction Design - Royal College of Art - 2012-2014
+BA Graphic Design - University of the West of England - 2009-2012
+
+SELECTED IMPACT
+Enterprise permissions redesign
+- Problem: support burden and security risk from brittle role models
+- Approach: service blueprint, threat modeling with security, progressive rollout
+- Outcome: fewer critical support escalations; clearer admin mental model
+
+Design org operating system
+- Built hiring scorecards, leveling language, and critique cadence
+- Outcome: more consistent hiring decisions and faster designer growth
+
+SKILLS
+Design Leadership - Team Management - Hiring - Product Strategy - Stakeholder Management - Design Systems - Facilitation - Service Design - Mentorship - Roadmap Influence - Accessibility Advocacy - Executive Communication
+
+TOOLS
+Figma - FigJam - Notion - Linear - Dovetail - Miro - Amplitude

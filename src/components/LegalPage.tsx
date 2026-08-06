@@ -28,6 +28,7 @@ export function LegalPage({
       </header>
       <div className="aced-legal__body">{children}</div>
       <nav className="aced-legal__nav" aria-label="Legal">
+        <Link href="/roadmap">Roadmap</Link>
         <Link href="/privacy">Privacy Policy</Link>
         <Link href="/terms">Terms &amp; Conditions</Link>
         <Link href="/contact">Contact</Link>

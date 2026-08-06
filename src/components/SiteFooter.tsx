@@ -27,6 +27,7 @@ export function SiteFooter({variant = 'app'}: SiteFooterProps) {
           <Link href="/#who">Who it&apos;s for</Link>
           <Link href="/#why">Why ACED-IT</Link>
           <Link href="/#pricing">Pricing</Link>
+          <Link href="/roadmap">Roadmap</Link>
           <Link href="/privacy">Privacy Policy</Link>
           <Link href="/terms">Terms &amp; Conditions</Link>
           <Link href="/contact">Contact</Link>
@@ -43,6 +44,7 @@ export function SiteFooter({variant = 'app'}: SiteFooterProps) {
   return (
     <footer className="aced-app-footer" aria-label="Site footer">
       <nav className="aced-app-footer__links">
+        <Link href="/roadmap">Roadmap</Link>
         <Link href="/privacy">Privacy</Link>
         <Link href="/terms">Terms</Link>
         <Link href="/contact">Contact</Link>

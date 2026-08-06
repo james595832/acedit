@@ -105,14 +105,11 @@ export function FeedbackWidget({userEmail}: FeedbackWidgetProps) {
       ) : null}
       <button
         type="button"
-        className="aced-feedback-fab"
+        className="aced-feedback-tab"
         aria-label="Send feedback to ACED-IT"
         onClick={() => setOpen(true)}
       >
-        <span className="aced-feedback-fab__icon" aria-hidden="true">
-          💬
-        </span>
-        <span className="aced-feedback-fab__label">Feedback</span>
+        Feedback
       </button>
 
       <Dialog

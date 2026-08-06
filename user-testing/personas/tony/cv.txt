@@ -1,0 +1,43 @@
+Tony Reyes
+London, UK - tony.reyes.design@example.com - linkedin.com/in/tony-reyes-demo
+Portfolio: https://tony-reyes-demo.example.com
+
+Product Designer
+
+SUMMARY
+Product designer with 3 years in B2B SaaS. Strong in end-to-end feature design, design systems, and collaborating with PMs and engineers. Looking for a Senior Product Designer role where I can own larger problem spaces and raise craft across the team.
+
+EXPERIENCE
+Product Designer - OrbitPay - Jan 2023-Present
+- Owned checkout recovery and billing settings redesigns for a payments dashboard used by 12k merchants
+- Reduced checkout drop-off on a key flow after shipping a simplified mobile path (team reported +8% completion in experiment)
+- Maintained and extended the Orbit design system (Figma + React tokens) with 2 other designers
+- Partnered with research on 3 moderated studies; synthesised insights into prioritised opportunities
+- Mentored a design intern for one placement cycle
+
+UX Designer - Lattice Soft - Sep 2021-Dec 2022
+- Designed onboarding and empty states for a project management tool
+- Built interactive prototypes in Figma; ran weekly critique with product
+- Improved information architecture for settings after card sorting with 9 users
+- Worked closely with engineers in 2-week sprints
+
+EDUCATION
+BSc Digital Media - University of Brighton - 2017-2020
+Product Design Bootcamp - DesignLab - 2021
+
+SELECTED PROJECTS
+Merchant checkout abandonment
+- Problem: merchants abandoned setup before going live
+- Approach: journey mapping, competitive teardown, progressive disclosure
+- Outcome: clearer setup checklist; experiment showed higher completion
+
+Billing settings redesign
+- Problem: support tickets about confusing invoice preferences
+- Approach: IA rewrite, clearer defaults, accessibility pass on forms
+- Outcome: fewer related support tickets after release
+
+SKILLS
+Product Design - Interaction Design - Design Systems - Figma - Prototyping - User Research - Usability Testing - Accessibility - Cross-functional Collaboration - Stakeholder Presentations - HTML/CSS literacy
+
+TOOLS
+Figma - FigJam - Notion - Linear - Amplitude (basic) - Maze

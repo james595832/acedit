@@ -1,0 +1,40 @@
+Jane Okonkwo
+Manchester, UK - jane.okonkwo.design@example.com - linkedin.com/in/jane-okonkwo-demo
+Portfolio: https://jane-okonkwo-demo.example.com
+
+Graduate Product Designer
+
+SUMMARY
+Recent design graduate looking for a junior product design role. Comfortable in Figma, enjoy research with real users, and like turning messy briefs into simple screens. Eager to learn from a strong team.
+
+EDUCATION
+BA Design - University of Leeds - 2022-2025
+- Dissertation: redesigning the student housing search experience for first-year students
+- Modules: Interaction Design, Visual Communication, User Research Methods
+
+EXPERIENCE
+Product Design Intern - Northloop Health - Jun 2024-Sep 2024
+- Redesigned appointment booking flows in Figma with a senior designer
+- Ran 5 usability tests with patients; summarised findings for the product team
+- Contributed UI components to the early design system library
+
+UX Design Intern - Civic Labs - Jul 2023-Aug 2023
+- Wireframed a council services prototype for booking bulky waste collection
+- Mapped the end-to-end journey with service owners
+- Presented weekly critique to a mixed design and policy audience
+
+PROJECTS
+Student Housing Finder (university project)
+- Problem: first-years struggled to compare messy private listings
+- Role: research, wireframes, hi-fi prototype in Figma
+- Outcome: prototype tested with 8 students; task success improved in moderated tests
+
+Campus Food Waste App (hackathon)
+- Designed a simple flow for students to claim leftover cafe food
+- Focus: accessibility, clear next steps, trust
+
+SKILLS
+Figma - Wireframing - Prototyping - User Interviews - Usability Testing - Affinity Mapping - Design Critique - Basic Accessibility (WCAG awareness) - FigJam - Notion
+
+INTERESTS
+Inclusive design - health products - mentoring other grads
