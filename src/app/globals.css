@@ -255,26 +255,84 @@ body:has(.aced-app-page),
 }
 
 /* Form fields: clear affordance on white cards (Stripe-style).
-   Explicit width/style because the global reset zeroes border-width. */
-.aced-app-page .astryx-text-input,
-.aced-app-page .astryx-textarea,
-.aced-app-page .astryx-selector {
+   Explicit border + padding: Astryx reset zeroes input padding, and StyleX
+   wrapper padding is easy to lose in the cascade — force both globally. */
+.astryx-text-input,
+.astryx-textarea,
+.astryx-selector,
+.astryx-number-input,
+.astryx-date-input,
+.astryx-time-input,
+.astryx-typeahead,
+.astryx-tokenizer {
+  box-sizing: border-box !important;
+  /* Astryx md height is 32px — too tight once real padding is restored */
+  height: auto !important;
+  min-height: 2.75rem !important;
   border-width: 1px !important;
   border-style: solid !important;
   border-color: #d8d4cb !important;
   background: #ffffff;
+  padding-block: 0.65rem !important;
+  padding-inline: 0.85rem !important;
   transition:
     border-color var(--duration-fast, 150ms) ease,
     box-shadow var(--duration-fast, 150ms) ease;
 }
 
-.aced-app-page .astryx-text-input:hover,
-.aced-app-page .astryx-textarea:hover {
+.astryx-textarea {
+  align-items: flex-start !important;
+  min-height: 6.5rem !important;
+  padding-block: 0.75rem !important;
+}
+
+.astryx-text-input[data-size='sm'],
+.astryx-selector[data-size='sm'],
+.astryx-number-input[data-size='sm'] {
+  min-height: 2.35rem !important;
+  padding-block: 0.45rem !important;
+  padding-inline: 0.7rem !important;
+}
+
+.astryx-text-input[data-size='lg'],
+.astryx-selector[data-size='lg'],
+.astryx-number-input[data-size='lg'] {
+  min-height: 3.1rem !important;
+  padding-block: 0.8rem !important;
+  padding-inline: 1rem !important;
+}
+
+.astryx-text-input input,
+.astryx-text-input textarea,
+.astryx-textarea textarea,
+.astryx-number-input input,
+.astryx-date-input input,
+.astryx-time-input input,
+.astryx-typeahead input,
+.astryx-tokenizer input {
+  padding: 0 !important;
+  margin: 0 !important;
+}
+
+.astryx-text-input:hover,
+.astryx-textarea:hover,
+.astryx-selector:hover,
+.astryx-number-input:hover,
+.astryx-date-input:hover,
+.astryx-time-input:hover,
+.astryx-typeahead:hover,
+.astryx-tokenizer:hover {
   border-color: #b9b4a8 !important;
 }
 
-.aced-app-page .astryx-text-input:focus-within,
-.aced-app-page .astryx-textarea:focus-within {
+.astryx-text-input:focus-within,
+.astryx-textarea:focus-within,
+.astryx-selector:focus-within,
+.astryx-number-input:focus-within,
+.astryx-date-input:focus-within,
+.astryx-time-input:focus-within,
+.astryx-typeahead:focus-within,
+.astryx-tokenizer:focus-within {
   border-color: var(--aced-ink) !important;
   box-shadow: 0 0 0 3px rgba(28, 27, 24, 0.08);
 }
@@ -3018,7 +3076,9 @@ dialog.aced-trial-dialog::backdrop {
   margin-top: 0;
 }
 
-/* Right-edge feedback tab (Hotjar / Sprig style): out of the way of CTAs and canvas */
+/* Right-edge feedback tab (Hotjar / Sprig style): out of the way of CTAs and canvas.
+   vertical-rl alone reads top→bottom with upright Latin glyphs (tilt head right).
+   Do not add rotate:180 — that flips the label upside down. */
 .aced-feedback-tab {
   position: fixed;
   right: 0;
@@ -3027,7 +3087,6 @@ dialog.aced-trial-dialog::backdrop {
   transform: translateY(-50%);
   writing-mode: vertical-rl;
   text-orientation: mixed;
-  rotate: 180deg;
   box-sizing: border-box;
   margin: 0;
   padding: 0.85rem 0.45rem;
@@ -3065,7 +3124,6 @@ dialog.aced-trial-dialog::backdrop {
     bottom: 5.5rem;
     transform: none;
     writing-mode: horizontal-tb;
-    rotate: none;
     text-orientation: mixed;
     letter-spacing: 0.06em;
     padding: 0.55rem 0.7rem;

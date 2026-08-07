@@ -92,7 +92,7 @@ export function SignUpForm({
             />
             <CheckboxInput
               label="Email me tips and product updates"
-              description="Optional. You can unsubscribe anytime. We’ll still send essential account and billing emails."
+              description="You can unsubscribe anytime. We’ll still send essential account and billing emails."
               htmlName="marketing_consent"
               value={marketingConsent}
               onChange={setMarketingConsent}
