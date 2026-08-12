@@ -321,8 +321,11 @@ export function MarketingLanding({userEmail}: MarketingLandingProps) {
                 <p className="aced-mkt-stage__label">{heroPrompt.label}</p>
                 <p className="aced-mkt-stage__q">{heroPrompt.question}</p>
                 <div className="aced-mkt-stage__meter">
-                  <span className="aced-mkt-stage__pulse" />
-                  <p>Listening · {listenClock}</p>
+                  <span className="aced-mkt-stage__meter-live">
+                    <span className="aced-mkt-stage__pulse" />
+                    <p>Listening</p>
+                  </span>
+                  <p className="aced-mkt-stage__meter-time">{listenClock}</p>
                 </div>
                 <div className="aced-mkt-stage__scores">
                   <span>Process</span>

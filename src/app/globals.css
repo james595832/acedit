@@ -689,7 +689,8 @@ body:has(.aced-app-page),
   line-height: 1.15;
   letter-spacing: -0.035em;
   color: var(--aced-ink);
-  max-width: 18ch;
+  max-width: none;
+  text-wrap: balance;
 }
 
 .aced-mkt-hero__lead {
@@ -697,7 +698,8 @@ body:has(.aced-app-page),
   font-size: 1.05rem;
   line-height: 1.55;
   color: var(--aced-mute);
-  max-width: 36ch;
+  max-width: 42ch;
+  text-wrap: pretty;
 }
 
 .aced-mkt-hero__actions {
@@ -795,7 +797,9 @@ body:has(.aced-app-page),
   font-size: clamp(1.15rem, 2.2vw, 1.45rem);
   line-height: 1.3;
   letter-spacing: -0.02em;
-  max-width: 22ch;
+  max-width: none;
+  width: 100%;
+  text-wrap: pretty;
   color: #ffffff;
 }
 
@@ -803,16 +807,27 @@ body:has(.aced-app-page),
   margin-top: auto;
   display: flex;
   align-items: center;
-  gap: 0.65rem;
-  padding: 0.75rem 0.9rem;
+  justify-content: space-between;
+  gap: 0.75rem;
+  width: 100%;
+  box-sizing: border-box;
+  padding: 0.75rem 1rem;
   border-radius: 0.75rem;
   background: rgba(255, 255, 255, 0.06);
   border: 1px solid rgba(255, 255, 255, 0.08);
 }
 
+.aced-mkt-stage__meter-live {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.65rem;
+  min-width: 0;
+}
+
 .aced-mkt-stage__pulse {
   width: 0.7rem;
   height: 0.7rem;
+  flex-shrink: 0;
   border-radius: 999px;
   background: #c83e3d;
   box-shadow: 0 0 0 0 rgba(200, 62, 61, 0.55);
@@ -823,15 +838,26 @@ body:has(.aced-app-page),
   margin: 0;
   font-size: 0.85rem;
   color: rgba(255, 255, 255, 0.78);
+  white-space: nowrap;
+}
+
+.aced-mkt-stage__meter-time {
+  margin-left: auto;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.04em;
+  color: rgba(255, 255, 255, 0.92);
 }
 
 .aced-mkt-stage__scores {
   display: flex;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   gap: 0.45rem;
+  width: 100%;
 }
 
 .aced-mkt-stage__scores span {
+  flex: 1;
+  text-align: center;
   padding: 0.35rem 0.65rem;
   border-radius: 999px;
   border: 1px solid rgba(255, 255, 255, 0.14);
@@ -883,7 +909,8 @@ body:has(.aced-app-page),
   font-size: clamp(1.7rem, 3.4vw, 2.55rem);
   line-height: 1.12;
   letter-spacing: -0.04em;
-  max-width: 18ch;
+  max-width: 28ch;
+  text-wrap: balance;
 }
 
 .aced-mkt-lead {
@@ -891,7 +918,8 @@ body:has(.aced-app-page),
   font-size: 1.05rem;
   line-height: 1.55;
   color: var(--aced-mute);
-  max-width: 42ch;
+  max-width: 48ch;
+  text-wrap: pretty;
 }
 
 .aced-mkt-audience {
