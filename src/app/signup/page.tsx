@@ -1,41 +1,15 @@
-import {Section} from '@astryxdesign/core/Section';
-import {SignUpForm} from '@/components/SignUpForm';
-import {isSupabaseConfigured} from '@/lib/supabase/config';
+import {redirect} from 'next/navigation';
 
 type SignUpPageProps = {
   searchParams: Promise<{trial?: string; plan?: string}>;
 };
 
+/** Canonical signup is the full-page trial flow at /start. */
 export default async function SignUpPage({searchParams}: SignUpPageProps) {
-  const configured = isSupabaseConfigured();
   const params = await searchParams;
-  const trialDays = Math.min(
-    Math.max(Number(params.trial ?? 5) || 5, 1),
-    30,
-  );
-  const plan = params.plan === 'pro' ? 'pro' : 'pro';
-
-  return (
-    <div className="aced-auth">
-      <header className="aced-masthead">
-        <div className="aced-masthead__copy">
-          <p className="aced-masthead__kicker">Account</p>
-          <h1>Create account</h1>
-          <p className="aced-masthead__lead">
-            {trialDays} free days of Pro. £0 today, then £7.50 a month
-            ($9.99). You’ll add a card on the next step, then start practice.
-          </p>
-        </div>
-      </header>
-      <Section variant="transparent" padding={0}>
-        <div className="aced-panel">
-          <SignUpForm
-            configured={configured}
-            trialDays={trialDays}
-            plan={plan}
-          />
-        </div>
-      </Section>
-    </div>
-  );
+  const next = new URLSearchParams();
+  if (params.trial) next.set('trial', params.trial);
+  if (params.plan) next.set('plan', params.plan);
+  const qs = next.toString();
+  redirect(qs ? `/start?${qs}` : '/start');
 }

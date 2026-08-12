@@ -9,7 +9,6 @@ import {
 } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import {PricingTrialDialog} from '@/components/PricingTrialDialog';
 import {SiteFooter} from '@/components/SiteFooter';
 
 type MarketingLandingProps = {
@@ -44,7 +43,6 @@ const HERO_PROMPTS = [
 ] as const;
 
 export function MarketingLanding({userEmail}: MarketingLandingProps) {
-  const [pricingOpen, setPricingOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [promptIndex, setPromptIndex] = useState(0);
   const [promptVisible, setPromptVisible] = useState(true);
@@ -175,13 +173,12 @@ export function MarketingLanding({userEmail}: MarketingLandingProps) {
           >
             {accountLabel}
           </Link>
-          <button
-            type="button"
+          <Link
+            href="/start"
             className="aced-mkt__btn aced-mkt__btn--primary aced-mkt__btn--nav-cta"
-            onClick={() => setPricingOpen(true)}
           >
             Start free trial
-          </button>
+          </Link>
           <button
             type="button"
             className={`aced-mkt__burger${menuOpen ? ' is-open' : ''}`}
@@ -238,17 +235,14 @@ export function MarketingLanding({userEmail}: MarketingLandingProps) {
         >
           {accountLabel}
         </Link>
-        <button
-          type="button"
+        <Link
+          href="/start"
           className="aced-mkt__btn aced-mkt__btn--primary aced-mkt__btn--lg aced-mkt__btn--block"
-          onClick={() => {
-            closeMenu();
-            setPricingOpen(true);
-          }}
+          onClick={closeMenu}
           tabIndex={menuOpen ? 0 : -1}
         >
           Start free trial
-        </button>
+        </Link>
       </nav>
 
       <main>
@@ -266,13 +260,12 @@ export function MarketingLanding({userEmail}: MarketingLandingProps) {
               for designers.
             </p>
             <div className="aced-mkt-hero__actions">
-              <button
-                type="button"
+              <Link
+                href="/start"
                 className="aced-mkt__btn aced-mkt__btn--primary aced-mkt__btn--lg"
-                onClick={() => setPricingOpen(true)}
               >
                 Start your 5 free days
-              </button>
+              </Link>
               <a
                 className="aced-mkt__btn aced-mkt__btn--ghost aced-mkt__btn--lg"
                 href="#pricing"
@@ -520,13 +513,12 @@ export function MarketingLanding({userEmail}: MarketingLandingProps) {
               <li>Timed whiteboard challenges</li>
               <li>Cancel any time in Settings</li>
             </ul>
-            <button
-              type="button"
+            <Link
+              href="/start"
               className="aced-mkt__btn aced-mkt__btn--primary aced-mkt__btn--lg aced-mkt__btn--block"
-              onClick={() => setPricingOpen(true)}
             >
               Start free trial
-            </button>
+            </Link>
             <ol className="aced-mkt-plan__timeline">
               <li>
                 <strong>Today:</strong> full access, nothing charged
@@ -546,19 +538,16 @@ export function MarketingLanding({userEmail}: MarketingLandingProps) {
           <p className="aced-mkt-lead">
             Five free days to practice properly. Keep it only if it{'\u00A0'}helps.
           </p>
-          <button
-            type="button"
+          <Link
+            href="/start"
             className="aced-mkt__btn aced-mkt__btn--primary aced-mkt__btn--lg"
-            onClick={() => setPricingOpen(true)}
           >
             Start practicing free
-          </button>
+          </Link>
         </section>
       </main>
 
       <SiteFooter variant="marketing" />
-
-      <PricingTrialDialog isOpen={pricingOpen} onOpenChange={setPricingOpen} />
     </div>
   );
 }

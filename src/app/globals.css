@@ -2048,129 +2048,106 @@ body:has(.aced-app-page),
   text-underline-offset: 2px;
 }
 
-.aced-trial-dialog-cta {
-  display: grid;
-  gap: 0.75rem;
-  margin-top: auto;
-}
-
-/* Trial dialog: wide 2-col (Later/Adobe pattern), soft chrome, quiet close */
-.astryx-dialog.aced-trial-dialog,
-dialog.aced-trial-dialog {
-  position: fixed !important;
-  inset: 0 !important;
-  margin: auto !important;
-  top: 0 !important;
-  right: 0 !important;
-  bottom: 0 !important;
-  left: 0 !important;
-  width: min(44rem, calc(100vw - 2rem)) !important;
-  max-width: calc(100vw - 2rem) !important;
-  height: fit-content !important;
-  max-height: min(90dvh, 40rem) !important;
-  border: 0 !important;
-  border-radius: 1.15rem !important;
-  background: #fff !important;
-  color: var(--aced-ink) !important;
-  box-shadow:
-    0 24px 64px rgba(28, 27, 24, 0.18),
-    0 2px 8px rgba(28, 27, 24, 0.06) !important;
-  overflow: hidden !important;
-  z-index: 80;
-  padding: 0 !important;
-}
-
-.astryx-dialog.aced-trial-dialog::backdrop,
-dialog.aced-trial-dialog::backdrop {
-  background: rgba(28, 27, 24, 0.48) !important;
-  backdrop-filter: blur(6px);
-}
-
-.aced-trial-dialog__shell {
-  position: relative;
-  box-sizing: border-box;
-  padding: 1.75rem 1.75rem 1.65rem;
-  overflow-y: auto;
-  max-height: min(90dvh, 40rem);
-}
-
-.aced-trial-dialog__close {
-  position: absolute;
-  top: 0.85rem;
-  right: 0.85rem;
-  z-index: 2;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 2.25rem;
-  height: 2.25rem;
-  margin: 0;
-  padding: 0;
-  border: 0;
-  border-radius: 999px;
-  background: transparent;
-  color: var(--aced-mute);
-  font-size: 1.55rem;
-  line-height: 1;
-  cursor: pointer;
-  transition:
-    color 140ms ease,
-    background-color 140ms ease;
-}
-
-.aced-trial-dialog__close:hover {
+/* Full-page trial start (/start) — breathable 2-col, Later/Quicken pattern */
+.aced-start {
+  --aced-start-gutter: clamp(1.25rem, 5vw, 3.5rem);
+  min-height: 100dvh;
+  background:
+    radial-gradient(120% 80% at 100% -10%, rgba(200, 62, 61, 0.08), transparent 55%),
+    radial-gradient(90% 60% at -10% 20%, rgba(42, 111, 151, 0.07), transparent 50%),
+    #ffffff;
   color: var(--aced-ink);
-  background: rgba(28, 27, 24, 0.05);
 }
 
-.aced-trial-dialog__close:focus-visible {
-  outline: 2px solid var(--aced-terra);
-  outline-offset: 2px;
+.aced-start__nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1.15rem var(--aced-start-gutter);
+  border-bottom: 1px solid var(--aced-rule);
+  background: rgba(255, 255, 255, 0.86);
+  backdrop-filter: blur(10px);
 }
 
-.aced-trial-dialog__grid {
+.aced-start__logo {
+  display: inline-flex;
+  line-height: 0;
+}
+
+.aced-start__nav-end {
+  margin: 0;
+  font-size: 0.9rem;
+  color: var(--aced-mute);
+  text-align: right;
+}
+
+.aced-start__nav-end a {
+  color: var(--aced-ink);
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.aced-start__nav-end a:hover {
+  color: var(--aced-terra);
+}
+
+.aced-start__main {
   display: grid;
-  gap: 1.35rem;
+  gap: 2rem;
+  width: min(64rem, 100%);
+  margin: 0 auto;
+  padding: clamp(2rem, 5vw, 3.5rem) var(--aced-start-gutter) 4rem;
+  align-items: start;
+  grid-template-areas:
+    'intro'
+    'aside'
+    'form';
 }
 
-.aced-trial-dialog__intro {
-  display: grid;
-  gap: 0.65rem;
-  align-content: start;
-  padding-right: 1.75rem;
-}
-
-.aced-trial-dialog__body {
+.aced-start__intro {
+  grid-area: intro;
   display: grid;
   gap: 1rem;
   align-content: start;
 }
 
-@media (min-width: 720px) {
-  .aced-trial-dialog__grid {
-    grid-template-columns: minmax(0, 1.15fr) minmax(0, 0.95fr);
+.aced-start__aside {
+  grid-area: aside;
+  display: grid;
+  gap: 1.35rem;
+  align-content: start;
+  padding: 1.35rem 1.4rem;
+  border-radius: 1rem;
+  background: #f6f4f0;
+  border: 1px solid var(--aced-rule);
+}
+
+.aced-start__form {
+  grid-area: form;
+  display: grid;
+  align-content: start;
+  max-width: 28rem;
+}
+
+@media (min-width: 900px) {
+  .aced-start__main {
+    grid-template-columns: minmax(0, 1.15fr) minmax(0, 0.85fr);
     grid-template-areas:
       'intro aside'
-      'body aside';
-    gap: 1.25rem 2rem;
-    align-items: start;
+      'form aside';
+    gap: 1.5rem 3.5rem;
+    padding-top: 3.75rem;
   }
 
-  .aced-trial-dialog__intro {
-    grid-area: intro;
-    padding-right: 0.5rem;
-  }
-
-  .aced-trial-dialog__aside {
-    grid-area: aside;
-  }
-
-  .aced-trial-dialog__body {
-    grid-area: body;
+  .aced-start__aside {
+    position: sticky;
+    top: 1.5rem;
   }
 }
 
-.aced-trial-dialog__kicker {
+.aced-start__kicker {
   margin: 0;
   font-size: 0.72rem;
   font-weight: 600;
@@ -2179,75 +2156,41 @@ dialog.aced-trial-dialog::backdrop {
   color: var(--aced-terra);
 }
 
-.aced-trial-dialog__title {
+.aced-start__intro h1 {
   margin: 0;
-  max-width: 18ch;
+  max-width: 14ch;
   font-family: var(--font-aced-heading), 'Raleway', sans-serif;
   font-weight: 600;
-  font-size: clamp(1.55rem, 2.6vw, 1.9rem);
-  line-height: 1.15;
-  letter-spacing: -0.035em;
-  text-wrap: balance;
+  font-size: clamp(1.85rem, 3.2vw, 2.45rem);
+  line-height: 1.12;
+  letter-spacing: -0.04em;
   color: var(--aced-ink);
 }
 
-.aced-trial-dialog__lead {
+.aced-start__lead {
   margin: 0;
   max-width: 36ch;
-  font-size: 0.98rem;
+  font-size: 1.05rem;
   line-height: 1.5;
   color: var(--aced-mute);
 }
 
-.aced-trial-dialog__features {
+.aced-start__benefits {
   list-style: none;
-  margin: 0;
+  margin: 0.35rem 0 0;
   padding: 0;
   display: grid;
   gap: 0.55rem;
 }
 
-.aced-trial-dialog__features li {
+.aced-start__benefits li {
   display: grid;
   grid-template-columns: auto 1fr;
   gap: 0.55rem;
   align-items: start;
-  font-size: 0.92rem;
+  font-size: 0.95rem;
   line-height: 1.4;
   color: var(--aced-ink);
-}
-
-.aced-trial-dialog__aside {
-  display: grid;
-  gap: 1.15rem;
-  align-content: start;
-  padding: 1.15rem;
-  border-radius: 0.95rem;
-  background: #f6f4f0;
-}
-
-.aced-trial-dialog .aced-mkt__btn--primary {
-  color: #fff !important;
-  background: var(--aced-ink) !important;
-}
-
-.aced-trial-dialog .aced-mkt__btn--primary:hover {
-  color: #fff !important;
-  background: #000 !important;
-}
-
-@media (max-width: 719px) {
-  .aced-trial-dialog__shell {
-    padding: 1.4rem 1.25rem 1.35rem;
-  }
-
-  .aced-trial-dialog__title {
-    max-width: none;
-  }
-
-  .aced-trial-fineprint {
-    text-align: center;
-  }
 }
 
 @keyframes aced-stage-float {

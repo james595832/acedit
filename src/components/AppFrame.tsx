@@ -25,9 +25,10 @@ export function AppFrame({
 }: AppFrameProps) {
   const pathname = usePathname();
   const isHome = pathname === '/';
+  const isStart = pathname === '/start';
 
-  if (isHome) {
-    // Marketing landing owns its own chrome.
+  if (isHome || isStart) {
+    // Marketing / trial start pages own their own chrome.
     return children;
   }
 

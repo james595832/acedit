@@ -45,7 +45,8 @@ export async function updateSession(request: NextRequest) {
     path.startsWith('/api/cv') ||
     path.startsWith('/api/jd') ||
     path.startsWith('/settings');
-  const isAuthRoute = path === '/login' || path === '/signup';
+  const isAuthRoute =
+    path === '/login' || path === '/signup' || path === '/start';
 
   if (!user && isProtected) {
     // APIs get JSON 401; pages redirect to login.

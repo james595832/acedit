@@ -17,18 +17,22 @@ type AuthFormProps = {
   configured: boolean;
   trialDays?: number;
   plan?: string;
+  /** Full-page trial signup: skip the info banner; quieter legal line */
+  variant?: 'default' | 'start';
 };
 
 export function SignUpForm({
   configured,
   trialDays = 5,
   plan = 'pro',
+  variant = 'default',
 }: AuthFormProps) {
   const [state, formAction, isPending] = useActionState(signUp, initialState);
   const [fullName, setFullName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [marketingConsent, setMarketingConsent] = useState(false);
+  const isStart = variant === 'start';
 
   return (
     <VStack gap={4}>
@@ -48,11 +52,13 @@ export function SignUpForm({
         />
       ) : null}
 
-      <Banner
-        status="info"
-        title={`${trialDays}-day Pro trial`}
-        description="After you create your account you’ll enter card details on Stripe. £0 today. Cancel any time in Settings."
-      />
+      {!isStart ? (
+        <Banner
+          status="info"
+          title={`${trialDays}-day Pro trial`}
+          description="After you create your account you’ll enter card details on Stripe. £0 today. Cancel any time in Settings."
+        />
+      ) : null}
 
       <form action={formAction}>
         <input type="hidden" name="trial" value={String(trialDays)} />
@@ -92,7 +98,11 @@ export function SignUpForm({
             />
             <CheckboxInput
               label="Email me tips and product updates"
-              description="You can unsubscribe anytime. We’ll still send essential account and billing emails."
+              description={
+                isStart
+                  ? 'Unsubscribe anytime.'
+                  : 'You can unsubscribe anytime. We’ll still send essential account and billing emails.'
+              }
               htmlName="marketing_consent"
               value={marketingConsent}
               onChange={setMarketingConsent}
@@ -101,32 +111,36 @@ export function SignUpForm({
             />
           </FormLayout>
 
-          <HStack gap={3} align="center" wrap="wrap">
+          <VStack gap={3}>
             <Button
-              label="Create account & continue"
+              label={isStart ? 'Start free trial' : 'Create account & continue'}
               type="submit"
               variant="primary"
               isLoading={isPending}
               isDisabled={!configured}
             />
-            <Text type="supporting" color="secondary">
-              Already have an account?{' '}
-              <Link href="/login" hasUnderline>
-                Sign in
+            {!isStart ? (
+              <Text type="supporting" color="secondary">
+                Already have an account?{' '}
+                <Link href="/login" hasUnderline>
+                  Sign in
+                </Link>
+              </Text>
+            ) : null}
+            <Text type="supporting" color="secondary" as="p">
+              {isStart
+                ? 'You’ll add a card on the next step. £0 today. By continuing you agree to our '
+                : 'By creating an account you agree to our '}
+              <Link href="/terms" hasUnderline>
+                Terms
+              </Link>{' '}
+              and{' '}
+              <Link href="/privacy" hasUnderline>
+                Privacy Policy
               </Link>
+              .
             </Text>
-          </HStack>
-          <Text type="supporting" color="secondary" as="p">
-            By creating an account you agree to our{' '}
-            <Link href="/terms" hasUnderline>
-              Terms &amp; Conditions
-            </Link>{' '}
-            and{' '}
-            <Link href="/privacy" hasUnderline>
-              Privacy Policy
-            </Link>
-            .
-          </Text>
+          </VStack>
         </VStack>
       </form>
     </VStack>

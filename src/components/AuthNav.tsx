@@ -31,7 +31,7 @@ export function AuthNav({email, configured}: AuthNavProps) {
     return (
       <HStack gap={2} align="center" className="aced-nav-account">
         <Button label="Sign in" href="/login" variant="ghost" size="sm" />
-        <Button label="Sign up" href="/signup" variant="primary" size="sm" />
+        <Button label="Sign up" href="/start" variant="primary" size="sm" />
       </HStack>
     );
   }

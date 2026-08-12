@@ -92,7 +92,7 @@ export function SignInForm({configured}: AuthFormProps) {
             />
             <Text type="supporting" color="secondary">
               New here?{' '}
-              <Link href="/signup" hasUnderline>
+              <Link href="/start" hasUnderline>
                 Create an account
               </Link>
             </Text>
