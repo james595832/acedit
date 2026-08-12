@@ -43,28 +43,6 @@ const HERO_PROMPTS = [
   },
 ] as const;
 
-// Placeholder quotes. Replace with real user feedback before wide launch.
-const TESTIMONIALS = [
-  {
-    quote:
-      'I stopped practicing in my head and started saying answers out loud. My real interviews felt easy after that.',
-    name: 'Amara',
-    role: 'Product Designer',
-  },
-  {
-    quote:
-      'The whiteboard timer scared me at first. By my real interview it just felt normal.',
-    name: 'Dan',
-    role: 'UX Designer',
-  },
-  {
-    quote:
-      'My questions came from my actual CV, so I practiced the exact stories interviewers asked about.',
-    name: 'Priya',
-    role: 'New to design',
-  },
-] as const;
-
 export function MarketingLanding({userEmail}: MarketingLandingProps) {
   const [pricingOpen, setPricingOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
@@ -171,7 +149,7 @@ export function MarketingLanding({userEmail}: MarketingLandingProps) {
           />
         </Link>
 
-        <nav className="aced-mkt__nav-end" aria-label="Landing">
+        <nav className="aced-mkt__nav-links" aria-label="Landing">
           {SECTION_LINKS.map(({id, label}) => (
             <a
               key={id}
@@ -188,6 +166,9 @@ export function MarketingLanding({userEmail}: MarketingLandingProps) {
           >
             Roadmap
           </Link>
+        </nav>
+
+        <div className="aced-mkt__nav-end">
           <Link
             className="aced-mkt__nav-link aced-mkt__nav-link--desktop"
             href={accountHref}
@@ -215,7 +196,7 @@ export function MarketingLanding({userEmail}: MarketingLandingProps) {
               <span />
             </span>
           </button>
-        </nav>
+        </div>
       </header>
 
       <div
@@ -514,22 +495,6 @@ export function MarketingLanding({userEmail}: MarketingLandingProps) {
           </div>
         </section>
 
-        <section className="aced-mkt-section aced-mkt-section--tint">
-          <p className="aced-mkt-kicker">From practice rooms</p>
-          <h2 className="aced-mkt-h2">Designers who stopped winging{'\u00A0'}it</h2>
-          <ul className="aced-mkt-quotes">
-            {TESTIMONIALS.map(({quote, name, role}) => (
-              <li key={name} className="aced-mkt-quotes__item">
-                <p className="aced-mkt-quotes__text">“{quote}”</p>
-                <p className="aced-mkt-quotes__who">
-                  <strong>{name}</strong>
-                  <span>{role}</span>
-                </p>
-              </li>
-            ))}
-          </ul>
-        </section>
-
         <section id="pricing" className="aced-mkt-section aced-mkt-section--pricing">
           <p className="aced-mkt-kicker">Pricing</p>
           <h2 className="aced-mkt-h2">One plan. Five free days.</h2>
@@ -586,7 +551,7 @@ export function MarketingLanding({userEmail}: MarketingLandingProps) {
             className="aced-mkt__btn aced-mkt__btn--primary aced-mkt__btn--lg"
             onClick={() => setPricingOpen(true)}
           >
-            Start your 5 free days
+            Start practicing free
           </button>
         </section>
       </main>

@@ -13,26 +13,39 @@ export function SiteFooter({variant = 'app'}: SiteFooterProps) {
   if (variant === 'marketing') {
     return (
       <footer className="aced-mkt-footer">
-        <div className="aced-mkt-footer__brand">
-          <Image
-            src="/ACED-IT.svg"
-            alt=""
-            width={96}
-            height={18}
-            className="aced-mkt__logo-img"
-          />
-          <p>Design interview prep · one place to practice</p>
+        <div className="aced-mkt-footer__top">
+          <div className="aced-mkt-footer__brand">
+            <Image
+              src="/ACED-IT.svg"
+              alt=""
+              width={96}
+              height={18}
+              className="aced-mkt__logo-img"
+            />
+            <p>Design interview prep · one place to practice</p>
+          </div>
+
+          <div className="aced-mkt-footer__cols">
+            <nav className="aced-mkt-footer__col" aria-label="Product">
+              <p className="aced-mkt-footer__heading">Product</p>
+              <Link href="/#who">Who it&apos;s for</Link>
+              <Link href="/#why">How it works</Link>
+              <Link href="/#pricing">Pricing</Link>
+              <Link href="/roadmap">Roadmap</Link>
+            </nav>
+            <nav className="aced-mkt-footer__col" aria-label="Company">
+              <p className="aced-mkt-footer__heading">Company</p>
+              <Link href="/contact">Contact</Link>
+              <a href={`mailto:${SUPPORT_EMAIL}`}>Support</a>
+            </nav>
+            <nav className="aced-mkt-footer__col" aria-label="Legal">
+              <p className="aced-mkt-footer__heading">Legal</p>
+              <Link href="/privacy">Privacy</Link>
+              <Link href="/terms">Terms</Link>
+            </nav>
+          </div>
         </div>
-        <nav className="aced-mkt-footer__links" aria-label="Footer">
-          <Link href="/#who">Who it&apos;s for</Link>
-          <Link href="/#why">Why ACED-IT</Link>
-          <Link href="/#pricing">Pricing</Link>
-          <Link href="/roadmap">Roadmap</Link>
-          <Link href="/privacy">Privacy Policy</Link>
-          <Link href="/terms">Terms &amp; Conditions</Link>
-          <Link href="/contact">Contact</Link>
-          <a href={`mailto:${SUPPORT_EMAIL}`}>{SUPPORT_EMAIL}</a>
-        </nav>
+
         <p className="aced-mkt-footer__legal">
           © {year} ACED-IT ·{' '}
           <a href="https://acedit.app">acedit.app</a>
