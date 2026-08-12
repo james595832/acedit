@@ -1919,9 +1919,69 @@ body:has(.aced-app-page),
 
 .aced-price-panel {
   border: 1px solid var(--aced-rule);
-  border-radius: 0.75rem;
-  padding: 1rem 1.1rem;
+  border-radius: 0.85rem;
+  padding: 1.15rem 1.2rem;
   background: #fafaf8;
+  display: grid;
+  gap: 0.55rem;
+}
+
+.aced-price-panel__top {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.aced-price-panel__name {
+  margin: 0;
+  font-family: var(--font-aced-heading), 'Raleway', sans-serif;
+  font-weight: 600;
+  font-size: 1.05rem;
+  color: var(--aced-ink);
+}
+
+.aced-price-panel__price {
+  margin: 0;
+  display: flex;
+  align-items: baseline;
+  gap: 0.25rem;
+  font-family: var(--font-aced-heading), 'Raleway', sans-serif;
+  font-weight: 600;
+  font-size: 1.45rem;
+  color: var(--aced-ink);
+  letter-spacing: -0.02em;
+}
+
+.aced-price-panel__price small {
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--aced-mute);
+}
+
+.aced-price-panel__alt {
+  margin: 0;
+  font-size: 0.82rem;
+  color: var(--aced-mute);
+  line-height: 1.4;
+}
+
+.aced-price-panel__due {
+  margin: 0.35rem 0 0;
+  padding-top: 0.75rem;
+  border-top: 1px solid var(--aced-rule);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  font-size: 0.92rem;
+  color: var(--aced-ink);
+}
+
+.aced-price-panel__due span {
+  font-family: var(--font-aced-heading), 'Raleway', sans-serif;
+  font-weight: 700;
+  font-size: 1.05rem;
 }
 
 .aced-price-features,
@@ -1929,6 +1989,32 @@ body:has(.aced-app-page),
   list-style: none;
   margin: 0;
   padding: 0;
+}
+
+.aced-trial-timeline {
+  display: grid;
+  gap: 0.85rem;
+}
+
+.aced-trial-timeline li {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 0.75rem;
+  align-items: start;
+}
+
+.aced-trial-timeline__title {
+  margin: 0 0 0.2rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--aced-ink);
+}
+
+.aced-trial-timeline__detail {
+  margin: 0;
+  font-size: 0.82rem;
+  line-height: 1.45;
+  color: var(--aced-mute);
 }
 
 .aced-trial-day {
@@ -1950,18 +2036,25 @@ body:has(.aced-app-page),
 
 .aced-trial-fineprint {
   margin: 0;
-  text-align: center;
+  text-align: left;
   font-size: 0.75rem;
   line-height: 1.45;
   color: var(--aced-mute);
 }
 
+.aced-trial-fineprint a {
+  color: var(--aced-terra);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
 .aced-trial-dialog-cta {
   display: grid;
   gap: 0.75rem;
+  margin-top: auto;
 }
 
-/* Astryx Dialog: force true viewport center + readable padding */
+/* Trial dialog: wide 2-col (Later/Adobe pattern), soft chrome, quiet close */
 .astryx-dialog.aced-trial-dialog,
 dialog.aced-trial-dialog {
   position: fixed !important;
@@ -1971,12 +2064,12 @@ dialog.aced-trial-dialog {
   right: 0 !important;
   bottom: 0 !important;
   left: 0 !important;
-  width: min(28rem, calc(100vw - 2rem)) !important;
+  width: min(44rem, calc(100vw - 2rem)) !important;
   max-width: calc(100vw - 2rem) !important;
   height: fit-content !important;
-  max-height: min(88dvh, 42rem) !important;
-  border: 1px solid var(--aced-rule) !important;
-  border-radius: 1rem !important;
+  max-height: min(90dvh, 40rem) !important;
+  border: 0 !important;
+  border-radius: 1.15rem !important;
   background: #fff !important;
   color: var(--aced-ink) !important;
   box-shadow:
@@ -1993,22 +2086,144 @@ dialog.aced-trial-dialog::backdrop {
   backdrop-filter: blur(6px);
 }
 
-.aced-trial-dialog .astryx-dialog-header,
-.aced-trial-dialog .astryx-layout-header,
-.aced-trial-dialog [class*='dialog-header'] {
+.aced-trial-dialog__shell {
+  position: relative;
   box-sizing: border-box;
-  padding: 1.35rem 1.5rem 1.1rem !important;
-}
-
-.aced-trial-dialog .astryx-layout-header > * {
-  gap: 0.75rem;
-}
-
-.aced-trial-dialog-body {
-  box-sizing: border-box;
-  padding: 0.5rem 1.5rem 1.65rem;
+  padding: 1.75rem 1.75rem 1.65rem;
   overflow-y: auto;
-  max-height: min(68dvh, 30rem);
+  max-height: min(90dvh, 40rem);
+}
+
+.aced-trial-dialog__close {
+  position: absolute;
+  top: 0.85rem;
+  right: 0.85rem;
+  z-index: 2;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--aced-mute);
+  font-size: 1.55rem;
+  line-height: 1;
+  cursor: pointer;
+  transition:
+    color 140ms ease,
+    background-color 140ms ease;
+}
+
+.aced-trial-dialog__close:hover {
+  color: var(--aced-ink);
+  background: rgba(28, 27, 24, 0.05);
+}
+
+.aced-trial-dialog__close:focus-visible {
+  outline: 2px solid var(--aced-terra);
+  outline-offset: 2px;
+}
+
+.aced-trial-dialog__grid {
+  display: grid;
+  gap: 1.35rem;
+}
+
+.aced-trial-dialog__intro {
+  display: grid;
+  gap: 0.65rem;
+  align-content: start;
+  padding-right: 1.75rem;
+}
+
+.aced-trial-dialog__body {
+  display: grid;
+  gap: 1rem;
+  align-content: start;
+}
+
+@media (min-width: 720px) {
+  .aced-trial-dialog__grid {
+    grid-template-columns: minmax(0, 1.15fr) minmax(0, 0.95fr);
+    grid-template-areas:
+      'intro aside'
+      'body aside';
+    gap: 1.25rem 2rem;
+    align-items: start;
+  }
+
+  .aced-trial-dialog__intro {
+    grid-area: intro;
+    padding-right: 0.5rem;
+  }
+
+  .aced-trial-dialog__aside {
+    grid-area: aside;
+  }
+
+  .aced-trial-dialog__body {
+    grid-area: body;
+  }
+}
+
+.aced-trial-dialog__kicker {
+  margin: 0;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--aced-terra);
+}
+
+.aced-trial-dialog__title {
+  margin: 0;
+  max-width: 18ch;
+  font-family: var(--font-aced-heading), 'Raleway', sans-serif;
+  font-weight: 600;
+  font-size: clamp(1.55rem, 2.6vw, 1.9rem);
+  line-height: 1.15;
+  letter-spacing: -0.035em;
+  text-wrap: balance;
+  color: var(--aced-ink);
+}
+
+.aced-trial-dialog__lead {
+  margin: 0;
+  max-width: 36ch;
+  font-size: 0.98rem;
+  line-height: 1.5;
+  color: var(--aced-mute);
+}
+
+.aced-trial-dialog__features {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.55rem;
+}
+
+.aced-trial-dialog__features li {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 0.55rem;
+  align-items: start;
+  font-size: 0.92rem;
+  line-height: 1.4;
+  color: var(--aced-ink);
+}
+
+.aced-trial-dialog__aside {
+  display: grid;
+  gap: 1.15rem;
+  align-content: start;
+  padding: 1.15rem;
+  border-radius: 0.95rem;
+  background: #f6f4f0;
 }
 
 .aced-trial-dialog .aced-mkt__btn--primary {
@@ -2019,6 +2234,20 @@ dialog.aced-trial-dialog::backdrop {
 .aced-trial-dialog .aced-mkt__btn--primary:hover {
   color: #fff !important;
   background: #000 !important;
+}
+
+@media (max-width: 719px) {
+  .aced-trial-dialog__shell {
+    padding: 1.4rem 1.25rem 1.35rem;
+  }
+
+  .aced-trial-dialog__title {
+    max-width: none;
+  }
+
+  .aced-trial-fineprint {
+    text-align: center;
+  }
 }
 
 @keyframes aced-stage-float {

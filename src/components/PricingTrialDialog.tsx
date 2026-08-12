@@ -1,11 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import {Dialog, DialogHeader} from '@astryxdesign/core/Dialog';
-import {VStack, HStack} from '@astryxdesign/core/Layout';
-import {Text} from '@astryxdesign/core/Text';
-import {Heading} from '@astryxdesign/core/Heading';
-import {Divider} from '@astryxdesign/core/Divider';
+import {Dialog} from '@astryxdesign/core/Dialog';
 
 type PricingTrialDialogProps = {
   isOpen: boolean;
@@ -46,87 +42,103 @@ export function PricingTrialDialog({
     <Dialog
       isOpen={isOpen}
       onOpenChange={onOpenChange}
-      width={448}
-      maxHeight="88dvh"
+      width={720}
+      maxHeight="90dvh"
       purpose="info"
       className="aced-trial-dialog"
     >
-      <DialogHeader
-        title="Start your 5-day free trial"
-        subtitle="One plan. Clear timeline. Nothing charged today."
-        onOpenChange={onOpenChange}
-      />
-      <div className="aced-trial-dialog-body">
-        <VStack gap={5}>
-          <VStack gap={2} className="aced-price-panel">
-            <HStack gap={3} align="center" justify="between">
-              <Heading level={3}>ACED-IT Pro</Heading>
-              <HStack gap={2} align="end">
-                <Text size="xl" weight="semibold">
-                  £7.50
-                </Text>
-                <Text size="sm" color="secondary">
-                  / mo
-                </Text>
-              </HStack>
-            </HStack>
-            <Text size="sm" color="secondary">
-              Or $9.99 a month · Billed after the trial · Cancel any time
-            </Text>
-            <Divider />
-            <VStack gap={2} as="ul" className="aced-price-features">
+      <div className="aced-trial-dialog__shell">
+        <button
+          type="button"
+          className="aced-trial-dialog__close"
+          aria-label="Close"
+          onClick={() => onOpenChange(false)}
+        >
+          <span aria-hidden="true">×</span>
+        </button>
+
+        <div className="aced-trial-dialog__grid">
+          <header className="aced-trial-dialog__intro">
+            <p className="aced-trial-dialog__kicker">5-day free trial</p>
+            <h2 className="aced-trial-dialog__title">
+              Start practicing. Nothing charged today.
+            </h2>
+            <p className="aced-trial-dialog__lead">
+              One plan. Clear timeline. Keep it only if it helps.
+            </p>
+          </header>
+
+          <aside className="aced-trial-dialog__aside" aria-label="Plan summary">
+            <div className="aced-price-panel">
+              <div className="aced-price-panel__top">
+                <p className="aced-price-panel__name">ACED-IT Pro</p>
+                <p className="aced-price-panel__price">
+                  <span>£7.50</span>
+                  <small>/ mo</small>
+                </p>
+              </div>
+              <p className="aced-price-panel__alt">
+                Or $9.99 a month · Billed after the trial
+              </p>
+              <p className="aced-price-panel__due">
+                <strong>Due today</strong>
+                <span>£0.00</span>
+              </p>
+            </div>
+
+            <ol className="aced-trial-timeline">
+              {TIMELINE.map((step, index) => (
+                <li key={step.day}>
+                  <span className="aced-trial-day">
+                    {String(index + 1).padStart(2, '0')}
+                  </span>
+                  <div>
+                    <p className="aced-trial-timeline__title">
+                      {step.day}: {step.title}
+                    </p>
+                    <p className="aced-trial-timeline__detail">{step.detail}</p>
+                  </div>
+                </li>
+              ))}
+            </ol>
+          </aside>
+
+          <div className="aced-trial-dialog__body">
+            <ul className="aced-trial-dialog__features">
               {FEATURES.map(item => (
-                <HStack key={item} gap={2} align="start" as="li">
+                <li key={item}>
                   <span className="aced-trial-check" aria-hidden="true">
                     ✓
                   </span>
-                  <Text size="sm">{item}</Text>
-                </HStack>
+                  <span>{item}</span>
+                </li>
               ))}
-            </VStack>
-          </VStack>
+            </ul>
 
-          <VStack gap={3} as="ol" className="aced-trial-timeline">
-            {TIMELINE.map((step, index) => (
-              <HStack key={step.day} gap={3} align="start" as="li">
-                <span className="aced-trial-day">
-                  {String(index + 1).padStart(2, '0')}
-                </span>
-                <VStack gap={1}>
-                  <Text size="sm" weight="semibold">
-                    {step.day}: {step.title}
-                  </Text>
-                  <Text size="sm" color="secondary">
-                    {step.detail}
-                  </Text>
-                </VStack>
-              </HStack>
-            ))}
-          </VStack>
-
-          <div className="aced-trial-dialog-cta">
-            <Link
-              href="/signup?trial=5&plan=pro"
-              className="aced-mkt__btn aced-mkt__btn--primary aced-mkt__btn--lg aced-mkt__btn--block"
-              onClick={() => onOpenChange(false)}
-            >
-              Continue to create account
-            </Link>
-            <p className="aced-trial-fineprint">
-              Stripe Checkout collects your card after account setup. You
-              won&apos;t be charged today, and you can cancel any time in
-              Settings. By continuing you agree to our{' '}
-              <Link href="/terms" onClick={() => onOpenChange(false)}>
-                Terms
-              </Link>{' '}
-              and{' '}
-              <Link href="/privacy" onClick={() => onOpenChange(false)}>
-                Privacy Policy
+            <div className="aced-trial-dialog-cta">
+              <Link
+                href="/signup?trial=5&plan=pro"
+                className="aced-mkt__btn aced-mkt__btn--primary aced-mkt__btn--lg aced-mkt__btn--block"
+                onClick={() => onOpenChange(false)}
+              >
+                Continue to create account
               </Link>
-              .
-            </p>
+              <p className="aced-trial-fineprint">
+                Stripe Checkout collects your card after account setup. You
+                won&apos;t be charged today, and you can cancel any time in
+                Settings. By continuing you agree to our{' '}
+                <Link href="/terms" onClick={() => onOpenChange(false)}>
+                  Terms
+                </Link>{' '}
+                and{' '}
+                <Link href="/privacy" onClick={() => onOpenChange(false)}>
+                  Privacy Policy
+                </Link>
+                .
+              </p>
+            </div>
           </div>
-        </VStack>
+        </div>
       </div>
     </Dialog>
   );
