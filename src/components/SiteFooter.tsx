@@ -22,7 +22,11 @@ export function SiteFooter({variant = 'app'}: SiteFooterProps) {
               height={18}
               className="aced-mkt__logo-img"
             />
-            <p>Design interview prep · one place to practice</p>
+            <p>
+              Design interview prep
+              <br />
+              one place to practice
+            </p>
           </div>
 
           <div className="aced-mkt-footer__cols">

@@ -158,12 +158,6 @@ export function MarketingLanding({userEmail}: MarketingLandingProps) {
               {label}
             </a>
           ))}
-          <Link
-            className="aced-mkt__nav-link aced-mkt__nav-link--desktop"
-            href="/roadmap"
-          >
-            Roadmap
-          </Link>
         </nav>
 
         <div className="aced-mkt__nav-end">
@@ -219,14 +213,6 @@ export function MarketingLanding({userEmail}: MarketingLandingProps) {
             {label}
           </a>
         ))}
-        <Link
-          className="aced-mkt__drawer-link"
-          href="/roadmap"
-          onClick={closeMenu}
-          tabIndex={menuOpen ? 0 : -1}
-        >
-          Roadmap
-        </Link>
         <Link
           className="aced-mkt__drawer-link"
           href={accountHref}
