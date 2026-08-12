@@ -31,6 +31,8 @@ export function AppFrame({
     return children;
   }
 
+  const isSignedIn = Boolean(userEmail);
+
   const isInterview =
     pathname.startsWith('/interview') &&
     !pathname.startsWith('/interview/results');
@@ -40,11 +42,12 @@ export function AppFrame({
   const isResults = pathname.startsWith('/interview/results');
   const isWhiteboard = pathname.startsWith('/whiteboard');
 
-  // Responsive contract:
-  //   > 1024px  logo left · Studio · Practice · Whiteboard · Results + account right
+  // Feature links only after login — guests see Sign in / Sign up only.
+  // Responsive (signed in):
+  //   > 1024px  logo left · Studio · Practice · Whiteboard · Results + account
   //   <= 1024px links hide; burger opens MobileNav drawer
 
-  const navItems = (
+  const navItems = isSignedIn ? (
     <>
       <TopNavItem label="Studio" href="/studio" isSelected={isStudio} />
       <TopNavItem label="Practice" href="/interview" isSelected={isInterview} />
@@ -64,47 +67,55 @@ export function AppFrame({
         isSelected={isResults}
       />
     </>
-  );
+  ) : null;
 
   return (
     <AppShell
       height="auto"
       variant="wash"
       contentPadding={0}
-      mobileNav={{
-        breakpoint: 'lg',
-        hasToggle: false,
-        content: (
-          <MobileNav header="ACED-IT" side="end">
-            <SideNavItem label="Studio" href="/studio" isSelected={isStudio} />
-            <SideNavItem
-              label="Practice"
-              href="/interview"
-              isSelected={isInterview}
-            />
-            <SideNavItem
-              label="Portfolio"
-              href="/portfolio"
-              isSelected={isPortfolio}
-            />
-            <SideNavItem
-              label="Whiteboard"
-              href="/whiteboard"
-              isSelected={isWhiteboard}
-            />
-            <SideNavItem
-              label="Results"
-              href="/interview/results"
-              isSelected={isResults}
-            />
-            <SideNavItem
-              label="Settings"
-              href="/settings"
-              isSelected={pathname.startsWith('/settings')}
-            />
-          </MobileNav>
-        ),
-      }}
+      mobileNav={
+        isSignedIn
+          ? {
+              breakpoint: 'lg',
+              hasToggle: false,
+              content: (
+                <MobileNav header="ACED-IT" side="end">
+                  <SideNavItem
+                    label="Studio"
+                    href="/studio"
+                    isSelected={isStudio}
+                  />
+                  <SideNavItem
+                    label="Practice"
+                    href="/interview"
+                    isSelected={isInterview}
+                  />
+                  <SideNavItem
+                    label="Portfolio"
+                    href="/portfolio"
+                    isSelected={isPortfolio}
+                  />
+                  <SideNavItem
+                    label="Whiteboard"
+                    href="/whiteboard"
+                    isSelected={isWhiteboard}
+                  />
+                  <SideNavItem
+                    label="Results"
+                    href="/interview/results"
+                    isSelected={isResults}
+                  />
+                  <SideNavItem
+                    label="Settings"
+                    href="/settings"
+                    isSelected={pathname.startsWith('/settings')}
+                  />
+                </MobileNav>
+              ),
+            }
+          : undefined
+      }
       topNav={
         <TopNav
           label="ACED-IT primary navigation"
@@ -125,11 +136,15 @@ export function AppFrame({
           }
           endContent={
             <HStack gap={4} align="center" className="aced-nav-end">
-              <HStack gap={4} align="center" className="aced-nav-links">
-                {navItems}
-              </HStack>
+              {navItems ? (
+                <HStack gap={4} align="center" className="aced-nav-links">
+                  {navItems}
+                </HStack>
+              ) : null}
               <AuthNav email={userEmail} configured={supabaseConfigured} />
-              <MobileNavToggle label="Open navigation" />
+              {isSignedIn ? (
+                <MobileNavToggle label="Open navigation" />
+              ) : null}
             </HStack>
           }
         />
