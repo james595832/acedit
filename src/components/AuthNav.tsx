@@ -1,10 +1,13 @@
 'use client';
 
+import {useState} from 'react';
 import {Avatar} from '@astryxdesign/core/Avatar';
 import {Button} from '@astryxdesign/core/Button';
-import {DropdownMenu} from '@astryxdesign/core/DropdownMenu';
-import {HStack} from '@astryxdesign/core/Layout';
+import {Divider} from '@astryxdesign/core/Divider';
+import {HStack, VStack} from '@astryxdesign/core/Layout';
 import {Link} from '@astryxdesign/core/Link';
+import {Popover} from '@astryxdesign/core/Popover';
+import {Text} from '@astryxdesign/core/Text';
 import {signOut} from '@/lib/auth/actions';
 
 type AuthNavProps = {
@@ -19,6 +22,8 @@ function displayNameFromEmail(email: string): string {
 }
 
 export function AuthNav({email, configured}: AuthNavProps) {
+  const [isOpen, setIsOpen] = useState(false);
+
   if (!configured) {
     return (
       <Link href="/login" isStandalone>
@@ -39,39 +44,70 @@ export function AuthNav({email, configured}: AuthNavProps) {
   const name = displayNameFromEmail(email);
 
   return (
-    <div className="aced-nav-account">
-      <DropdownMenu
-        hasChevron={false}
-        menuWidth={260}
-        button={{
-          label: `Account menu for ${email}`,
-          variant: 'ghost',
-          size: 'sm',
-          isIconOnly: true,
-          className: 'aced-nav-avatar-trigger',
-          icon: <Avatar name={name} size="sm" />,
-        }}
-        items={[
-          {
-            type: 'section',
-            title: email,
-            items: [
-              {
-                label: 'Settings',
-                onClick: () => {
+    <HStack gap={0} align="center" className="aced-nav-account">
+      <Popover
+        placement="below"
+        alignment="end"
+        width={272}
+        isOpen={isOpen}
+        onOpenChange={setIsOpen}
+        hasCloseButton={false}
+        label={`Account menu for ${email}`}
+        className="aced-account-menu-popover"
+        content={
+          <VStack gap={0} className="aced-account-menu">
+            <VStack gap={1} className="aced-account-menu__actions">
+              <Button
+                label="Settings"
+                variant="ghost"
+                size="sm"
+                className="aced-account-menu__item"
+                onClick={() => {
+                  setIsOpen(false);
                   window.location.assign('/settings');
-                },
-              },
-              {
-                label: 'Sign out',
-                onClick: () => {
+                }}
+              />
+              <Button
+                label="Sign out"
+                variant="ghost"
+                size="sm"
+                className="aced-account-menu__item"
+                onClick={() => {
+                  setIsOpen(false);
                   void signOut();
-                },
-              },
-            ],
-          },
-        ]}
-      />
-    </div>
+                }}
+              />
+            </VStack>
+
+            <Divider variant="subtle" isFullBleed />
+
+            <HStack
+              gap={3}
+              align="center"
+              className="aced-account-menu__identity"
+            >
+              <Avatar name={name} size="md" />
+              <VStack gap={0} className="aced-account-menu__meta">
+                <Text type="label" as="p">
+                  {name}
+                </Text>
+                <Text type="supporting" color="secondary" as="p">
+                  {email}
+                </Text>
+              </VStack>
+            </HStack>
+          </VStack>
+        }
+      >
+        <Button
+          label={`Account menu for ${email}`}
+          variant="ghost"
+          size="sm"
+          isIconOnly
+          className="aced-nav-avatar-trigger"
+          icon={<Avatar name={name} size="sm" />}
+        />
+      </Popover>
+    </HStack>
   );
 }
