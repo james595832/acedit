@@ -48,6 +48,13 @@ Open [http://localhost:3000](http://localhost:3000).
    - `supabase/migrations/20260729230000_marketing_consent.sql`
    - `supabase/migrations/20260730220000_protect_billing_columns.sql`
 7. Open `/signup`, create an account, then `/login`.
+8. **Shared QA login (recommended for ongoing testing):**
+
+```bash
+npm run qa:ensure-user
+```
+
+This creates/refreshes `qa-manual@acedit.app` (or `QA_TEST_EMAIL`), writes the password to `.env.local`, and grants a Pro trial. Details in `user-testing/README.md`. Never commit those credentials.
 
 Once those env vars are set, `/interview` requires a signed-in user. Without them, the app stays open in local stub mode.
 

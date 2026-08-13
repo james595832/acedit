@@ -14,6 +14,7 @@
     "test:smoke": "node scripts/smoke-http.mjs",
     "test:all": "npm run test && npm run build && npm run test:smoke",
     "personas:pdf": "node scripts/generate-persona-pdfs.mjs",
+    "qa:ensure-user": "node scripts/ensure-qa-user.mjs",
     "astryx": "node node_modules/@astryxdesign/cli/bin/astryx.mjs"
   },
   "dependencies": {

@@ -29,8 +29,9 @@ Read that folder’s `profile.md`, `cv.txt`, `jd.txt`, and `test-script.md` befo
 - Prefer local `http://localhost:3001` if the dev server is running; otherwise `https://acedit.app`.
 - Use the persona’s CV PDF from the same folder (run `npm run personas:pdf` if missing).
 - Paste the persona’s JD when the flow asks for a job description.
-- Do **not** use real personal data. Throwaway emails only.
-- Do **not** commit secrets. Clean up any admin-created test users.
+- Prefer the shared QA login from `.env.local` (`QA_TEST_EMAIL` / `QA_TEST_PASSWORD`). Run `npm run qa:ensure-user` if missing.
+- Do **not** use real personal data. If you need a clean-slate signup, use a throwaway email and delete it afterward.
+- Do **not** commit secrets. Do **not** delete the shared QA account.
 
 ## How to behave
 1. Follow the persona’s test script, but treat it as a **feature coverage checklist**, not a vibe check.

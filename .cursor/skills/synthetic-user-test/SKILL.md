@@ -30,7 +30,7 @@ Verify the product, not the persona:
 3. Prefer real browser interaction; note console/network errors.
 4. For each step: Pass / Fail / Partial + evidence.
 5. Answer interview prompts at the persona’s skill level so grading is real.
-6. No real PII; throwaway emails; clean up admin test users; no secrets in git.
+6. Prefer shared QA login (`npm run qa:ensure-user` → `.env.local`). No real PII; never delete the shared QA account; no secrets in git.
 
 ## Severity
 blocker · broken · gap · coherence · polish
