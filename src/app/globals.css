@@ -213,21 +213,33 @@ body:has(.aced-app-page),
 }
 
 .aced-account-menu__actions {
-  padding: 0.4rem;
-  gap: 0.15rem !important;
+  padding: 0.35rem 0;
+  gap: 0 !important;
 }
 
+/* Quiet menu rows — no chrome; hover fills the menu width */
+.aced-account-menu__item.astryx-button,
 .aced-account-menu__item {
   justify-content: flex-start !important;
   width: 100% !important;
-  min-height: 2.35rem !important;
-  padding-inline: 0.75rem !important;
-  border-radius: 0.45rem !important;
+  min-height: 2.5rem !important;
+  padding: 0.65rem 1rem !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  background: transparent !important;
   font-weight: 500 !important;
+  color: var(--aced-ink) !important;
 }
 
-.aced-account-menu__item:hover {
-  background: rgba(28, 27, 24, 0.05) !important;
+.aced-account-menu__item.astryx-button:hover,
+.aced-account-menu__item:hover,
+.aced-account-menu__item.astryx-button:focus-visible,
+.aced-account-menu__item:focus-visible {
+  background: rgba(28, 27, 24, 0.06) !important;
+  border: 0 !important;
+  box-shadow: none !important;
+  outline: none !important;
 }
 
 .aced-account-menu .astryx-divider {
