@@ -52,18 +52,26 @@ export async function POST(request: Request) {
     }
 
     const bytes = Buffer.from(await audio.arrayBuffer());
-    const uploadsDir = path.join(process.cwd(), '.data', 'audio');
-    await fs.mkdir(uploadsDir, {recursive: true});
-    const fileName = `${sessionId}-${questionId}.webm`;
-    await fs.writeFile(path.join(uploadsDir, fileName), bytes);
-    const audioUrl = `/local-audio/${fileName}`;
+    // Hosted deploys cannot write .data/; grading uses the transcript, not the file.
+    let audioUrl = `audio://${auth.userId}/${sessionId}/${questionId}`;
+    if (!process.env.VERCEL) {
+      try {
+        const uploadsDir = path.join(process.cwd(), '.data', 'audio');
+        await fs.mkdir(uploadsDir, {recursive: true});
+        const fileName = `${sessionId}-${questionId}.webm`;
+        await fs.writeFile(path.join(uploadsDir, fileName), bytes);
+        audioUrl = `/local-audio/${fileName}`;
+      } catch (err) {
+        console.error('[answer-record] local audio write skipped', err);
+      }
+    }
 
     let transcription = browserTranscript;
     let source: 'browser' | 'deepgram' | 'empty' = browserTranscript
       ? 'browser'
       : 'empty';
 
-    if (hasDeepgram()) {
+    if (hasDeepgram() && bytes.length > 0) {
       const response = await fetch(
         'https://api.deepgram.com/v1/listen?model=nova-2',
         {
@@ -75,23 +83,21 @@ export async function POST(request: Request) {
           body: bytes,
         },
       );
-      if (!response.ok) {
-        return NextResponse.json(
-          {error: 'Transcription failed', code: 'DEEPGRAM_ERROR'},
-          {status: 500},
-        );
-      }
-      const data = (await response.json()) as {
-        results?: {
-          channels?: Array<{alternatives?: Array<{transcript?: string}>}>;
+      if (response.ok) {
+        const data = (await response.json()) as {
+          results?: {
+            channels?: Array<{alternatives?: Array<{transcript?: string}>}>;
+          };
         };
-      };
-      const deepgramText =
-        data.results?.channels?.[0]?.alternatives?.[0]?.transcript?.trim() ??
-        '';
-      if (deepgramText) {
-        transcription = deepgramText;
-        source = 'deepgram';
+        const deepgramText =
+          data.results?.channels?.[0]?.alternatives?.[0]?.transcript?.trim() ??
+          '';
+        if (deepgramText) {
+          transcription = deepgramText;
+          source = 'deepgram';
+        }
+      } else {
+        console.error('[answer-record] Deepgram failed', response.status);
       }
     }
 
@@ -99,7 +105,7 @@ export async function POST(request: Request) {
       return NextResponse.json(
         {
           error:
-            'No speech detected. Allow microphone access and speak clearly, or check browser speech recognition support (Chrome/Edge work best).',
+            'No speech detected. Allow microphone access and speak clearly, or use Chrome/Edge for live transcription.',
           code: 'EMPTY_TRANSCRIPT',
         },
         {status: 422},
@@ -122,9 +128,13 @@ export async function POST(request: Request) {
       source,
     });
   } catch (error) {
-    console.error(error);
+    console.error('[answer-record]', error);
+    const detail =
+      error instanceof Error && error.message.trim()
+        ? error.message.trim()
+        : 'Answer recording failed';
     return NextResponse.json(
-      {error: 'Answer recording failed', code: 'SERVER_ERROR'},
+      {error: detail, code: 'SERVER_ERROR'},
       {status: 500},
     );
   }

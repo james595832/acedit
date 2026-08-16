@@ -3576,6 +3576,37 @@ dialog.aced-feedback-dialog::backdrop {
   background: #ffffff;
 }
 
+/* Riverside-style: short cue list, collapsed by default */
+.aced-answer-tips {
+  border: 1px solid var(--aced-rule);
+  background: #fff;
+  border-radius: 0.9rem;
+  padding: 0.85rem 1.1rem;
+}
+
+.aced-answer-tips__body {
+  padding-top: 0.65rem;
+}
+
+.aced-answer-tips__list {
+  margin: 0;
+  padding: 0 0 0 1.15rem;
+  display: grid;
+  gap: 0.55rem;
+}
+
+.aced-answer-tips__list li {
+  color: var(--aced-ink);
+  line-height: 1.45;
+  font-size: 0.98rem;
+}
+
+.aced-answer-tips__nudge {
+  margin: 0;
+  font-size: 0.9rem;
+  line-height: 1.45;
+}
+
 .aced-record {
   display: grid;
   gap: 1rem;

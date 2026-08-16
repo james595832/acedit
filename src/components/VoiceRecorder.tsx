@@ -133,18 +133,26 @@ export function VoiceRecorder({
       const stream = await navigator.mediaDevices.getUserMedia({audio: true});
       startMeter(stream);
 
-      const recorder = new MediaRecorder(stream);
+      const mimeType = MediaRecorder.isTypeSupported('audio/webm;codecs=opus')
+        ? 'audio/webm;codecs=opus'
+        : MediaRecorder.isTypeSupported('audio/webm')
+          ? 'audio/webm'
+          : undefined;
+      const recorder = mimeType
+        ? new MediaRecorder(stream, {mimeType})
+        : new MediaRecorder(stream);
       chunksRef.current = [];
-      recorder.ondataavailable = (event) => {
+      recorder.ondataavailable = event => {
         if (event.data.size > 0) chunksRef.current.push(event.data);
       };
       recorder.onstop = () => {
-        stream.getTracks().forEach((track) => track.stop());
+        stream.getTracks().forEach(track => track.stop());
         stopMeter();
         void uploadRecording();
       };
       mediaRecorderRef.current = recorder;
-      recorder.start();
+      // Timeslice keeps chunks flowing; some browsers buffer until stop otherwise.
+      recorder.start(1000);
 
       const SpeechRecognitionCtor = getSpeechRecognition();
       if (SpeechRecognitionCtor) {
@@ -269,8 +277,8 @@ export function VoiceRecorder({
 
         <Text type="supporting" color="secondary" as="p">
           {isRecording
-            ? 'Speak your answer aloud. Stop when you’re finished and we grade the transcript.'
-            : 'We listen live in the browser. Audio is saved; the transcript is what gets graded.'}
+            ? 'Keep talking. When you stop, we save your words and score that transcript against this question’s rubric.'
+            : 'Your browser mic listens live (Chrome/Edge work best). We grade the transcript — not the audio file itself.'}
         </Text>
 
         {isRecording ? (
@@ -290,7 +298,7 @@ export function VoiceRecorder({
               value={level}
               max={100}
               hasValueLabel
-              formatValueLabel={(value) =>
+              formatValueLabel={value =>
                 value < 8 ? 'Quiet. Speak up!' : `${value}% input`
               }
               variant={level < 8 ? 'warning' : 'success'}
@@ -303,23 +311,21 @@ export function VoiceRecorder({
             <Text type="label" color="secondary">
               Live transcript
             </Text>
-            <Text as="p">
-              {liveTranscript || 'Waiting for speech…'}
-            </Text>
+            <Text as="p">{liveTranscript || 'Waiting for speech…'}</Text>
           </div>
         ) : null}
 
         <HStack gap={2}>
           {!isRecording ? (
             <Button
-              label="Start recording"
+              label="Record your answer"
               variant="primary"
               isDisabled={isUploading}
               clickAction={startRecording}
             />
           ) : (
             <Button
-              label="Stop recording"
+              label="Stop your answer"
               variant="destructive"
               clickAction={async () => stopRecording()}
             />

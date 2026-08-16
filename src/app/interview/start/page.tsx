@@ -145,8 +145,8 @@ function InterviewStartInner() {
           </p>
           <h1>{questionText ?? 'Loading question…'}</h1>
           <p className="aced-masthead__lead">
-            Answer out loud. We’ll capture a transcript and score it against the
-            rubric for this role.
+            Speak out loud. Your browser turns speech into a transcript, then we
+            score that text against the cues for this question.
           </p>
         </div>
       </header>
@@ -154,37 +154,29 @@ function InterviewStartInner() {
       <Section variant="transparent" padding={0}>
         <VStack gap={5}>
           {criteria ? (
-            <div className="aced-panel aced-panel--soft">
+            <div className="aced-answer-tips">
               <Collapsible
-                defaultIsOpen
+                defaultIsOpen={false}
                 trigger={
-                  <Text type="label">
-                    What a strong answer includes. Read before you speak
-                  </Text>
+                  <Text type="label">Before you answer · {criteria.mustCover.length} cues</Text>
                 }
               >
-                <VStack gap={2}>
-                  <Text as="p" color="secondary">
-                    {criteria.summary}
-                  </Text>
-                  <Text type="label">Must cover</Text>
-                  {criteria.mustCover.map((item) => (
-                    <Text key={item} as="p" color="secondary">
-                      • {item}
+                <VStack gap={3} className="aced-answer-tips__body">
+                  {criteria.summary ? (
+                    <Text as="p" color="secondary">
+                      {criteria.summary}
                     </Text>
-                  ))}
-                  <Text type="label">Strong signals</Text>
-                  {criteria.strongSignals.map((item) => (
-                    <Text key={item} as="p" color="secondary">
-                      • {item}
+                  ) : null}
+                  <ol className="aced-answer-tips__list">
+                    {criteria.mustCover.slice(0, 4).map(item => (
+                      <li key={item}>{item}</li>
+                    ))}
+                  </ol>
+                  {criteria.strongSignals[0] ? (
+                    <Text as="p" color="secondary" className="aced-answer-tips__nudge">
+                      Strong answers often include: {criteria.strongSignals[0]}
                     </Text>
-                  ))}
-                  <Text type="label">Weak answers usually sound like</Text>
-                  {criteria.weakSignals.map((item) => (
-                    <Text key={item} as="p" color="secondary">
-                      • {item}
-                    </Text>
-                  ))}
+                  ) : null}
                 </VStack>
               </Collapsible>
             </div>
