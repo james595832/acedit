@@ -31,11 +31,34 @@ export type AtsAuditResult = {
 };
 
 const SECTION_PATTERNS: Array<{id: string; label: string; pattern: RegExp}> = [
-  {id: 'experience', label: 'Experience', pattern: /\b(experience|employment|work history|professional experience)\b/i},
-  {id: 'education', label: 'Education', pattern: /\b(education|qualifications|degree|university|college)\b/i},
-  {id: 'skills', label: 'Skills', pattern: /\b(skills|tools|technologies|competencies|expertise)\b/i},
-  {id: 'summary', label: 'Summary', pattern: /\b(summary|profile|about me|professional summary)\b/i},
-  {id: 'projects', label: 'Projects', pattern: /\b(projects|portfolio|selected work|case stud)/i},
+  {
+    id: 'experience',
+    label: 'Experience',
+    pattern:
+      /\b(experience|employment|work history|professional experience|work experience|career|roles?)\b/i,
+  },
+  {
+    id: 'education',
+    label: 'Education',
+    pattern: /\b(education|qualifications|degree|university|college)\b/i,
+  },
+  {
+    id: 'skills',
+    label: 'Skills',
+    pattern:
+      /\b(skills|tools|technologies|competencies|expertise|toolkit|software)\b/i,
+  },
+  {
+    id: 'summary',
+    label: 'Summary',
+    pattern: /\b(summary|profile|about me|professional summary|about)\b/i,
+  },
+  {
+    id: 'projects',
+    label: 'Projects',
+    pattern:
+      /\b(projects|portfolio|selected work|case stud|featured work)\b/i,
+  },
 ];
 
 const DESIGN_TOOL_PATTERN =
@@ -94,6 +117,7 @@ export function auditCvForAts(input: {
   fileName: string;
   fileSizeBytes: number;
   pageCount?: number | null;
+  usedOcr?: boolean;
 }): AtsAuditResult {
   const text = input.text.trim();
   const charCount = text.length;
@@ -104,7 +128,7 @@ export function auditCvForAts(input: {
 
   const lines = text
     .split('\n')
-    .map((l) => l.trim())
+    .map(l => l.trim())
     .filter(Boolean);
 
   const lower = text.toLowerCase();
@@ -121,6 +145,7 @@ export function auditCvForAts(input: {
 
   const flags: AtsFlag[] = [];
 
+  // Empty extract: stop here. Cascading “no email / no skills” is misleading noise.
   if (charCount === 0) {
     flags.push(
       flag(
@@ -128,7 +153,37 @@ export function auditCvForAts(input: {
         'critical',
         'No readable text found',
         'This PDF looks image-only or heavily graphical. Most ATS parsers will see a blank file.',
-        'Export a text-based PDF from Word, Google Docs, or Figma (not a flattened screenshot).',
+        'Export a text-based PDF from Word, Google Docs, or Figma (File → Export → PDF with selectable text), not a flattened screenshot.',
+      ),
+    );
+
+    return {
+      score: scoreFromFlags(flags),
+      readiness: 'poor',
+      summary:
+        'We couldn’t read any text from this PDF, so later checks were skipped. Re-export as selectable text, then analyse again.',
+      flags,
+      stats: {
+        charCount,
+        wordCount,
+        pageCount,
+        charsPerPage,
+        sectionsFound,
+        hasEmail,
+        hasPhone,
+        hasLinkedIn,
+      },
+    };
+  }
+
+  if (input.usedOcr) {
+    flags.push(
+      flag(
+        'ocr-recovered',
+        'warning',
+        'Text recovered with OCR',
+        'Selectable PDF text was missing or very thin, so we read page images instead. Practice questions can use this text, but many ATS systems will still see a blank file.',
+        'For applications, export a text-based PDF (selectable text), not a design flatten or screenshot.',
       ),
     );
   } else if (charCount < 180) {

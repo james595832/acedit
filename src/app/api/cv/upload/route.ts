@@ -10,6 +10,7 @@ import {saveCv} from '@/lib/store';
 import {hasBlob} from '@/lib/config';
 
 export const runtime = 'nodejs';
+export const maxDuration = 60;
 
 export async function POST(request: Request) {
   const auth = await requireInterviewUser();
@@ -64,10 +65,12 @@ export async function POST(request: Request) {
 
     let pdfText = '';
     let pageCount: number | null = null;
+    let usedOcr = false;
     try {
       const extracted = await extractPdfContent(bytes);
       pdfText = extracted.text;
       pageCount = extracted.pageCount;
+      usedOcr = extracted.usedOcr;
     } catch (err) {
       console.error('PDF extract failed', err);
       pdfText = '';
@@ -79,6 +82,7 @@ export async function POST(request: Request) {
       fileName: file.name,
       fileSizeBytes: file.size,
       pageCount,
+      usedOcr,
     });
     const writing = await auditCvWriting(pdfText);
     const cv = await saveCv(
@@ -101,6 +105,7 @@ export async function POST(request: Request) {
       companies: analysis.companies,
       roles: analysis.roles,
       text_extracted: Boolean(pdfText.trim()),
+      used_ocr: usedOcr,
       ats,
       writing,
       stub: !process.env.ANTHROPIC_API_KEY || process.env.USE_STUBS === 'true',

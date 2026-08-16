@@ -59,13 +59,25 @@ export async function extractPdfText(bytes: Buffer): Promise<string> {
 export type PdfExtractResult = {
   text: string;
   pageCount: number | null;
+  /** True when selectable PDF text was empty/thin and we recovered copy via page OCR. */
+  usedOcr: boolean;
 };
+
+const MIN_NATIVE_TEXT_CHARS = 180;
 
 export async function extractPdfContent(bytes: Buffer): Promise<PdfExtractResult> {
   const mod = (await import('pdf-parse')) as unknown as {
     PDFParse?: new (opts: {data: Buffer}) => {
       getText: () => Promise<{text: string}>;
       getInfo?: () => Promise<{pages?: unknown[]; total?: number}>;
+      getScreenshot?: (opts?: {
+        scale?: number;
+        first?: number;
+        imageBuffer?: boolean;
+        imageDataUrl?: boolean;
+      }) => Promise<{
+        pages?: Array<{data?: Uint8Array | Buffer; buffer?: Buffer}>;
+      }>;
       destroy?: () => Promise<void>;
     };
     default?: (data: Buffer) => Promise<{text: string; numpages?: number}>;
@@ -86,10 +98,24 @@ export async function extractPdfContent(bytes: Buffer): Promise<PdfExtractResult
       } catch {
         pageCount = null;
       }
-      return {
-        text: cleanCvText(result.text ?? ''),
-        pageCount,
-      };
+
+      let text = cleanCvText(result.text ?? '');
+      let usedOcr = false;
+
+      // Design CVs are often flattened / image-heavy — OCR first pages when native text is thin.
+      if (text.length < MIN_NATIVE_TEXT_CHARS && typeof parser.getScreenshot === 'function') {
+        try {
+          const ocrText = await ocrPdfScreenshots(parser);
+          if (ocrText.length > text.length) {
+            text = ocrText;
+            usedOcr = true;
+          }
+        } catch (err) {
+          console.error('[cv-parse] OCR fallback failed', err);
+        }
+      }
+
+      return {text, pageCount, usedOcr};
     } finally {
       await parser.destroy?.();
     }
@@ -100,10 +126,42 @@ export async function extractPdfContent(bytes: Buffer): Promise<PdfExtractResult
     return {
       text: cleanCvText(result.text ?? ''),
       pageCount: result.numpages ?? null,
+      usedOcr: false,
     };
   }
 
   throw new Error('pdf-parse API not recognized');
+}
+
+async function ocrPdfScreenshots(parser: {
+  getScreenshot?: (opts?: {
+    scale?: number;
+    first?: number;
+    imageBuffer?: boolean;
+    imageDataUrl?: boolean;
+  }) => Promise<{
+    pages?: Array<{data?: Uint8Array | Buffer; buffer?: Buffer}>;
+  }>;
+}): Promise<string> {
+  if (!parser.getScreenshot) return '';
+
+  const {ocrImageToText} = await import('@/lib/ocr');
+  const shot = await parser.getScreenshot({
+    scale: 2,
+    first: 2,
+    imageBuffer: true,
+    imageDataUrl: false,
+  });
+
+  const chunks: string[] = [];
+  for (const page of shot.pages ?? []) {
+    const raw = page.data ?? page.buffer;
+    if (!raw) continue;
+    const pageText = await ocrImageToText(Buffer.from(raw));
+    if (pageText.trim()) chunks.push(pageText.trim());
+  }
+
+  return cleanCvText(chunks.join('\n\n'));
 }
 
 function cleanCvText(text: string): string {

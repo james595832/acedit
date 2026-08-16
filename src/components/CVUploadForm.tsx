@@ -234,7 +234,7 @@ export function CVUploadForm() {
                 ? 'CV text extracted for practice'
                 : 'Little CV text extracted'
             }
-            description={`Skills spotted: ${preview.skills.join(', ')}`}
+            description={`Skills spotted: ${preview.skills.join(', ') || 'none yet'}`}
           />
           {preview.projects.length > 0 ? (
             <Text as="p" color="secondary">
