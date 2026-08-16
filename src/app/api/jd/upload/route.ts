@@ -28,11 +28,19 @@ export async function POST(request: Request) {
     if (file instanceof File && file.size > 0) {
       fileName = file.name;
       const bytes = Buffer.from(await file.arrayBuffer());
-      const uploadsDir = path.join(process.cwd(), '.data', 'uploads');
-      await fs.mkdir(uploadsDir, {recursive: true});
-      const safeName = `${Date.now()}-${file.name.replace(/[^\w.-]/g, '_')}`;
-      await fs.writeFile(path.join(uploadsDir, safeName), bytes);
-      fileUrl = `/local-uploads/${safeName}`;
+      fileUrl = `jd://${auth.userId}/${Date.now()}-${file.name.replace(/[^\w.-]/g, '_')}`;
+
+      if (!process.env.VERCEL) {
+        try {
+          const uploadsDir = path.join(process.cwd(), '.data', 'uploads');
+          await fs.mkdir(uploadsDir, {recursive: true});
+          const safeName = `${Date.now()}-${file.name.replace(/[^\w.-]/g, '_')}`;
+          await fs.writeFile(path.join(uploadsDir, safeName), bytes);
+          fileUrl = `/local-uploads/${safeName}`;
+        } catch (err) {
+          console.error('[jd/upload] local file write skipped', err);
+        }
+      }
 
       const lower = file.name.toLowerCase();
       const isPdf =
@@ -98,9 +106,13 @@ export async function POST(request: Request) {
       whiteboard_recommendation: whiteboard,
     });
   } catch (error) {
-    console.error(error);
+    console.error('[jd/upload]', error);
+    const detail =
+      error instanceof Error && error.message.trim()
+        ? error.message.trim()
+        : 'Job description upload failed';
     return NextResponse.json(
-      {error: 'Job description upload failed', code: 'SERVER_ERROR'},
+      {error: detail, code: 'SERVER_ERROR'},
       {status: 500},
     );
   }

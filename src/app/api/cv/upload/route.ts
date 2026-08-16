@@ -44,17 +44,22 @@ export async function POST(request: Request) {
     }
 
     const bytes = Buffer.from(await file.arrayBuffer());
-    let fileUrl: string;
+    // Prefer durable DB metadata; local disk is only for stub/dev hosts.
+    let fileUrl = `cv://${auth.userId}/${Date.now()}-${file.name.replace(/[^\w.-]/g, '_')}`;
 
     if (hasBlob()) {
       fileUrl = `blob://pending/${file.name}`;
-    } else {
-      const uploadsDir = path.join(process.cwd(), '.data', 'uploads');
-      await fs.mkdir(uploadsDir, {recursive: true});
-      const safeName = `${Date.now()}-${file.name.replace(/[^\w.-]/g, '_')}`;
-      const dest = path.join(uploadsDir, safeName);
-      await fs.writeFile(dest, bytes);
-      fileUrl = `/local-uploads/${safeName}`;
+    } else if (!process.env.VERCEL) {
+      try {
+        const uploadsDir = path.join(process.cwd(), '.data', 'uploads');
+        await fs.mkdir(uploadsDir, {recursive: true});
+        const safeName = `${Date.now()}-${file.name.replace(/[^\w.-]/g, '_')}`;
+        const dest = path.join(uploadsDir, safeName);
+        await fs.writeFile(dest, bytes);
+        fileUrl = `/local-uploads/${safeName}`;
+      } catch (err) {
+        console.error('[cv/upload] local file write skipped', err);
+      }
     }
 
     let pdfText = '';
@@ -101,9 +106,13 @@ export async function POST(request: Request) {
       stub: !process.env.ANTHROPIC_API_KEY || process.env.USE_STUBS === 'true',
     });
   } catch (error) {
-    console.error(error);
+    console.error('[cv/upload]', error);
+    const detail =
+      error instanceof Error && error.message.trim()
+        ? error.message.trim()
+        : 'CV upload failed';
     return NextResponse.json(
-      {error: 'CV upload failed', code: 'SERVER_ERROR'},
+      {error: detail, code: 'SERVER_ERROR'},
       {status: 500},
     );
   }
