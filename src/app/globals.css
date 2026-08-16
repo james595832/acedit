@@ -2291,7 +2291,7 @@ body:has(.aced-app-page),
 .aced-masthead__copy {
   display: grid;
   gap: 0.5rem;
-  max-width: 46rem;
+  max-width: none;
 }
 
 .aced-masthead__kicker {
@@ -2315,7 +2315,7 @@ body:has(.aced-app-page),
 
 .aced-masthead__lead {
   margin: 0.15rem 0 0;
-  max-width: 58ch;
+  max-width: none;
   color: var(--aced-mute);
   font-size: 1rem;
   line-height: 1.55;
@@ -2344,7 +2344,7 @@ body:has(.aced-app-page),
 
 .aced-masthead__note {
   margin: 0.85rem 0 0;
-  max-width: 42ch;
+  max-width: none;
   color: var(--aced-terra);
   font-size: 0.95rem;
   font-weight: 600;
@@ -2555,7 +2555,7 @@ body:has(.aced-app-page),
   margin: 0;
   line-height: 1.5;
   color: var(--aced-ink);
-  max-width: 56ch;
+  max-width: none;
 }
 
 .aced-studio-stats {
@@ -2667,7 +2667,7 @@ body:has(.aced-app-page),
   margin: 0 0 0.75rem;
   color: var(--aced-mute);
   line-height: 1.5;
-  max-width: 46ch;
+  max-width: none;
   font-size: 0.98rem;
 }
 
@@ -2781,7 +2781,7 @@ body:has(.aced-app-page),
   margin: 0;
   color: var(--aced-mute);
   line-height: 1.55;
-  max-width: 40ch;
+  max-width: none;
   font-size: 1rem;
 }
 
