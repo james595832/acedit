@@ -5,7 +5,9 @@ import Link from 'next/link';
 import {useParams} from 'next/navigation';
 import {Banner} from '@astryxdesign/core/Banner';
 import {Section} from '@astryxdesign/core/Section';
+import {FeaturePaused} from '@/components/FeaturePaused';
 import {WhiteboardDebriefView} from '@/components/WhiteboardDebrief';
+import {isFeatureEnabled} from '@/lib/feature-flags';
 import type {WhiteboardBoard, WhiteboardDebrief} from '@/lib/whiteboard/chat';
 
 type ReviewSession = {
@@ -27,7 +29,7 @@ export default function WhiteboardReviewPage() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!sessionId) return;
+    if (!isFeatureEnabled('whiteboard') || !sessionId) return;
     void (async () => {
       try {
         const res = await fetch(`/api/whiteboard/sessions/${sessionId}`);
@@ -63,6 +65,21 @@ export default function WhiteboardReviewPage() {
       }
     })();
   }, [sessionId]);
+
+  if (!isFeatureEnabled('whiteboard')) {
+    return (
+      <>
+        <nav className="aced-crumb" aria-label="Breadcrumb">
+          <Link href="/studio">← Home</Link>
+        </nav>
+        <FeaturePaused
+          title="Whiteboard challenges"
+          lead="Timed design prompts and clarifying questions will return after we lock interview practice."
+          roadmapHash="#next"
+        />
+      </>
+    );
+  }
 
   return (
     <>

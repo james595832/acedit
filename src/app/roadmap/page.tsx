@@ -4,7 +4,7 @@ import Link from 'next/link';
 export const metadata: Metadata = {
   title: 'Roadmap | ACED-IT',
   description:
-    'What we have shipped, what is next, and where ACED-IT is headed: practice, leaderboards, hiring partners, and a better path than LinkedIn spam.',
+    'What is live on ACED-IT today, what is next (whiteboard and portfolio), and where we are headed.',
 };
 
 type RoadmapItem = {
@@ -27,22 +27,12 @@ const PHASES: RoadmapPhase[] = [
     id: 'now',
     label: 'Now',
     title: 'Live today',
-    lead: 'The core loop you can use right now.',
+    lead: 'The practice loop we are shipping and hardening first.',
     status: 'live',
     items: [
       {
         title: 'Practice interviews',
-        body: 'Upload your CV and a job ad. Answer out loud. Get a score and clear notes on what to fix.',
-        tag: 'Live',
-      },
-      {
-        title: 'Whiteboard challenges',
-        body: 'Timed prompts, a marker board, and clarifying questions. Practice like an onsite.',
-        tag: 'Live',
-      },
-      {
-        title: 'Portfolio review',
-        body: 'Check whether your case studies tell a story a hiring manager can follow.',
+        body: 'Upload your CV and an optional job ad. Answer out loud. Get a score and clear notes on what to fix.',
         tag: 'Live',
       },
       {
@@ -55,13 +45,23 @@ const PHASES: RoadmapPhase[] = [
   {
     id: 'next',
     label: 'Next',
-    title: 'Climb the board',
-    lead: 'Make practice sticky. Give people a reason to come back and get sharper.',
+    title: 'Coming next',
+    lead: 'Paused for soft launch so interview practice can feel seamless first.',
     status: 'next',
     items: [
       {
+        title: 'Whiteboard challenges',
+        body: 'Timed design prompts, a marker board, and clarifying questions — practice like an onsite. Returning once the interview room is rock solid.',
+        tag: 'Paused',
+      },
+      {
+        title: 'Portfolio review',
+        body: 'Check whether your case studies tell a story a hiring manager can follow, with optional JD fit. Returning after interview practice.',
+        tag: 'Paused',
+      },
+      {
         title: 'Leaderboard',
-        body: 'Keep practising to climb. See how you compare, track streaks, and push for a higher score over time. Not a vanity list. A reason to improve every week.',
+        body: 'Keep practising to climb. See how you compare, track streaks, and push for a higher score over time.',
         tag: 'Planned',
       },
     ],
@@ -70,7 +70,7 @@ const PHASES: RoadmapPhase[] = [
     id: 'building',
     label: 'Building',
     title: 'Hiring that finds you',
-    lead: 'When you are ready, companies come to strong candidates. Not the other way round.',
+    lead: 'When practice is trusted, companies can come to strong candidates.',
     status: 'building',
     items: [
       {
@@ -118,8 +118,8 @@ export default function RoadmapPage() {
         <div className="aced-masthead__copy">
           <h1>Where ACED-IT is going</h1>
           <p className="aced-masthead__lead">
-            Practice first. Then proof. Then real opportunities. Here is what is
-            live, what is next, and the bigger bet we are building toward.
+            Soft launch focus: make practice interviews seamless. Whiteboard and
+            portfolio are next — then proof, then real opportunities.
           </p>
         </div>
       </header>
@@ -127,7 +127,9 @@ export default function RoadmapPage() {
       <nav className="aced-roadmap__tabs" aria-label="Roadmap phases">
         {PHASES.map((phase) => (
           <a key={phase.id} href={`#${phase.id}`} className="aced-roadmap__tab">
-            <span className={`aced-roadmap__dot aced-roadmap__dot--${phase.status}`} />
+            <span
+              className={`aced-roadmap__dot aced-roadmap__dot--${phase.status}`}
+            />
             {phase.label}
           </a>
         ))}
@@ -142,7 +144,9 @@ export default function RoadmapPage() {
             aria-labelledby={`${phase.id}-title`}
           >
             <header className="aced-roadmap__column-head">
-              <p className={`aced-roadmap__status aced-roadmap__status--${phase.status}`}>
+              <p
+                className={`aced-roadmap__status aced-roadmap__status--${phase.status}`}
+              >
                 {phase.label}
               </p>
               <h2 id={`${phase.id}-title`}>{phase.title}</h2>
@@ -166,10 +170,10 @@ export default function RoadmapPage() {
       <section className="aced-roadmap__why" aria-labelledby="roadmap-why">
         <h2 id="roadmap-why">Why this order</h2>
         <p>
-          Designers need a place to get good before they apply. Companies need
-          people who can already show they are ready. LinkedIn gives neither
-          side that signal. ACED-IT starts with practice you can trust, then
-          turns strong scores into introductions employers will pay for.
+          Designers need a practice room they can trust before they apply. We
+          are locking interview rehearsal first. Whiteboard and portfolio return
+          when they meet that same bar — then strong scores can open doors
+          employers will pay for.
         </p>
         <p>
           Ideas change. If something here shifts, we will update this page. Want

@@ -1,8 +1,25 @@
 import Link from 'next/link';
+import {FeaturePaused} from '@/components/FeaturePaused';
+import {isFeatureEnabled} from '@/lib/feature-flags';
 import {Section} from '@astryxdesign/core/Section';
 import {PortfolioReviewForm} from '@/components/PortfolioReviewForm';
 
 export default function PortfolioPage() {
+  if (!isFeatureEnabled('portfolio')) {
+    return (
+      <>
+        <nav className="aced-crumb" aria-label="Breadcrumb">
+          <Link href="/studio">← Home</Link>
+        </nav>
+        <FeaturePaused
+          title="Portfolio review"
+          lead="Case study checks and JD fit will come back once the interview loop is rock solid."
+          roadmapHash="#next"
+        />
+      </>
+    );
+  }
+
   return (
     <>
       <nav className="aced-crumb" aria-label="Breadcrumb">

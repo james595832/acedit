@@ -45,10 +45,9 @@ export function AppFrame({
   const isInterview =
     pathname.startsWith('/interview') &&
     !pathname.startsWith('/interview/results');
-  const isPortfolio = pathname.startsWith('/portfolio');
   const isStudio = pathname === '/studio';
   const isResults = pathname.startsWith('/interview/results');
-  const isWhiteboard = pathname.startsWith('/whiteboard');
+  const isRoadmap = pathname.startsWith('/roadmap');
 
   useLayoutEffect(() => {
     if (!showAppChrome) return;
@@ -97,20 +96,11 @@ export function AppFrame({
       <TopNavItem label="Home" href="/studio" isSelected={isStudio} />
       <TopNavItem label="Practice" href="/interview" isSelected={isInterview} />
       <TopNavItem
-        label="Portfolio"
-        href="/portfolio"
-        isSelected={isPortfolio}
-      />
-      <TopNavItem
-        label="Whiteboard"
-        href="/whiteboard"
-        isSelected={isWhiteboard}
-      />
-      <TopNavItem
         label="Results"
         href="/interview/results"
         isSelected={isResults}
       />
+      <TopNavItem label="Roadmap" href="/roadmap" isSelected={isRoadmap} />
     </>
   ) : null;
 
@@ -137,19 +127,14 @@ export function AppFrame({
                     isSelected={isInterview}
                   />
                   <SideNavItem
-                    label="Portfolio"
-                    href="/portfolio"
-                    isSelected={isPortfolio}
-                  />
-                  <SideNavItem
-                    label="Whiteboard"
-                    href="/whiteboard"
-                    isSelected={isWhiteboard}
-                  />
-                  <SideNavItem
                     label="Results"
                     href="/interview/results"
                     isSelected={isResults}
+                  />
+                  <SideNavItem
+                    label="Roadmap"
+                    href="/roadmap"
+                    isSelected={isRoadmap}
                   />
                   <SideNavItem
                     label="Settings"

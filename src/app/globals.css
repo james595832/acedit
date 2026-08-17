@@ -5342,6 +5342,50 @@ dialog.aced-feedback-dialog::backdrop {
   white-space: nowrap;
 }
 
+.aced-paused {
+  display: grid;
+  gap: 0.85rem;
+  max-width: 34rem;
+  padding-block: clamp(1rem, 3vh, 2rem) 0.5rem;
+}
+
+.aced-paused__status {
+  margin: 0;
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--aced-mute);
+}
+
+.aced-paused h1 {
+  margin: 0;
+  font-size: clamp(1.65rem, 4vw, 2.2rem);
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+}
+
+.aced-paused__lead {
+  margin: 0;
+  font-size: 1.05rem;
+  line-height: 1.5;
+  color: var(--aced-ink);
+}
+
+.aced-paused__note {
+  margin: 0;
+  line-height: 1.5;
+  color: var(--aced-mute);
+}
+
+.aced-paused__actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.85rem 1.25rem;
+  margin-top: 0.5rem;
+}
+
 /* —— Prep —— */
 .aced-panel--prep {
   max-width: 40rem;

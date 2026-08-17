@@ -1,5 +1,6 @@
 import {NextResponse} from 'next/server';
 import {analyzeJobDescriptionText} from '@/lib/criteria';
+import {featurePausedPayload, isFeatureEnabled} from '@/lib/feature-flags';
 import {requireInterviewUser} from '@/lib/interview/auth';
 import {
   assessPastedPortfolioText,
@@ -12,6 +13,9 @@ export const runtime = 'nodejs';
 export const maxDuration = 30;
 
 export async function POST(request: Request) {
+  if (!isFeatureEnabled('portfolio')) {
+    return NextResponse.json(featurePausedPayload('portfolio'), {status: 503});
+  }
   const auth = await requireInterviewUser();
   if (auth.response) return auth.response;
 

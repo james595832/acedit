@@ -4,7 +4,6 @@ import {isSupabaseConfigured} from '@/lib/supabase/config';
 import {isStripeConfigured} from '@/lib/stripe';
 import {syncBillingFromCheckoutSession} from '@/lib/billing/sync';
 import {demoUserId, listSessions} from '@/lib/store';
-import {listWhiteboardSessions} from '@/lib/whiteboard/sessions';
 
 type StudioPageProps = {
   searchParams: Promise<{billing?: string; session_id?: string}>;
@@ -63,17 +62,14 @@ export default async function StudioPage({searchParams}: StudioPageProps) {
   let lastSessionId: string | null = null;
   let lastSessionScore: number | null = null;
   let lastActivity: string | null = null;
-  let whiteboardRuns = 0;
 
   try {
     const statsUserId =
       userId ?? (isSupabaseConfigured() ? null : demoUserId());
-    const [interviewSessions, whiteboardSessions] = await Promise.all([
-      statsUserId ? listSessions(statsUserId) : Promise.resolve([]),
-      userId ? listWhiteboardSessions(userId) : Promise.resolve([]),
-    ]);
+    const interviewSessions = statsUserId
+      ? await listSessions(statsUserId)
+      : [];
     practiceRuns = interviewSessions.length;
-    whiteboardRuns = whiteboardSessions.length;
     const latest = interviewSessions[0] ?? null;
     if (latest) {
       lastSessionId = latest.id;
@@ -127,23 +123,19 @@ export default async function StudioPage({searchParams}: StudioPageProps) {
         </div>
       </header>
 
-      <section className="aced-home__more" aria-label="More practice">
-        <p className="aced-home__more-label">Also practice</p>
+      <section className="aced-home__more" aria-label="Coming next">
+        <p className="aced-home__more-label">Coming next</p>
         <ul className="aced-home__more-list">
           <li>
-            <Link href="/whiteboard">
+            <Link href="/roadmap#next">
               <span className="aced-home__more-title">Whiteboard</span>
-              <span className="aced-home__more-meta">
-                {whiteboardRuns > 0
-                  ? `${whiteboardRuns} run${whiteboardRuns === 1 ? '' : 's'}`
-                  : 'Timed design prompts'}
-              </span>
+              <span className="aced-home__more-meta">On the roadmap</span>
             </Link>
           </li>
           <li>
-            <Link href="/portfolio">
-              <span className="aced-home__more-title">Portfolio</span>
-              <span className="aced-home__more-meta">Case study check</span>
+            <Link href="/roadmap#next">
+              <span className="aced-home__more-title">Portfolio review</span>
+              <span className="aced-home__more-meta">On the roadmap</span>
             </Link>
           </li>
         </ul>

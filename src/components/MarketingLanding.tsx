@@ -35,10 +35,10 @@ const HERO_PROMPTS = [
       'Walk me through a time you disagreed with a PM on a design decision. How did you resolve it?',
   },
   {
-    kicker: 'Whiteboard · 30 min on the clock',
-    label: 'Challenge',
+    kicker: 'Practice interview · Question 5 of 5',
+    label: 'Prompt',
     question:
-      'Redesign the checkout flow for a grocery app so a weekly shopper can reorder in under a minute.',
+      'You’re given 20 minutes. How would you structure a critique of a portfolio case study you’ve never seen before?',
   },
 ] as const;
 
@@ -241,9 +241,8 @@ export function MarketingLanding({userEmail}: MarketingLandingProps) {
               Ace your design interview.
             </h1>
             <p className="aced-mkt-hero__lead">
-              Practice real questions out loud. Sketch on a timed whiteboard.
-              Get a score that shows you what to fix. All of it made just{' '}
-              for designers.
+              Practice real questions out loud. Get a score that shows you what
+              to fix. Built just for designers.
             </p>
             <div className="aced-mkt-hero__actions">
               <Link
@@ -430,10 +429,10 @@ export function MarketingLanding({userEmail}: MarketingLandingProps) {
                   <i className="aced-art-board__stroke aced-art-board__stroke--c" />
                 </span>
               </div>
-              <h3>You sketch against the{'\u00A0'}clock</h3>
+              <h3>Whiteboard & portfolio{'\u00A0'}next</h3>
               <p>
-                Timed whiteboard challenges. Scary the first time. Easy by{' '}
-                the{'\u00A0'}fifth.
+                Timed boards and case-study checks are on the roadmap. Soft
+                launch focuses on interview practice first.
               </p>
             </article>
           </div>
@@ -459,7 +458,6 @@ export function MarketingLanding({userEmail}: MarketingLandingProps) {
               ['Made for', 'Coders first', 'Designers only'],
               ['Questions about your work', 'Generic lists', 'Built from your CV'],
               ['Practice speaking', 'Sometimes', 'Every session'],
-              ['Whiteboard', 'Boxes and arrows', 'Real design prompts'],
               ['Feedback', 'Pass or fail vibes', 'Clear scores and tips'],
               ['Price', 'About $79 a month', '£7.50 a month'],
             ].map(([label, diy, aced]) => (
@@ -496,7 +494,7 @@ export function MarketingLanding({userEmail}: MarketingLandingProps) {
               <li>Five free days · £0 today</li>
               <li>Questions built from your CV</li>
               <li>Speak your answers and get scores</li>
-              <li>Timed whiteboard challenges</li>
+              <li>Results you can revisit and improve</li>
               <li>Cancel any time in Settings</li>
             </ul>
             <Link

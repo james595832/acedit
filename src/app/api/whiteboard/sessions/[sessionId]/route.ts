@@ -1,4 +1,5 @@
 import {NextResponse} from 'next/server';
+import {featurePausedPayload, isFeatureEnabled} from '@/lib/feature-flags';
 import {requireWhiteboardUser} from '@/lib/whiteboard/auth';
 import {getWhiteboardSession} from '@/lib/whiteboard/sessions';
 
@@ -9,6 +10,9 @@ type RouteProps = {
 };
 
 export async function GET(_request: Request, {params}: RouteProps) {
+  if (!isFeatureEnabled('whiteboard')) {
+    return NextResponse.json(featurePausedPayload('whiteboard'), {status: 503});
+  }
   try {
     const auth = await requireWhiteboardUser();
     if (auth.response) return auth.response;

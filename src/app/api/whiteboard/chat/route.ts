@@ -1,4 +1,5 @@
 import {NextResponse} from 'next/server';
+import {featurePausedPayload, isFeatureEnabled} from '@/lib/feature-flags';
 import {requireWhiteboardUser} from '@/lib/whiteboard/auth';
 import {getWhiteboardChallenge} from '@/lib/whiteboard/challenges';
 import {
@@ -9,6 +10,9 @@ import {
 export const runtime = 'nodejs';
 
 export async function POST(request: Request) {
+  if (!isFeatureEnabled('whiteboard')) {
+    return NextResponse.json(featurePausedPayload('whiteboard'), {status: 503});
+  }
   try {
     const auth = await requireWhiteboardUser();
     if (auth.response) return auth.response;
