@@ -68,7 +68,6 @@ export default function WhiteboardReviewPage() {
     <>
       <header className="aced-masthead">
         <div className="aced-masthead__copy">
-          <p className="aced-masthead__kicker">Whiteboard review</p>
           <h1>{session?.challengeTitle ?? 'Loading board…'}</h1>
           <p className="aced-masthead__lead">
             Revisit your sketch, talk track, and debrief from this run.

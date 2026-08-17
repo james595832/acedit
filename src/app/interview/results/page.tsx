@@ -58,7 +58,6 @@ function ResultsInner() {
       </nav>
       <header className="aced-masthead">
         <div className="aced-masthead__copy">
-          <p className="aced-masthead__kicker">Session review</p>
           <h1>Results</h1>
           <p className="aced-masthead__lead">
             Score first, then drill into each answer. Use next steps to keep

@@ -116,7 +116,6 @@ export default function RoadmapPage() {
     <article className="aced-roadmap">
       <header className="aced-masthead">
         <div className="aced-masthead__copy">
-          <p className="aced-masthead__kicker">Product · Roadmap</p>
           <h1>Where ACED-IT is going</h1>
           <p className="aced-masthead__lead">
             Practice first. Then proof. Then real opportunities. Here is what is

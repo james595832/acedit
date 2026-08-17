@@ -2294,15 +2294,6 @@ body:has(.aced-app-page),
   max-width: none;
 }
 
-.aced-masthead__kicker {
-  font-size: 0.88rem;
-  letter-spacing: 0;
-  text-transform: none;
-  color: var(--aced-mute);
-  margin: 0;
-  font-weight: 500;
-}
-
 .aced-masthead h1 {
   font-family: var(--font-aced-heading), 'Raleway', sans-serif;
   font-weight: 600;

@@ -11,11 +11,7 @@ const LAST_UPDATED = '1 August 2026';
 
 export default function TermsPage() {
   return (
-    <LegalPage
-      title="Terms & Conditions"
-      kicker="Legal · Terms"
-      lastUpdated={LAST_UPDATED}
-    >
+    <LegalPage title="Terms & Conditions" lastUpdated={LAST_UPDATED}>
       <LegalSection id="agreement" title="1. Agreement to these terms">
         <p>
           These Terms &amp; Conditions (“Terms”) govern your access to and use of

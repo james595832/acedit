@@ -76,7 +76,6 @@ export default async function SettingsPage({searchParams}: SettingsPageProps) {
     <>
       <header className="aced-masthead">
         <div className="aced-masthead__copy">
-          <p className="aced-masthead__kicker">Account</p>
           <h1>Settings</h1>
           <p className="aced-masthead__lead">
             Manage your membership, view payment history, or delete your

@@ -3,22 +3,15 @@ import Link from 'next/link';
 
 type LegalPageProps = {
   title: string;
-  kicker: string;
   lastUpdated: string;
   children: ReactNode;
 };
 
-export function LegalPage({
-  title,
-  kicker,
-  lastUpdated,
-  children,
-}: LegalPageProps) {
+export function LegalPage({title, lastUpdated, children}: LegalPageProps) {
   return (
     <article className="aced-legal">
       <header className="aced-masthead">
         <div className="aced-masthead__copy">
-          <p className="aced-masthead__kicker">{kicker}</p>
           <h1>{title}</h1>
           <p className="aced-masthead__lead">
             Last updated {lastUpdated}. Questions?{' '}

@@ -12,7 +12,6 @@ export default function ContactPage() {
     <article className="aced-legal">
       <header className="aced-masthead">
         <div className="aced-masthead__copy">
-          <p className="aced-masthead__kicker">Help · Contact</p>
           <h1>Contact us</h1>
           <p className="aced-masthead__lead">
             Account, billing, privacy, or product questions. We read every

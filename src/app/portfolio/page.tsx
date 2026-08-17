@@ -10,7 +10,6 @@ export default function PortfolioPage() {
       </nav>
       <header className="aced-masthead">
         <div className="aced-masthead__copy">
-          <p className="aced-masthead__kicker">Prep · Portfolio</p>
           <h1>Portfolio review</h1>
           <p className="aced-masthead__lead">
             We check whether your case studies tell a story a hiring manager

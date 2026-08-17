@@ -246,9 +246,6 @@ export function WhiteboardSession({challenge}: WhiteboardSessionProps) {
     <div className={`aced-wb${started ? ' aced-wb--live' : ''}`}>
       <header className="aced-wb__top">
         <div className="aced-wb__top-copy">
-          <p className="aced-masthead__kicker">
-            Whiteboard · {challenge.difficulty} · {challenge.focus.join(' · ')}
-          </p>
           <h1>{challenge.title}</h1>
           {!started ? (
             <p className="aced-masthead__lead">{challenge.summary}</p>

@@ -10,7 +10,6 @@ export default function InterviewPage() {
       </nav>
       <header className="aced-masthead">
         <div className="aced-masthead__copy">
-          <p className="aced-masthead__kicker">Practice · Prep</p>
           <h1>Practice interview</h1>
           <p className="aced-masthead__lead">
             This is the practice flow: analyse your CV, optionally add a job

@@ -9,7 +9,6 @@ export default function WhiteboardIndexPage() {
     <>
       <header className="aced-masthead">
         <div className="aced-masthead__copy">
-          <p className="aced-masthead__kicker">Practice · Whiteboard</p>
           <h1>Whiteboard challenges</h1>
           <p className="aced-masthead__lead">
             Timed design prompts, a marker canvas, and an AI interviewer for

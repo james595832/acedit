@@ -11,11 +11,7 @@ const LAST_UPDATED = '1 August 2026';
 
 export default function PrivacyPage() {
   return (
-    <LegalPage
-      title="Privacy Policy"
-      kicker="Legal · Privacy"
-      lastUpdated={LAST_UPDATED}
-    >
+    <LegalPage title="Privacy Policy" lastUpdated={LAST_UPDATED}>
       <LegalSection id="intro" title="1. Introduction">
         <p>
           This Privacy Policy explains how <strong>ACED-IT</strong> (“we”, “us”,

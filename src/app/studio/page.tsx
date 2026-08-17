@@ -93,7 +93,6 @@ export default async function StudioPage({searchParams}: StudioPageProps) {
     <div className="aced-studio">
       <header className="aced-masthead">
         <div className="aced-masthead__copy">
-          <p className="aced-masthead__kicker">Studio · Home</p>
           <h1>You’re signed in, {firstName}.</h1>
           <p className="aced-masthead__lead">
             Studio is your home base. Start a practice run when you’re ready.

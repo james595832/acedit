@@ -33,8 +33,6 @@ function InterviewStartInner() {
 
   const [questions, setQuestions] = useState<QuestionRow[]>([]);
   const [questionText, setQuestionText] = useState<string | null>(null);
-  const [questionCategory, setQuestionCategory] = useState<string | null>(null);
-  const [isPersonal, setIsPersonal] = useState(false);
   const [criteria, setCriteria] = useState<AnswerCriteria | null>(null);
   const [transcription, setTranscription] = useState<string | null>(null);
   const [transcriptSource, setTranscriptSource] = useState<string | null>(null);
@@ -72,8 +70,6 @@ function InterviewStartInner() {
       const match =
         list.find((q) => q.id === questionId) ?? data.first_question;
       setQuestionText(match?.question_text ?? null);
-      setQuestionCategory(match?.question_category ?? null);
-      setIsPersonal(Boolean(match?.is_personal));
       if (match?.criteria_json) {
         try {
           setCriteria(JSON.parse(match.criteria_json) as AnswerCriteria);
@@ -137,12 +133,6 @@ function InterviewStartInner() {
           />
         ) : null}
         <div className="aced-masthead__copy">
-          <p className="aced-masthead__kicker">
-            {isPersonal ? 'Personal · From your CV / JD' : 'Fundamentals'}
-            {questionCategory
-              ? ` · ${questionCategory.replaceAll('_', ' ')}`
-              : ''}
-          </p>
           <h1>{questionText ?? 'Loading question…'}</h1>
           <p className="aced-masthead__lead">
             Speak out loud. Your browser turns speech into a transcript, then we
