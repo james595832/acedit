@@ -511,6 +511,12 @@ export async function saveAnswer(
     return mapAnswer(data as Record<string, unknown>);
   }
 
+  if (process.env.VERCEL) {
+    throw new Error(
+      'Answer save needs SUPABASE_SERVICE_KEY on hosted deploys (local .data/ is read-only).',
+    );
+  }
+
   const answers = await readJson<UserAnswer[]>('answers.json', []);
   const answer: UserAnswer = {
     id: randomUUID(),

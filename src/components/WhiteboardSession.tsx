@@ -22,6 +22,8 @@ type WhiteboardSessionProps = {
   challenge: WhiteboardChallenge;
 };
 
+type Panel = 'none' | 'chat' | 'talk';
+
 function formatClock(totalSeconds: number) {
   const safe = Math.max(0, totalSeconds);
   const m = Math.floor(safe / 60);
@@ -37,6 +39,44 @@ const EMPTY_BOARD: WhiteboardBoard = {
   tradeoffs: '',
 };
 
+const TALK_FIELDS: Array<{
+  key: keyof WhiteboardBoard;
+  label: string;
+  description: string;
+  rows: number;
+}> = [
+  {
+    key: 'framing',
+    label: 'Problem framing',
+    description: 'What’s broken, for whom, and why it matters now?',
+    rows: 3,
+  },
+  {
+    key: 'users',
+    label: 'Users & context',
+    description: 'Primary user, jobs-to-be-done, constraints you learned.',
+    rows: 3,
+  },
+  {
+    key: 'flows',
+    label: 'Flows',
+    description: 'Current → proposed steps. Call out key states.',
+    rows: 4,
+  },
+  {
+    key: 'solution',
+    label: 'Solution notes',
+    description: 'What the sketch is arguing: key screens and decisions.',
+    rows: 4,
+  },
+  {
+    key: 'tradeoffs',
+    label: 'Tradeoffs & validation',
+    description: 'Risks, metrics, what you’d test next.',
+    rows: 3,
+  },
+];
+
 type SavePayload = {
   debrief: WhiteboardDebrief;
   session: {id: string; sketchUrl: string | null};
@@ -50,10 +90,12 @@ export function WhiteboardSession({challenge}: WhiteboardSessionProps) {
   const [timedOut, setTimedOut] = useState(false);
   const [board, setBoard] = useState<WhiteboardBoard>(EMPTY_BOARD);
   const [hasSketchInk, setHasSketchInk] = useState(false);
+  const [panel, setPanel] = useState<Panel>('none');
+  const [talkStep, setTalkStep] = useState(0);
   const [messages, setMessages] = useState<ClarifyingMessage[]>([
     {
       role: 'assistant',
-      content: `I’m your interviewer for “${challenge.title}”. You have ${challenge.maxClarifyingQuestions} clarifying questions. Ask about users, constraints, data, or success. I won’t solve the board for you.`,
+      content: `I’m your interviewer for “${challenge.title}”. You have ${challenge.maxClarifyingQuestions} clarifying questions. Ask about users, constraints, data, or success — I’ll share facts from this brief. I won’t solve the board for you.`,
     },
   ]);
   const [draft, setDraft] = useState('');
@@ -72,6 +114,10 @@ export function WhiteboardSession({challenge}: WhiteboardSessionProps) {
     challenge.maxClarifyingQuestions - questionsUsed,
   );
 
+  const talkFilled = TALK_FIELDS.filter(
+    (field) => board[field.key].trim().length > 20,
+  ).length;
+
   useEffect(() => {
     if (!started || timedOut || result) return;
     const id = window.setInterval(() => {
@@ -87,8 +133,26 @@ export function WhiteboardSession({challenge}: WhiteboardSessionProps) {
     return () => window.clearInterval(id);
   }, [started, timedOut, result]);
 
+  useEffect(() => {
+    if (panel === 'none') return;
+    function onKey(e: KeyboardEvent) {
+      if (e.key === 'Escape') setPanel('none');
+    }
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    window.addEventListener('keydown', onKey);
+    return () => {
+      document.body.style.overflow = prev;
+      window.removeEventListener('keydown', onKey);
+    };
+  }, [panel]);
+
   function updateBoard(key: keyof WhiteboardBoard, value: string) {
     setBoard((prev) => ({...prev, [key]: value}));
+  }
+
+  function togglePanel(next: Panel) {
+    setPanel((prev) => (prev === next ? 'none' : next));
   }
 
   async function sendClarifying(value: string) {
@@ -138,6 +202,7 @@ export function WhiteboardSession({challenge}: WhiteboardSessionProps) {
   async function runDebrief() {
     setDebriefError(null);
     setDebriefBusy(true);
+    setPanel('none');
     try {
       const sketchDataUrl = sketchRef.current?.exportPng() ?? null;
       const res = await fetch('/api/whiteboard/sessions', {
@@ -175,31 +240,21 @@ export function WhiteboardSession({challenge}: WhiteboardSessionProps) {
         : 'ok';
 
   const debrief = result?.debrief ?? null;
-
-  const talkSections = [
-    {key: 'framing' as const, filled: board.framing.trim().length > 20},
-    {key: 'users' as const, filled: board.users.trim().length > 20},
-    {key: 'flows' as const, filled: board.flows.trim().length > 20},
-    {key: 'solution' as const, filled: board.solution.trim().length > 20},
-    {key: 'tradeoffs' as const, filled: board.tradeoffs.trim().length > 20},
-  ];
-  const talkFilled = talkSections.filter((s) => s.filled).length;
-
-  function jumpTo(id: string) {
-    const el = document.getElementById(id);
-    if (!el) return;
-    el.scrollIntoView({behavior: 'smooth', block: 'start'});
-  }
+  const activeTalk = TALK_FIELDS[talkStep] ?? TALK_FIELDS[0];
 
   return (
-    <div className="aced-wb">
+    <div className={`aced-wb${started ? ' aced-wb--live' : ''}`}>
       <header className="aced-wb__top">
         <div className="aced-wb__top-copy">
           <p className="aced-masthead__kicker">
             Whiteboard · {challenge.difficulty} · {challenge.focus.join(' · ')}
           </p>
           <h1>{challenge.title}</h1>
-          <p className="aced-masthead__lead">{challenge.summary}</p>
+          {!started ? (
+            <p className="aced-masthead__lead">{challenge.summary}</p>
+          ) : (
+            <p className="aced-wb__live-ask">{challenge.goal}</p>
+          )}
         </div>
         <div
           className={`aced-wb__timer aced-wb__timer--${timerTone}`}
@@ -219,10 +274,7 @@ export function WhiteboardSession({challenge}: WhiteboardSessionProps) {
       {!started ? (
         <section className="aced-panel aced-wb__brief">
           <h2>Challenge brief</h2>
-          <p className="aced-wb__goal">
-            <span>The ask</span>
-            {challenge.goal}
-          </p>
+          <p className="aced-wb__goal">{challenge.goal}</p>
           <p className="aced-wb__brief-text">{challenge.brief}</p>
           <h3 className="aced-wb__deliverable-heading">You’ll be assessed on</h3>
           <ol className="aced-wb__meta aced-wb__meta--numbered">
@@ -236,10 +288,7 @@ export function WhiteboardSession({challenge}: WhiteboardSessionProps) {
               {challenge.maxClarifyingQuestions} clarifying questions with the
               AI interviewer
             </li>
-            <li>
-              Marker + post-its on the canvas, plus talk track, judged against
-              the ask
-            </li>
+            <li>Sketch on the canvas, then add a short talk track before you finish</li>
           </ul>
           <Button
             label="Start timed challenge"
@@ -258,74 +307,53 @@ export function WhiteboardSession({challenge}: WhiteboardSessionProps) {
             />
           ) : null}
 
-          <div className="aced-wb__rail" aria-label="Session guide">
-            <div className="aced-wb__rail-ask">
-              <p className="aced-wb__rail-kicker">The ask</p>
-              <p className="aced-wb__rail-goal">{challenge.goal}</p>
-            </div>
-            <nav className="aced-wb__rail-nav" aria-label="Jump to section">
+          <div className="aced-wb__toolbar" aria-label="Session tools">
+            <p className="aced-wb__toolbar-meta">
+              Board {hasSketchInk ? 'started' : 'empty'} · Talk {talkFilled}/5 ·
+              Qs left {questionsRemaining}
+            </p>
+            <div className="aced-wb__toolbar-actions">
               <button
                 type="button"
-                className="aced-wb__rail-link"
-                onClick={() => jumpTo('wb-canvas')}
-              >
-                Canvas
-              </button>
-              <button
-                type="button"
-                className="aced-wb__rail-link"
-                onClick={() => jumpTo('wb-chat')}
+                className={`aced-wb__tool-btn${panel === 'chat' ? ' is-active' : ''}`}
+                aria-pressed={panel === 'chat'}
+                onClick={() => togglePanel('chat')}
               >
                 Ask interviewer
+                <span className="aced-wb__tool-count">{questionsRemaining}</span>
               </button>
               <button
                 type="button"
-                className="aced-wb__rail-link"
-                onClick={() => jumpTo('wb-talk')}
+                className={`aced-wb__tool-btn${panel === 'talk' ? ' is-active' : ''}`}
+                aria-pressed={panel === 'talk'}
+                onClick={() => togglePanel('talk')}
               >
                 Talk track
+                <span className="aced-wb__tool-count">{talkFilled}/5</span>
               </button>
-              <button
-                type="button"
-                className="aced-wb__rail-link"
-                onClick={() => jumpTo('wb-finish')}
-              >
-                Finish
-              </button>
-            </nav>
-            <ul className="aced-wb__rail-status" aria-label="Progress">
-              <li>
-                Talk track · {talkFilled}/5
-              </li>
-              <li>
-                Clarifying Qs left · {questionsRemaining}
-              </li>
-              <li>
-                Board · {hasSketchInk ? 'sketched' : 'empty'}
-              </li>
-            </ul>
-            <details className="aced-wb__rail-details">
-              <summary>Assessed on</summary>
-              <ol>
-                {challenge.deliverables.map((item) => (
-                  <li key={item}>{item}</li>
-                ))}
-              </ol>
-            </details>
+              <details className="aced-wb__brief-pop">
+                <summary>Brief</summary>
+                <div className="aced-wb__brief-pop-body">
+                  <p>{challenge.goal}</p>
+                  <ol>
+                    {challenge.deliverables.map((item) => (
+                      <li key={item}>{item}</li>
+                    ))}
+                  </ol>
+                </div>
+              </details>
+            </div>
           </div>
 
-          <div className="aced-wb__workspace">
+          <div className="aced-wb__stage">
             <section
               id="wb-canvas"
               className="aced-wb__sketch-panel"
               aria-label="Marker canvas"
             >
               <div className="aced-wb__board-head">
-                <h2>1 · Sketch canvas</h2>
-                <p>
-                  Marker for flows, post-its for labels. Keep the ask in mind
-                  while you draw.
-                </p>
+                <h2>Sketch</h2>
+                <p>Marker for flows, post-its for labels. Open Ask or Talk when you need them.</p>
               </div>
               <WhiteboardCanvas
                 canvasRef={sketchRef}
@@ -334,17 +362,36 @@ export function WhiteboardSession({challenge}: WhiteboardSessionProps) {
               />
             </section>
 
+            {panel !== 'none' ? (
+              <div
+                className="aced-wb__panel-scrim"
+                aria-hidden="true"
+                onClick={() => setPanel('none')}
+              />
+            ) : null}
+
             <aside
               id="wb-chat"
-              className="aced-wb__chat"
+              className={`aced-wb__side-panel${panel === 'chat' ? ' is-open' : ''}`}
               aria-label="Clarifying questions"
+              aria-hidden={panel !== 'chat'}
             >
-              <div className="aced-wb__chat-head">
-                <h2>2 · Ask the interviewer</h2>
-                <p>
-                  Clarifying questions only for this challenge. Left:{' '}
-                  <strong>{questionsRemaining}</strong>
-                </p>
+              <div className="aced-wb__side-panel-head">
+                <div>
+                  <h2>Ask the interviewer</h2>
+                  <p>
+                    Clarifying questions only. Left:{' '}
+                    <strong>{questionsRemaining}</strong>
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  className="aced-wb__side-close"
+                  aria-label="Close interviewer panel"
+                  onClick={() => setPanel('none')}
+                >
+                  Close
+                </button>
               </div>
 
               <div className="aced-wb__messages" role="log" aria-live="polite">
@@ -353,9 +400,6 @@ export function WhiteboardSession({challenge}: WhiteboardSessionProps) {
                     key={`${message.role}-${index}`}
                     className={`aced-wb__bubble aced-wb__bubble--${message.role}`}
                   >
-                    <span className="aced-wb__bubble-role">
-                      {message.role === 'user' ? 'You' : 'Interviewer'}
-                    </span>
                     <p>{message.content}</p>
                   </div>
                 ))}
@@ -381,70 +425,81 @@ export function WhiteboardSession({challenge}: WhiteboardSessionProps) {
                 isDisabled={
                   chatBusy || questionsRemaining <= 0 || Boolean(result)
                 }
-                density="compact"
+                density="balanced"
               />
             </aside>
 
-            <section
+            <aside
               id="wb-talk"
-              className="aced-wb__board"
+              className={`aced-wb__side-panel${panel === 'talk' ? ' is-open' : ''}`}
               aria-label="Talk track"
+              aria-hidden={panel !== 'talk'}
             >
-              <div className="aced-wb__board-head">
-                <h2>3 · Talk track</h2>
-                <p>
-                  What you’d say out loud while pointing at the board. Assessed
-                  with your sketch. {talkFilled} of 5 sections started.
-                </p>
+              <div className="aced-wb__side-panel-head">
+                <div>
+                  <h2>Talk track</h2>
+                  <p>
+                    What you’d say out loud. {talkFilled} of 5 sections started.
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  className="aced-wb__side-close"
+                  aria-label="Close talk track panel"
+                  onClick={() => setPanel('none')}
+                >
+                  Close
+                </button>
               </div>
 
-              <div className="aced-wb__talk-progress" aria-hidden="true">
-                {talkSections.map((section, index) => (
-                  <span
-                    key={section.key}
-                    className={`aced-wb__talk-dot${section.filled ? ' is-filled' : ''}`}
-                  >
-                    {index + 1}
-                  </span>
-                ))}
+              <div className="aced-wb__talk-steps" role="tablist" aria-label="Talk sections">
+                {TALK_FIELDS.map((field, index) => {
+                  const filled = board[field.key].trim().length > 20;
+                  return (
+                    <button
+                      key={field.key}
+                      type="button"
+                      role="tab"
+                      aria-selected={talkStep === index}
+                      className={`aced-wb__talk-step${talkStep === index ? ' is-active' : ''}${filled ? ' is-filled' : ''}`}
+                      onClick={() => setTalkStep(index)}
+                    >
+                      {index + 1}
+                    </button>
+                  );
+                })}
               </div>
 
               <TextArea
-                label="1 · Problem framing"
-                description="What’s broken, for whom, and why it matters now?"
-                value={board.framing}
-                onChange={(v) => updateBoard('framing', v)}
-                rows={3}
+                label={`${talkStep + 1} · ${activeTalk.label}`}
+                description={activeTalk.description}
+                value={board[activeTalk.key]}
+                onChange={(v) => updateBoard(activeTalk.key, v)}
+                rows={activeTalk.rows}
               />
-              <TextArea
-                label="2 · Users & context"
-                description="Primary user, jobs-to-be-done, constraints you learned."
-                value={board.users}
-                onChange={(v) => updateBoard('users', v)}
-                rows={3}
-              />
-              <TextArea
-                label="3 · Flows / IA"
-                description="Current → proposed steps. Call out key states."
-                value={board.flows}
-                onChange={(v) => updateBoard('flows', v)}
-                rows={4}
-              />
-              <TextArea
-                label="4 · Solution notes"
-                description="What the sketch is arguing: key screens and decisions."
-                value={board.solution}
-                onChange={(v) => updateBoard('solution', v)}
-                rows={4}
-              />
-              <TextArea
-                label="5 · Tradeoffs & validation"
-                description="Risks, metrics, what you’d test next."
-                value={board.tradeoffs}
-                onChange={(v) => updateBoard('tradeoffs', v)}
-                rows={3}
-              />
-            </section>
+
+              <div className="aced-wb__talk-nav">
+                <Button
+                  label="Previous"
+                  variant="secondary"
+                  size="sm"
+                  isDisabled={talkStep === 0}
+                  onClick={() => setTalkStep((s) => Math.max(0, s - 1))}
+                />
+                <Button
+                  label={talkStep >= TALK_FIELDS.length - 1 ? 'Done' : 'Next'}
+                  variant="secondary"
+                  size="sm"
+                  onClick={() => {
+                    if (talkStep >= TALK_FIELDS.length - 1) {
+                      setPanel('none');
+                      return;
+                    }
+                    setTalkStep((s) => Math.min(TALK_FIELDS.length - 1, s + 1));
+                  }}
+                />
+              </div>
+            </aside>
           </div>
 
           <section id="wb-finish" className="aced-wb__footer">

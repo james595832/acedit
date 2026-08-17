@@ -18,7 +18,8 @@ export async function POST(request: Request) {
     const sessionId = String(form.get('session_id') ?? '');
     const browserTranscript = String(form.get('transcription') ?? '').trim();
 
-    if (!(audio instanceof File) || !questionId || !sessionId) {
+    // FormData may yield File or Blob depending on runtime; both expose arrayBuffer/size.
+    if (!(audio instanceof Blob) || !questionId || !sessionId) {
       return NextResponse.json(
         {
           error: 'audio, question_id, and session_id are required',

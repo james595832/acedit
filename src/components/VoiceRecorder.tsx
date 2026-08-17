@@ -207,8 +207,9 @@ export function VoiceRecorder({
     setIsUploading(true);
     try {
       const blob = new Blob(chunksRef.current, {type: 'audio/webm'});
+      const file = new File([blob], 'answer.webm', {type: 'audio/webm'});
       const form = new FormData();
-      form.append('audio', blob, 'answer.webm');
+      form.append('audio', file);
       form.append('question_id', questionId);
       form.append('session_id', sessionId);
       form.append('transcription', finalTranscriptRef.current.trim());

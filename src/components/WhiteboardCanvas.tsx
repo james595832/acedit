@@ -272,6 +272,9 @@ export function WhiteboardCanvas({
     note: StickyNote,
   ) {
     if (disabled) return;
+    const target = e.target as HTMLElement | null;
+    if (target?.closest('.aced-wb-note__remove')) return;
+    if (target?.closest('.aced-wb-note__input')) return;
     e.stopPropagation();
     const surface = surfaceRef.current;
     if (!surface) return;
@@ -533,8 +536,12 @@ export function WhiteboardCanvas({
                   type="button"
                   className="aced-wb-note__remove"
                   aria-label="Remove post-it"
+                  onPointerDown={(e) => {
+                    e.stopPropagation();
+                  }}
                   onClick={(e) => {
                     e.stopPropagation();
+                    e.preventDefault();
                     setNotes((prev) => prev.filter((n) => n.id !== note.id));
                     if (activeNoteId === note.id) setActiveNoteId(null);
                   }}

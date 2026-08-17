@@ -48,6 +48,7 @@ Open [http://localhost:3000](http://localhost:3000).
    - `supabase/migrations/20260729230000_marketing_consent.sql`
    - `supabase/migrations/20260730220000_protect_billing_columns.sql`
    - `supabase/migrations/20260816210000_interview_persistence.sql` (JD table + session columns for hosted deploys)
+   - `supabase/migrations/20260816223000_whiteboard_sessions.sql` (whiteboard runs + sketches for hosted deploys)
 7. Open `/signup`, create an account, then `/login`.
 8. **Shared QA login (recommended for ongoing testing):**
 

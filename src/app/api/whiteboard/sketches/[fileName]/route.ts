@@ -1,10 +1,6 @@
-import {promises as fs} from 'fs';
 import {NextResponse} from 'next/server';
 import {requireWhiteboardUser} from '@/lib/whiteboard/auth';
-import {
-  getSketchPath,
-  getWhiteboardSession,
-} from '@/lib/whiteboard/sessions';
+import {getSketchBytes} from '@/lib/whiteboard/sessions';
 
 export const runtime = 'nodejs';
 
@@ -22,19 +18,12 @@ export async function GET(_request: Request, {params}: RouteProps) {
       return NextResponse.json({error: 'Not found'}, {status: 404});
     }
 
-    const sessionId = fileName.replace(/\.png$/i, '');
-    const session = await getWhiteboardSession(sessionId, auth.userId);
-    if (!session?.hasSketch || !session.sketchUrl) {
+    const bytes = await getSketchBytes(fileName, auth.userId);
+    if (!bytes) {
       return NextResponse.json({error: 'Not found'}, {status: 404});
     }
 
-    const full = await getSketchPath(fileName);
-    if (!full) {
-      return NextResponse.json({error: 'Not found'}, {status: 404});
-    }
-
-    const bytes = await fs.readFile(full);
-    return new NextResponse(bytes, {
+    return new NextResponse(new Uint8Array(bytes), {
       headers: {
         'Content-Type': 'image/png',
         'Cache-Control': 'private, no-store',

@@ -13,16 +13,14 @@ export function WhiteboardDebriefView({
 }: WhiteboardDebriefViewProps) {
   return (
     <div className="aced-wb__debrief-body">
-      <p className="aced-wb__debrief-score">
-        Against the ask · {debrief.score}/100
-      </p>
+      <p className="aced-wb__debrief-score">Score · {debrief.score}/100</p>
       <h2>Assessment</h2>
       <p className="aced-wb__against-ask">{debrief.againstAsk}</p>
       <p>{debrief.summary}</p>
 
       {debrief.deliverables.length > 0 ? (
         <div className="aced-wb__deliverables">
-          <h3>Deliverables vs your work</h3>
+          <h3>Deliverables</h3>
           <ul className="aced-wb__deliverable-list">
             {debrief.deliverables.map((item) => (
               <li
@@ -30,7 +28,11 @@ export function WhiteboardDebriefView({
                 className={`aced-wb__deliverable aced-wb__deliverable--${item.status}`}
               >
                 <span className="aced-wb__deliverable-status">
-                  {item.status}
+                  {item.status === 'met'
+                    ? 'Met'
+                    : item.status === 'partial'
+                      ? 'Partial'
+                      : 'Missed'}
                 </span>
                 <div>
                   <p className="aced-wb__deliverable-item">{item.item}</p>
@@ -44,14 +46,14 @@ export function WhiteboardDebriefView({
 
       {debrief.sketchAssessment ? (
         <div className="aced-wb__sketch-assess">
-          <h3>Sketch vs ask</h3>
+          <h3>Sketch</h3>
           <p>{debrief.sketchAssessment}</p>
         </div>
       ) : null}
 
       {sketchUrl ? (
         <figure className="aced-wb__sketch-review">
-          <figcaption>Your saved sketch</figcaption>
+          <figcaption>Saved sketch</figcaption>
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src={sketchUrl} alt={sketchAlt} />
         </figure>
@@ -70,7 +72,7 @@ export function WhiteboardDebriefView({
 
       {debrief.improvements.length > 0 ? (
         <>
-          <h3>Improve next time</h3>
+          <h3>Next time</h3>
           <ul>
             {debrief.improvements.map((item) => (
               <li key={item}>{item}</li>

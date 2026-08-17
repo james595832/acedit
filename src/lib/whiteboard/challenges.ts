@@ -30,7 +30,7 @@ export const WHITEBOARD_CHALLENGES: WhiteboardChallenge[] = [
       'Propose a revised mobile-web checkout that reduces drop-off without harming conversion trust.',
     deliverables: [
       'Clarify the problem and who is affected',
-      'Map current → proposed checkout flow',
+      'Map current checkout (cart → shipping → payment → confirm) → your proposed flow',
       'Sketch key screens / states (boxes + labels ok)',
       'Call out risks, success metrics, and a lean validation plan',
     ],
@@ -38,9 +38,11 @@ export const WHITEBOARD_CHALLENGES: WhiteboardChallenge[] = [
 
 Goal: propose a revised checkout experience for mobile web that reduces drop-off without harming conversion trust.
 
+Current checkout (as-is): cart → shipping → payment → order confirmation. Guest checkout exists but is hard to find. Fees often appear only on the payment step.
+
 Deliver:
 1) Clarify the problem and who is affected
-2) Map the current → proposed flow
+2) Map current → proposed flow (start from the as-is above; ask the interviewer for drop-off detail)
 3) Sketch key screens / states (can be boxes + labels)
 4) Call out risks, metrics, and a lean validation plan`,
     durationMinutes: 25,
@@ -48,9 +50,10 @@ Deliver:
     focus: ['conversion', 'mobile', 'flows'],
     maxClarifyingQuestions: 5,
     knownFacts: [
+      'Current flow is cart → shipping → payment → confirmation.',
       'Top drop step is payment method entry (not shipping).',
       'Guest checkout exists but feels buried.',
-      'Mobile is 72% of traffic.',
+      'Mobile is 72% of traffic; most abandoners are returning shoppers on phones.',
       'Support tickets mention unexpected fees late in flow.',
     ],
     hiddenContext: [
@@ -75,7 +78,7 @@ Deliver:
       'Whiteboard an activation journey from invite → first insight shared with a teammate.',
     deliverables: [
       'Define what “activated” means as a concrete behavior',
-      'Sequence the first-run experience',
+      'Sequence invite → first-run → first shared insight',
       'Sketch empty states + guidance',
       'Decide what to defer vs force in setup',
       'Note analytics events you’d instrument',
@@ -84,9 +87,11 @@ Deliver:
 
 Goal: whiteboard an activation journey from invite → first insight shared with a teammate.
 
+Current first-run (as-is): create workspace → connect 2–3 integrations → empty dashboard → optional invite. Most people stall before any insight is shared.
+
 Deliver:
-1) Define “activated”
-2) Sequence the first-run experience
+1) Define “activated” as a concrete behavior
+2) Sequence the first-run experience (start from the as-is above)
 3) Sketch empty states + guidance
 4) Decide what to defer vs force
 5) Note analytics events you’d instrument`,
@@ -95,9 +100,11 @@ Deliver:
     focus: ['activation', 'saas', 'onboarding'],
     maxClarifyingQuestions: 5,
     knownFacts: [
+      'Current first-run is workspace → integrations → empty dashboard → optional invite.',
       'Most signups are invited by a teammate, not organic solo.',
       'First value is usually “shared a dashboard with a comment”.',
       'Admins complain setup asks for too many integrations upfront.',
+      'Only 22% of new workspaces complete a meaningful action in week one.',
     ],
     hiddenContext: [
       'Sales demos skip self-serve onboarding entirely.',
@@ -120,7 +127,7 @@ Deliver:
     goal:
       'Redesign choose service → pick slot → confirm with accessibility as a first-class constraint.',
     deliverables: [
-      'Audit the riskiest accessibility failure points',
+      'Audit the riskiest accessibility failure points in the current path',
       'Propose interaction patterns (focus, errors, confirmation)',
       'Sketch the critical screens',
       'Explain how you’d test with real assistive tech',
@@ -129,8 +136,10 @@ Deliver:
 
 Goal: redesign the “choose service → pick slot → confirm” path with accessibility as a first-class constraint.
 
+Current path (as-is): choose service → pick date → pick slot → patient details → confirm. Errors show as red borders only. Focus order skips the calendar. Slots can vanish while selecting.
+
 Deliver:
-1) Audit the riskiest failure points
+1) Audit the riskiest failure points (start from the as-is above)
 2) Propose interaction patterns (focus, errors, confirmation)
 3) Sketch the critical screens
 4) Explain how you’d test with real assistive tech`,
@@ -139,9 +148,11 @@ Deliver:
     focus: ['accessibility', 'forms', 'healthcare'],
     maxClarifyingQuestions: 4,
     knownFacts: [
+      'Current path is choose service → pick date → pick slot → patient details → confirm.',
       'Users book on both desktop and phone.',
-      'Error messages currently appear only as red borders.',
+      'Error messages currently appear only as red borders with no text.',
       'Slots update live and can disappear while selecting.',
+      'Focus order currently skips the calendar grid.',
     ],
     hiddenContext: [
       'There is a phone booking fallback staff prefer to push.',
@@ -164,7 +175,7 @@ Deliver:
       'Propose a unified pattern decision and migration plan that unblocks shipping this quarter.',
     deliverables: [
       'Frame the conflict and who is affected',
-      'Compare options with tradeoffs',
+      'Compare Growth vs Core options with tradeoffs',
       'Recommend a default + escape hatch',
       'Sketch the chosen pattern',
       'Outline a phased migration',
@@ -173,9 +184,11 @@ Deliver:
 
 Goal: propose a unified pattern decision and migration plan that unblocks shipping this quarter.
 
+Current state (as-is): Growth uses a chip-based filter bar with illustrated empty states. Core uses dense table filters with text-only empties. Both are in production; neither team owns a shared component yet.
+
 Deliver:
 1) Frame the conflict and who is affected
-2) Compare options with tradeoffs
+2) Compare options with tradeoffs (start from the as-is above)
 3) Recommend a default + escape hatch
 4) Sketch the chosen pattern
 5) Outline a phased migration`,
@@ -184,9 +197,11 @@ Deliver:
     focus: ['systems', 'governance', 'collaboration'],
     maxClarifyingQuestions: 5,
     knownFacts: [
+      'Growth uses chip filters + illustrated empty states; Core uses dense table filters + text empties.',
       'Growth ships weekly; Core ships monthly.',
       'Design system team is two people.',
       'Analytics shows Growth’s filter pattern converts better on marketing pages.',
+      'Engineers are blocked waiting for one shared component.',
     ],
     hiddenContext: [
       'Core’s pattern is better for dense data tables.',
@@ -217,9 +232,11 @@ Deliver:
 
 Goal: redesign how in-app, email, and push work together for a collaboration tool.
 
+Current system (as-is): every comment on a watched doc fires in-app + email. @mentions and security alerts use the same channel mix. Digests are weekly and often ignored. Push exists but is noisy.
+
 Deliver:
 1) Principles for what deserves interruption
-2) Information architecture for preferences
+2) Information architecture for preferences (start from the as-is above)
 3) Sketch inbox / digest / urgent alert patterns
 4) Migration plan for existing noisy rules`,
     durationMinutes: 25,
@@ -227,9 +244,11 @@ Deliver:
     focus: ['notifications', 'preferences', 'trust'],
     maxClarifyingQuestions: 5,
     knownFacts: [
-      'Critical: @mentions and security alerts.',
+      'Current system emails + pings in-app on every watched-doc comment.',
+      'Critical events today: @mentions and security alerts (same channels as noise).',
       'Noise: every comment on watched docs.',
       'Enterprise customers need admin-enforced defaults.',
+      'Weekly digest open rates are falling.',
     ],
     hiddenContext: [
       'Push is disabled in the EU build pending legal review.',

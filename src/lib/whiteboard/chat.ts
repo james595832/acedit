@@ -44,18 +44,51 @@ function extractJsonObject(text: string): string {
   return text;
 }
 
+function pickFact(
+  facts: string[],
+  needles: string[],
+): string | undefined {
+  return facts.find((fact) => {
+    const lower = fact.toLowerCase();
+    return needles.some((n) => lower.includes(n));
+  });
+}
+
 function stubClarifyingReply(
   challenge: WhiteboardChallenge,
   question: string,
 ): string {
   const q = question.toLowerCase();
+  const pool = [...challenge.knownFacts, ...challenge.hiddenContext];
+
   const matched = challenge.knownFacts.find((fact) => {
     const keys = fact.toLowerCase().split(/\W+/).filter((w) => w.length > 4);
     return keys.some((k) => q.includes(k));
   });
 
   if (matched) {
-    return `Good question. From what we know today: ${matched} Keep going. I won’t hand you the full solution.`;
+    return `${matched} What would you change first based on that?`;
+  }
+
+  if (
+    q.includes('current') ||
+    q.includes('today') ||
+    q.includes('existing') ||
+    q.includes('as-is') ||
+    q.includes('flow')
+  ) {
+    const flowFact =
+      pickFact(challenge.knownFacts, [
+        'flow',
+        'checkout',
+        'cart',
+        'payment',
+        'shipping',
+        'current',
+      ]) ?? challenge.knownFacts[0];
+    if (flowFact) {
+      return `${flowFact} Sketch the as-is briefly, then your proposed path.`;
+    }
   }
 
   if (
@@ -64,18 +97,48 @@ function stubClarifyingReply(
     q.includes('kpi') ||
     q.includes('measure')
   ) {
-    return 'I’d like you to propose the success metric. What would convince you the redesign worked in 4 to 6 weeks?';
+    const metricFact = pickFact(pool, ['metric', 'abandon', 'nps', 'rate', '%']);
+    if (metricFact) {
+      return `${metricFact} Propose one primary success metric you’d watch in 4–6 weeks.`;
+    }
+    return 'We care about a metric you can move in 4–6 weeks. What’s your primary success measure, and one guardrail you won’t sacrifice?';
   }
 
   if (q.includes('user') || q.includes('persona') || q.includes('who')) {
-    return 'Assume a primary user segment that matches the brief. You can name one primary and one secondary. Justify the split briefly.';
+    const userFact =
+      pickFact(challenge.knownFacts, [
+        'user',
+        'shopper',
+        'mobile',
+        'guest',
+        'signup',
+        'invite',
+        'admin',
+        'traffic',
+      ]) ?? challenge.knownFacts.find((f) => /mobile|guest|user|traffic/i.test(f));
+    if (userFact) {
+      return `${userFact} Name one primary segment you’d design for first.`;
+    }
+    return 'Primary traffic is whatever the brief implies — pick one primary segment and one secondary, and say why.';
   }
 
   if (q.includes('constraint') || q.includes('timeline') || q.includes('tech')) {
-    return `Constraints I’d flag: ${challenge.knownFacts[0] ?? 'Ship something believable this quarter.'} Engineering capacity is limited, so prefer patterns you can phase.`;
+    return `${challenge.knownFacts[0] ?? 'Ship something believable this quarter.'} Engineering capacity is limited, so prefer patterns you can phase.`;
   }
 
-  return `I’ll stay in interviewer mode for “${challenge.title}”. Ask something specific about users, constraints, data, or success criteria. I won’t design it for you.`;
+  if (q.includes('fee') || q.includes('trust') || q.includes('payment')) {
+    const trustFact = pickFact(pool, ['fee', 'pay', 'trust', 'support']);
+    if (trustFact) {
+      return `${trustFact} How would you surface that earlier without killing conversion?`;
+    }
+  }
+
+  const fallbackFact = challenge.knownFacts[0];
+  if (fallbackFact) {
+    return `Useful context: ${fallbackFact} Ask me something more specific (drop-off step, users, constraints, or success).`;
+  }
+
+  return `Ask something specific about users, constraints, data, or success for “${challenge.title}”. I can share facts from the brief — I won’t design the board for you.`;
 }
 
 export async function answerClarifyingQuestion(input: {
@@ -106,11 +169,11 @@ ${input.challenge.hiddenContext.map((f) => `- ${f}`).join('\n')}
 
 Rules:
 - Stay strictly in scope of this challenge. Refuse off-topic requests.
-- Answer like a real interviewer: concise, partial, never the full solution.
+- When they ask a real clarifying question, lead with ONE concrete fact from knownFacts (or hiddenContext only if directly asked). Do not answer with vague “assume a user” coaching.
+- After the fact, add one short nudge so they decide (under 90 words total).
 - Do not write their flows, screens, or final recommendation for them.
-- Prefer answering with one useful fact + a nudge to decide.
 - If they ask you to design/solve it, decline and redirect them to the board.
-- Keep replies under 90 words.`;
+- If they ask about the current/as-is flow, give the relevant known fact so they can map current → proposed.`;
 
   const response = await fetch('https://api.anthropic.com/v1/messages', {
     method: 'POST',
