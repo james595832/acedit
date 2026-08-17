@@ -269,30 +269,63 @@ export function WhiteboardSession({challenge}: WhiteboardSessionProps) {
       </header>
 
       {!started ? (
-        <section className="aced-panel aced-wb__brief">
-          <h2>Challenge brief</h2>
-          <p className="aced-wb__goal">{challenge.goal}</p>
-          <p className="aced-wb__brief-text">{challenge.brief}</p>
-          <h3 className="aced-wb__deliverable-heading">You’ll be assessed on</h3>
-          <ol className="aced-wb__meta aced-wb__meta--numbered">
-            {challenge.deliverables.map((item) => (
-              <li key={item}>{item}</li>
-            ))}
-          </ol>
-          <ul className="aced-wb__meta">
-            <li>{challenge.durationMinutes} minutes on the clock</li>
-            <li>
-              {challenge.maxClarifyingQuestions} clarifying questions with the
-              AI interviewer
-            </li>
-            <li>Sketch on the canvas, then add a short talk track before you finish</li>
-          </ul>
-          <Button
-            label="Start timed challenge"
-            variant="primary"
-            size="lg"
-            onClick={() => setStarted(true)}
-          />
+        <section className="aced-panel aced-wb__brief" aria-labelledby="wb-brief-title">
+          <div className="aced-wb__brief-head">
+            <h2 id="wb-brief-title">Brief</h2>
+            <p className="aced-wb__brief-meta">
+              {challenge.durationMinutes} min · {challenge.difficulty} ·{' '}
+              {challenge.maxClarifyingQuestions} clarifying Qs
+            </p>
+          </div>
+
+          <div className="aced-wb__brief-block">
+            <h3>Situation</h3>
+            <p>{challenge.situation}</p>
+          </div>
+
+          <div className="aced-wb__brief-block aced-wb__brief-block--ask">
+            <h3>Your ask</h3>
+            <p>{challenge.goal}</p>
+          </div>
+
+          <div className="aced-wb__brief-block">
+            <h3>As-is</h3>
+            <p className="aced-wb__as-is">{challenge.asIs}</p>
+          </div>
+
+          <div className="aced-wb__brief-block">
+            <h3>Deliver</h3>
+            <ol className="aced-wb__deliver-list">
+              {challenge.deliverables.map((item) => (
+                <li key={item}>{item}</li>
+              ))}
+            </ol>
+          </div>
+
+          <div className="aced-wb__brief-block aced-wb__brief-block--rules">
+            <h3>In the room</h3>
+            <ul className="aced-wb__rules">
+              <li>Timer starts when you press Start — read this first</li>
+              <li>
+                Ask the interviewer for facts ({challenge.maxClarifyingQuestions}{' '}
+                questions)
+              </li>
+              <li>Sketch on the canvas, then add a short talk track</li>
+            </ul>
+          </div>
+
+          <div className="aced-wb__brief-cta">
+            <Button
+              label="Start timed challenge"
+              variant="primary"
+              size="lg"
+              onClick={() => setStarted(true)}
+            />
+            <p className="aced-wb__brief-note">
+              Clock starts immediately. You can peek the brief again from the
+              toolbar.
+            </p>
+          </div>
         </section>
       ) : (
         <>
@@ -331,7 +364,12 @@ export function WhiteboardSession({challenge}: WhiteboardSessionProps) {
               <details className="aced-wb__brief-pop">
                 <summary>Brief</summary>
                 <div className="aced-wb__brief-pop-body">
-                  <p>{challenge.goal}</p>
+                  <p>
+                    <strong>Ask</strong> {challenge.goal}
+                  </p>
+                  <p>
+                    <strong>As-is</strong> {challenge.asIs}
+                  </p>
                   <ol>
                     {challenge.deliverables.map((item) => (
                       <li key={item}>{item}</li>

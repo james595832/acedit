@@ -4,9 +4,12 @@ export type WhiteboardChallenge = {
   id: string;
   title: string;
   summary: string;
-  brief: string;
+  /** Scene-setting context the candidate sees before the clock. */
+  situation: string;
   /** One-line goal the candidate must address. */
   goal: string;
+  /** Current product path / system they should start from. */
+  asIs: string;
   /** Explicit deliverables we assess against. */
   deliverables: string[];
   durationMinutes: number;
@@ -20,31 +23,39 @@ export type WhiteboardChallenge = {
   successCriteria: string[];
 };
 
+/** Full brief text for the AI interviewer / debrief (not shown as one blob in UI). */
+export function formatChallengeBrief(challenge: WhiteboardChallenge): string {
+  const deliver = challenge.deliverables
+    .map((item, i) => `${i + 1}) ${item}`)
+    .join('\n');
+  return `${challenge.situation}
+
+Goal: ${challenge.goal}
+
+Current state (as-is): ${challenge.asIs}
+
+Deliver:
+${deliver}`;
+}
+
 export const WHITEBOARD_CHALLENGES: WhiteboardChallenge[] = [
   {
     id: 'checkout-abandonment',
     title: 'Reduce checkout abandonment',
     summary:
       'Diagnose why shoppers drop at payment and sketch a clearer checkout flow.',
+    situation:
+      'A mid-market ecommerce brand loses ~68% of carts between cart and payment confirmation. You’re the product designer in a 1:1 whiteboard.',
     goal:
       'Propose a revised mobile-web checkout that reduces drop-off without harming conversion trust.',
+    asIs:
+      'cart → shipping → payment → order confirmation. Guest checkout exists but is hard to find. Fees often appear only on the payment step.',
     deliverables: [
       'Clarify the problem and who is affected',
-      'Map current checkout (cart → shipping → payment → confirm) → your proposed flow',
+      'Map current checkout → your proposed flow',
       'Sketch key screens / states (boxes + labels ok)',
       'Call out risks, success metrics, and a lean validation plan',
     ],
-    brief: `A mid-market ecommerce brand sees ~68% cart abandonment between cart and payment confirmation. You’re the product designer in a 1:1 whiteboard.
-
-Goal: propose a revised checkout experience for mobile web that reduces drop-off without harming conversion trust.
-
-Current checkout (as-is): cart → shipping → payment → order confirmation. Guest checkout exists but is hard to find. Fees often appear only on the payment step.
-
-Deliver:
-1) Clarify the problem and who is affected
-2) Map current → proposed flow (start from the as-is above; ask the interviewer for drop-off detail)
-3) Sketch key screens / states (can be boxes + labels)
-4) Call out risks, metrics, and a lean validation plan`,
     durationMinutes: 25,
     difficulty: 'mid',
     focus: ['conversion', 'mobile', 'flows'],
@@ -74,8 +85,12 @@ Deliver:
     title: 'Activate new B2B users',
     summary:
       'Design an onboarding path that gets teams to first value in under 10 minutes.',
+    situation:
+      'You’re designing onboarding for a B2B analytics SaaS. Signups are up, but only 22% of new workspaces complete a meaningful action in week one.',
     goal:
       'Whiteboard an activation journey from invite → first insight shared with a teammate.',
+    asIs:
+      'create workspace → connect 2–3 integrations → empty dashboard → optional invite. Most people stall before any insight is shared.',
     deliverables: [
       'Define what “activated” means as a concrete behavior',
       'Sequence invite → first-run → first shared insight',
@@ -83,18 +98,6 @@ Deliver:
       'Decide what to defer vs force in setup',
       'Note analytics events you’d instrument',
     ],
-    brief: `You’re designing onboarding for a B2B analytics SaaS. Signups are up, but only 22% of new workspaces complete a meaningful action in week one.
-
-Goal: whiteboard an activation journey from invite → first insight shared with a teammate.
-
-Current first-run (as-is): create workspace → connect 2–3 integrations → empty dashboard → optional invite. Most people stall before any insight is shared.
-
-Deliver:
-1) Define “activated” as a concrete behavior
-2) Sequence the first-run experience (start from the as-is above)
-3) Sketch empty states + guidance
-4) Decide what to defer vs force
-5) Note analytics events you’d instrument`,
     durationMinutes: 30,
     difficulty: 'mid',
     focus: ['activation', 'saas', 'onboarding'],
@@ -124,25 +127,18 @@ Deliver:
     title: 'Make a booking flow accessible',
     summary:
       'Rehab a clinic appointment booking UI that fails basic accessibility audits.',
+    situation:
+      'A clinic’s online booking tool fails WCAG on contrast, focus order, and form errors. Leadership wants it usable with keyboard + screen readers — without looking “clinical grey”.',
     goal:
       'Redesign choose service → pick slot → confirm with accessibility as a first-class constraint.',
+    asIs:
+      'choose service → pick date → pick slot → patient details → confirm. Errors show as red borders only. Focus order skips the calendar. Slots can vanish while selecting.',
     deliverables: [
       'Audit the riskiest accessibility failure points in the current path',
       'Propose interaction patterns (focus, errors, confirmation)',
       'Sketch the critical screens',
       'Explain how you’d test with real assistive tech',
     ],
-    brief: `A clinic’s online booking tool fails WCAG on contrast, focus order, and form errors. Leadership wants a redesign that is usable with keyboard + screen readers without looking “clinical grey”.
-
-Goal: redesign the “choose service → pick slot → confirm” path with accessibility as a first-class constraint.
-
-Current path (as-is): choose service → pick date → pick slot → patient details → confirm. Errors show as red borders only. Focus order skips the calendar. Slots can vanish while selecting.
-
-Deliver:
-1) Audit the riskiest failure points (start from the as-is above)
-2) Propose interaction patterns (focus, errors, confirmation)
-3) Sketch the critical screens
-4) Explain how you’d test with real assistive tech`,
     durationMinutes: 20,
     difficulty: 'junior',
     focus: ['accessibility', 'forms', 'healthcare'],
@@ -171,8 +167,12 @@ Deliver:
     title: 'Resolve a design-system conflict',
     summary:
       'Two product teams shipped divergent patterns. Align them without a rewrite.',
+    situation:
+      'Growth and Core each shipped different filter + empty-state patterns. Engineers are blocked; Figma is diverging. You’re facilitating a whiteboard to pick a path.',
     goal:
       'Propose a unified pattern decision and migration plan that unblocks shipping this quarter.',
+    asIs:
+      'Growth uses a chip-based filter bar with illustrated empty states. Core uses dense table filters with text-only empties. Both are in production; neither team owns a shared component yet.',
     deliverables: [
       'Frame the conflict and who is affected',
       'Compare Growth vs Core options with tradeoffs',
@@ -180,18 +180,6 @@ Deliver:
       'Sketch the chosen pattern',
       'Outline a phased migration',
     ],
-    brief: `Growth and Core each shipped different filter + empty-state patterns. Engineers are blocked; Figma is diverging. You’re facilitating a whiteboard to pick a path.
-
-Goal: propose a unified pattern decision and migration plan that unblocks shipping this quarter.
-
-Current state (as-is): Growth uses a chip-based filter bar with illustrated empty states. Core uses dense table filters with text-only empties. Both are in production; neither team owns a shared component yet.
-
-Deliver:
-1) Frame the conflict and who is affected
-2) Compare options with tradeoffs (start from the as-is above)
-3) Recommend a default + escape hatch
-4) Sketch the chosen pattern
-5) Outline a phased migration`,
     durationMinutes: 25,
     difficulty: 'senior',
     focus: ['systems', 'governance', 'collaboration'],
@@ -220,25 +208,18 @@ Deliver:
     title: 'Fix notification overload',
     summary:
       'Users mute the product. Redesign alerts so important events still surface.',
+    situation:
+      'NPS keeps saying “too many pings.” Email digest open rates are falling. You’re whiteboarding a notification strategy + UI for a collaboration tool.',
     goal:
-      'Redesign how in-app, email, and push work together for a collaboration tool.',
+      'Redesign how in-app, email, and push work together so important events still surface.',
+    asIs:
+      'Every comment on a watched doc fires in-app + email. @mentions and security alerts use the same channel mix. Digests are weekly and often ignored. Push exists but is noisy.',
     deliverables: [
       'Principles for what deserves interruption',
       'Information architecture for preferences',
       'Sketch inbox / digest / urgent alert patterns',
       'Migration plan for existing noisy rules',
     ],
-    brief: `NPS comments keep saying “too many pings.” Open rates on email digests are falling. You’re whiteboarding a notification strategy + UI.
-
-Goal: redesign how in-app, email, and push work together for a collaboration tool.
-
-Current system (as-is): every comment on a watched doc fires in-app + email. @mentions and security alerts use the same channel mix. Digests are weekly and often ignored. Push exists but is noisy.
-
-Deliver:
-1) Principles for what deserves interruption
-2) Information architecture for preferences (start from the as-is above)
-3) Sketch inbox / digest / urgent alert patterns
-4) Migration plan for existing noisy rules`,
     durationMinutes: 25,
     difficulty: 'mid',
     focus: ['notifications', 'preferences', 'trust'],

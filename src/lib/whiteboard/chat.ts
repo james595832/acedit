@@ -1,5 +1,8 @@
 import {CHEAP_ANTHROPIC_MODEL, useStubs} from '@/lib/config';
-import type {WhiteboardChallenge} from '@/lib/whiteboard/challenges';
+import {
+  formatChallengeBrief,
+  type WhiteboardChallenge,
+} from '@/lib/whiteboard/challenges';
 
 export type ClarifyingMessage = {
   role: 'user' | 'assistant';
@@ -159,7 +162,7 @@ export async function answerClarifyingQuestion(input: {
 
 Challenge title: ${input.challenge.title}
 Candidate brief (they can see this):
-${input.challenge.brief}
+${formatChallengeBrief(input.challenge)}
 
 Facts you may reveal if asked well:
 ${input.challenge.knownFacts.map((f) => `- ${f}`).join('\n')}
@@ -546,7 +549,7 @@ Judge whether the candidate answered THIS ASK — not whether the board looks bu
 Challenge: ${input.challenge.title}
 Goal: ${input.challenge.goal}
 Full brief:
-${input.challenge.brief}
+${formatChallengeBrief(input.challenge)}
 
 Required deliverables (score each met | partial | missed with a short evidence note):
 ${input.challenge.deliverables.map((d, i) => `${i + 1}. ${d}`).join('\n')}

@@ -4193,8 +4193,106 @@ dialog.aced-feedback-dialog::backdrop {
   color: var(--aced-brick);
 }
 
+.aced-wb__brief {
+  display: grid;
+  gap: 1.15rem;
+  max-width: 40rem;
+}
+
+.aced-wb__brief-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.5rem 1rem;
+}
+
 .aced-wb__brief h2 {
-  margin: 0 0 0.75rem;
+  margin: 0;
+}
+
+.aced-wb__brief-meta {
+  margin: 0;
+  font-size: 0.88rem;
+  color: var(--aced-mute);
+}
+
+.aced-wb__brief-block {
+  display: grid;
+  gap: 0.35rem;
+}
+
+.aced-wb__brief-block h3 {
+  margin: 0;
+  font-family: var(--font-aced-heading), 'Raleway', sans-serif;
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--aced-mute);
+}
+
+.aced-wb__brief-block p {
+  margin: 0;
+  line-height: 1.5;
+  color: var(--aced-ink);
+}
+
+.aced-wb__brief-block--ask {
+  padding: 0.95rem 1.05rem;
+  border-left: 3px solid var(--aced-ink);
+  background: #f7f6f3;
+}
+
+.aced-wb__brief-block--ask p {
+  font-family: var(--font-aced-heading), 'Raleway', sans-serif;
+  font-size: 1.05rem;
+  font-weight: 600;
+  line-height: 1.35;
+}
+
+.aced-wb__as-is {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 0.9rem;
+  line-height: 1.55;
+  color: var(--aced-ink);
+}
+
+.aced-wb__deliver-list {
+  margin: 0.15rem 0 0;
+  padding-left: 1.2rem;
+  display: grid;
+  gap: 0.4rem;
+  color: var(--aced-ink);
+  line-height: 1.45;
+}
+
+.aced-wb__brief-block--rules {
+  padding-top: 0.35rem;
+  border-top: 1px solid var(--aced-rule);
+}
+
+.aced-wb__rules {
+  margin: 0.15rem 0 0;
+  padding-left: 1.15rem;
+  color: var(--aced-mute);
+  line-height: 1.5;
+  display: grid;
+  gap: 0.3rem;
+}
+
+.aced-wb__brief-cta {
+  display: grid;
+  gap: 0.55rem;
+  justify-items: start;
+  padding-top: 0.25rem;
+}
+
+.aced-wb__brief-note {
+  margin: 0;
+  font-size: 0.88rem;
+  color: var(--aced-mute);
+  max-width: 36ch;
 }
 
 .aced-wb__goal {
@@ -4427,19 +4525,35 @@ dialog.aced-feedback-dialog::backdrop {
   background: #fff;
   box-shadow: 0 10px 28px rgba(28, 27, 24, 0.12);
   z-index: 6;
+  display: grid;
+  gap: 0.65rem;
 }
 
 .aced-wb__brief-pop-body p {
-  margin: 0 0 0.55rem;
+  margin: 0;
   line-height: 1.4;
   color: var(--aced-ink);
+  font-size: 0.92rem;
+}
+
+.aced-wb__brief-pop-body strong {
+  display: block;
+  margin-bottom: 0.15rem;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--aced-mute);
 }
 
 .aced-wb__brief-pop-body ol {
   margin: 0;
   padding-left: 1.1rem;
+  display: grid;
+  gap: 0.3rem;
   color: var(--aced-mute);
   line-height: 1.45;
+  font-size: 0.9rem;
 }
 
 .aced-wb__stage {
