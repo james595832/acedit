@@ -539,7 +539,7 @@ export function WhiteboardSession({challenge}: WhiteboardSessionProps) {
                     Try another challenge
                   </Link>
                   <Link className="aced-orient__cta" href="/studio">
-                    Back to Studio →
+                    Back to Home →
                   </Link>
                 </div>
               </div>

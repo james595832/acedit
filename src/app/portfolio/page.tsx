@@ -6,7 +6,7 @@ export default function PortfolioPage() {
   return (
     <>
       <nav className="aced-crumb" aria-label="Breadcrumb">
-        <Link href="/studio">← Studio</Link>
+        <Link href="/studio">← Home</Link>
       </nav>
       <header className="aced-masthead">
         <div className="aced-masthead__copy">

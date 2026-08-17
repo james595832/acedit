@@ -6,19 +6,18 @@ export default function InterviewPage() {
   return (
     <>
       <nav className="aced-crumb" aria-label="Breadcrumb">
-        <Link href="/studio">← Studio</Link>
+        <Link href="/studio">← Home</Link>
       </nav>
       <header className="aced-masthead">
         <div className="aced-masthead__copy">
-          <h1>Practice interview</h1>
+          <h1>Prepare</h1>
           <p className="aced-masthead__lead">
-            This is the practice flow: analyse your CV, optionally add a job
-            description, then start speaking. Results land after you finish.
+            Add your CV, then enter the interview. A job description is optional.
           </p>
         </div>
       </header>
       <Section variant="transparent" padding={0}>
-        <div className="aced-panel">
+        <div className="aced-panel aced-panel--prep">
           <CVUploadForm />
         </div>
       </Section>

@@ -60,9 +60,11 @@ export default async function StudioPage({searchParams}: StudioPageProps) {
   }
 
   let practiceRuns = 0;
-  let whiteboardRuns = 0;
-  let whiteboardAvg: number | null = null;
+  let lastSessionId: string | null = null;
+  let lastSessionScore: number | null = null;
   let lastActivity: string | null = null;
+  let whiteboardRuns = 0;
+
   try {
     const statsUserId =
       userId ?? (isSupabaseConfigured() ? null : demoUserId());
@@ -72,164 +74,79 @@ export default async function StudioPage({searchParams}: StudioPageProps) {
     ]);
     practiceRuns = interviewSessions.length;
     whiteboardRuns = whiteboardSessions.length;
-    if (whiteboardSessions.length > 0) {
-      whiteboardAvg = Math.round(
-        whiteboardSessions.reduce((sum, s) => sum + s.score, 0) /
-          whiteboardSessions.length,
-      );
+    const latest = interviewSessions[0] ?? null;
+    if (latest) {
+      lastSessionId = latest.id;
+      lastSessionScore =
+        latest.overall_score === null || latest.overall_score === undefined
+          ? null
+          : Math.round(Number(latest.overall_score));
+      lastActivity = latest.created_at;
     }
-    const dates = [
-      ...interviewSessions.map((s) => s.created_at),
-      ...whiteboardSessions.map((s) => s.createdAt),
-    ].sort();
-    lastActivity = dates.at(-1) ?? null;
   } catch {
     // stats are decorative — never block the page on them
   }
 
-  const isFirstRun = practiceRuns === 0 && whiteboardRuns === 0;
+  const hasPractice = practiceRuns > 0;
+  const resultsHref = lastSessionId
+    ? `/interview/results?session_id=${lastSessionId}`
+    : null;
 
   return (
-    <div className="aced-studio">
-      <header className="aced-masthead">
-        <div className="aced-masthead__copy">
-          <h1>You’re signed in, {firstName}.</h1>
-          <p className="aced-masthead__lead">
-            Studio is your home base. Start a practice run when you’re ready.
-            Prep, speak, then review your scores in Results.
+    <div className="aced-home">
+      <header className="aced-home__hero">
+        <p className="aced-home__hello">Hi {firstName}</p>
+        <h1>
+          {hasPractice
+            ? 'Ready for another practice?'
+            : 'Ready for a 15-minute practice?'}
+        </h1>
+        <p className="aced-home__lead">
+          {hasPractice
+            ? 'Answer out loud. Get scored. Improve the weak spots.'
+            : 'Upload your CV, answer five questions out loud, and get clear feedback.'}
+        </p>
+        {billingBanner ? (
+          <p className="aced-masthead__note" role="status">
+            {billingBanner}
           </p>
-          {billingBanner ? (
-            <p className="aced-masthead__note" role="status">
-              {billingBanner}
-            </p>
+        ) : null}
+
+        <div className="aced-home__actions">
+          <Link className="aced-home__primary" href="/interview">
+            Start interview
+          </Link>
+          {resultsHref ? (
+            <Link className="aced-home__secondary" href={resultsHref}>
+              {lastSessionScore !== null
+                ? `Last score · ${lastSessionScore}`
+                : 'Last session'}
+              {lastActivity ? ` · ${daysAgoLabel(lastActivity)}` : ''}
+            </Link>
           ) : null}
         </div>
       </header>
 
-      {isFirstRun ? (
-        <section className="aced-studio-hello" aria-label="Getting started">
-          <p className="aced-studio-hello__kicker">New here?</p>
-          <p className="aced-studio-hello__copy">
-            Start with a practice interview. Upload your CV, answer five
-            questions out loud, and see your first scores in about 15 minutes.
-          </p>
-        </section>
-      ) : (
-        <section className="aced-studio-stats" aria-label="Your progress">
-          <div className="aced-studio-stats__item">
-            <span className="aced-studio-stats__value">{practiceRuns}</span>
-            <span className="aced-studio-stats__label">
-              Practice {practiceRuns === 1 ? 'run' : 'runs'}
-            </span>
-          </div>
-          <div className="aced-studio-stats__item">
-            <span className="aced-studio-stats__value">{whiteboardRuns}</span>
-            <span className="aced-studio-stats__label">
-              {whiteboardRuns === 1 ? 'Whiteboard' : 'Whiteboards'}
-            </span>
-          </div>
-          {whiteboardAvg !== null ? (
-            <div className="aced-studio-stats__item">
-              <span className="aced-studio-stats__value">{whiteboardAvg}</span>
-              <span className="aced-studio-stats__label">Avg board score</span>
-            </div>
-          ) : null}
-          {lastActivity ? (
-            <div className="aced-studio-stats__item">
-              <span className="aced-studio-stats__value aced-studio-stats__value--sm">
-                {daysAgoLabel(lastActivity)}
+      <section className="aced-home__more" aria-label="More practice">
+        <p className="aced-home__more-label">Also practice</p>
+        <ul className="aced-home__more-list">
+          <li>
+            <Link href="/whiteboard">
+              <span className="aced-home__more-title">Whiteboard</span>
+              <span className="aced-home__more-meta">
+                {whiteboardRuns > 0
+                  ? `${whiteboardRuns} run${whiteboardRuns === 1 ? '' : 's'}`
+                  : 'Timed design prompts'}
               </span>
-              <span className="aced-studio-stats__label">Last practiced</span>
-            </div>
-          ) : null}
-        </section>
-      )}
-
-      <section className="aced-orient" aria-label="Where to go next">
-        <article className="aced-orient__hero-path">
-          <div className="aced-orient__hero-copy">
-            <p className="aced-orient__status">
-              {practiceRuns > 0 ? 'Keep going' : 'Not started'}
-            </p>
-            <h2>Practice interview</h2>
-            <p>
-              Upload your CV and optional job description, get personalised
-              questions, answer out loud, and see strong vs weak criteria.
-            </p>
-          </div>
-          <div className="aced-orient__art" aria-hidden="true">
-            <span className="aced-art-voice">
-              <span className="aced-art-voice__mic" />
-              <span className="aced-art-voice__bars">
-                <i />
-                <i />
-                <i />
-                <i />
-                <i />
-                <i />
-                <i />
-              </span>
-              <span className="aced-art-voice__time">0:42</span>
-            </span>
-          </div>
-          <Link className="aced-pill aced-pill--studio" href="/interview">
-            {practiceRuns > 0 ? 'Practice again' : 'Start practice'}
-          </Link>
-        </article>
-
-        <div className="aced-orient__rail">
-          <p className="aced-orient__rail-label">Also available</p>
-          <ol className="aced-orient__steps">
-            <li className="aced-orient__step">
-              <span className="aced-orient__num" aria-hidden="true">
-                02
-              </span>
-              <div className="aced-orient__body">
-                <h2>Portfolio review</h2>
-                <p>
-                  Check whether your case studies are hire-ready and match a
-                  target job, before you apply.
-                </p>
-                <Link className="aced-orient__cta" href="/portfolio">
-                  Review portfolio →
-                </Link>
-              </div>
-            </li>
-
-            <li className="aced-orient__step">
-              <span className="aced-orient__num" aria-hidden="true">
-                03
-              </span>
-              <div className="aced-orient__body">
-                <h2>Whiteboard challenges</h2>
-                <p>
-                  Timed design prompts with a marker canvas and an AI
-                  interviewer for clarifying questions. Practice under
-                  pressure, then review your boards.
-                </p>
-                <Link className="aced-orient__cta" href="/whiteboard">
-                  Open whiteboards →
-                </Link>
-              </div>
-            </li>
-
-            <li className="aced-orient__step">
-              <span className="aced-orient__num" aria-hidden="true">
-                04
-              </span>
-              <div className="aced-orient__body">
-                <h2>Review results</h2>
-                <p>
-                  Revisit scores, transcripts, and must-cover feedback from
-                  sessions you’ve already run.
-                </p>
-                <Link className="aced-orient__cta" href="/interview/results">
-                  Open results →
-                </Link>
-              </div>
-            </li>
-          </ol>
-        </div>
+            </Link>
+          </li>
+          <li>
+            <Link href="/portfolio">
+              <span className="aced-home__more-title">Portfolio</span>
+              <span className="aced-home__more-meta">Case study check</span>
+            </Link>
+          </li>
+        </ul>
       </section>
     </div>
   );

@@ -1,6 +1,6 @@
 'use client';
 
-import type {ReactNode} from 'react';
+import {type ReactNode, useLayoutEffect, useRef, useState} from 'react';
 import Image from 'next/image';
 import {usePathname} from 'next/navigation';
 import {AppShell} from '@astryxdesign/core/AppShell';
@@ -18,39 +18,83 @@ type AppFrameProps = {
   supabaseConfigured: boolean;
 };
 
+type NavIndicator = {
+  x: number;
+  width: number;
+  ready: boolean;
+};
+
 export function AppFrame({
   children,
   userEmail,
   supabaseConfigured,
 }: AppFrameProps) {
   const pathname = usePathname();
+  const linksRef = useRef<HTMLDivElement>(null);
+  const [indicator, setIndicator] = useState<NavIndicator>({
+    x: 0,
+    width: 0,
+    ready: false,
+  });
+
   const isHome = pathname === '/';
   const isStart = pathname === '/start';
+  const isSignedIn = Boolean(userEmail);
+  const showAppChrome = !isHome && !isStart && isSignedIn;
+
+  const isInterview =
+    pathname.startsWith('/interview') &&
+    !pathname.startsWith('/interview/results');
+  const isPortfolio = pathname.startsWith('/portfolio');
+  const isStudio = pathname === '/studio';
+  const isResults = pathname.startsWith('/interview/results');
+  const isWhiteboard = pathname.startsWith('/whiteboard');
+
+  useLayoutEffect(() => {
+    if (!showAppChrome) return;
+
+    function measure() {
+      const root = linksRef.current;
+      if (!root) return;
+      const selected = root.querySelector(
+        '.astryx-top-nav-item[data-selected="true"], .astryx-top-nav-item[aria-current="page"]',
+      ) as HTMLElement | null;
+      if (!selected) {
+        setIndicator((prev) => ({...prev, ready: false}));
+        return;
+      }
+      setIndicator({
+        x: selected.getBoundingClientRect().left - root.getBoundingClientRect().left,
+        width: selected.offsetWidth,
+        ready: true,
+      });
+    }
+
+    measure();
+    // Remeasure after layout settles (fonts / Astryx sizing).
+    const raf = window.requestAnimationFrame(measure);
+    const root = linksRef.current;
+    const ro =
+      typeof ResizeObserver !== 'undefined' && root
+        ? new ResizeObserver(measure)
+        : null;
+    if (root) ro?.observe(root);
+    window.addEventListener('resize', measure);
+    return () => {
+      window.cancelAnimationFrame(raf);
+      ro?.disconnect();
+      window.removeEventListener('resize', measure);
+    };
+  }, [pathname, showAppChrome]);
 
   if (isHome || isStart) {
     // Marketing / trial start pages own their own chrome.
     return children;
   }
 
-  const isSignedIn = Boolean(userEmail);
-
-  const isInterview =
-    pathname.startsWith('/interview') &&
-    !pathname.startsWith('/interview/results');
-
-  const isPortfolio = pathname.startsWith('/portfolio');
-  const isStudio = pathname === '/studio';
-  const isResults = pathname.startsWith('/interview/results');
-  const isWhiteboard = pathname.startsWith('/whiteboard');
-
-  // Feature links only after login — guests see Sign in / Sign up only.
-  // Responsive (signed in):
-  //   > 1024px  logo left · Studio · Practice · Whiteboard · Results + account
-  //   <= 1024px links hide; burger opens MobileNav drawer
-
   const navItems = isSignedIn ? (
     <>
-      <TopNavItem label="Studio" href="/studio" isSelected={isStudio} />
+      <TopNavItem label="Home" href="/studio" isSelected={isStudio} />
       <TopNavItem label="Practice" href="/interview" isSelected={isInterview} />
       <TopNavItem
         label="Portfolio"
@@ -83,7 +127,7 @@ export function AppFrame({
               content: (
                 <MobileNav header="ACED-IT" side="end">
                   <SideNavItem
-                    label="Studio"
+                    label="Home"
                     href="/studio"
                     isSelected={isStudio}
                   />
@@ -138,9 +182,19 @@ export function AppFrame({
           endContent={
             <HStack gap={4} align="center" className="aced-nav-end">
               {navItems ? (
-                <HStack gap={4} align="center" className="aced-nav-links">
-                  {navItems}
-                </HStack>
+                <div className="aced-nav-links" ref={linksRef}>
+                  <span
+                    className={`aced-nav-links__pill${indicator.ready ? ' is-ready' : ''}`}
+                    style={{
+                      transform: `translate3d(${indicator.x}px, -50%, 0)`,
+                      width: indicator.width,
+                    }}
+                    aria-hidden
+                  />
+                  <HStack gap={1} align="center" className="aced-nav-links__row">
+                    {navItems}
+                  </HStack>
+                </div>
               ) : null}
               <AuthNav email={userEmail} configured={supabaseConfigured} />
               {isSignedIn ? (

@@ -9,7 +9,6 @@ import {Text} from '@astryxdesign/core/Text';
 import {Section} from '@astryxdesign/core/Section';
 import {Banner} from '@astryxdesign/core/Banner';
 import {ProgressBar} from '@astryxdesign/core/ProgressBar';
-import {Button} from '@astryxdesign/core/Button';
 import {StatusDot} from '@astryxdesign/core/StatusDot';
 
 type ResultRow = {
@@ -54,7 +53,7 @@ function ResultsInner() {
   return (
     <>
       <nav className="aced-crumb" aria-label="Breadcrumb">
-        <Link href="/studio">← Studio</Link>
+        <Link href="/studio">← Home</Link>
       </nav>
       <header className="aced-masthead">
         <div className="aced-masthead__copy">
@@ -73,13 +72,25 @@ function ResultsInner() {
           ) : null}
 
           {!sessionId ? (
-            <Banner
-              status="warning"
-              title="No session selected"
-              description="Results show scores from a finished practice run. Start practice from Studio, or open Results from a completed session."
-            />
+            <>
+              <Banner
+                status="warning"
+                title="No session selected"
+                description="Open a finished run from Home, or start a new interview."
+              />
+              <HStack gap={2} wrap="wrap">
+                <Link className="aced-home__primary" href="/interview">
+                  Start interview
+                </Link>
+                <Link className="aced-orient__cta" href="/studio">
+                  Back to Home →
+                </Link>
+              </HStack>
+            </>
           ) : null}
 
+          {sessionId ? (
+            <>
           <section className={`aced-score-hero aced-score-hero--${tone}`}>
             <p className="aced-score-hero__kicker">Overall</p>
             {overall !== null ? (
@@ -140,14 +151,14 @@ function ResultsInner() {
                 Practice again →
               </Link>
               <Link className="aced-orient__cta" href="/studio">
-                Back to studio →
+                Back to Home →
               </Link>
             </HStack>
           </nav>
 
           <VStack gap={3}>
             <Heading level={2}>Your answers</Heading>
-            {rows.length === 0 && sessionId ? (
+            {rows.length === 0 ? (
               <Text as="p" color="secondary">
                 No answers in this session yet.
               </Text>
@@ -198,15 +209,7 @@ function ResultsInner() {
               })}
             </ul>
           </VStack>
-
-          {!sessionId ? (
-            <HStack gap={2}>
-              <Button
-                label="Start practice"
-                variant="primary"
-                href="/interview"
-              />
-            </HStack>
+            </>
           ) : null}
         </VStack>
       </Section>

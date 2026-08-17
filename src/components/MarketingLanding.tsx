@@ -131,7 +131,7 @@ export function MarketingLanding({userEmail}: MarketingLandingProps) {
   }, [closeMenu]);
 
   const accountHref = userEmail ? '/studio' : '/login';
-  const accountLabel = userEmail ? 'Studio' : 'Sign in';
+  const accountLabel = userEmail ? 'Home' : 'Sign in';
 
   return (
     <div className="aced-mkt">

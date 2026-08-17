@@ -4,7 +4,6 @@ import {useEffect, useMemo, useState, Suspense} from 'react';
 import Link from 'next/link';
 import {useRouter, useSearchParams} from 'next/navigation';
 import {VStack, HStack} from '@astryxdesign/core/Layout';
-import {Heading} from '@astryxdesign/core/Heading';
 import {Text} from '@astryxdesign/core/Text';
 import {Section} from '@astryxdesign/core/Section';
 import {Button} from '@astryxdesign/core/Button';
@@ -83,18 +82,20 @@ function InterviewStartInner() {
       setTranscriptSource(null);
       setAnswerId(null);
       setGrade(null);
+      setError(null);
+      setIsGrading(false);
     })();
   }, [sessionId, questionId]);
 
-  async function gradeCurrentAnswer() {
-    if (!answerId || !questionId) return;
+  async function gradeAnswer(id: string) {
+    if (!id || !questionId) return;
     setError(null);
     setIsGrading(true);
     try {
       const res = await fetch('/api/interview/grade-answer', {
         method: 'POST',
         headers: {'content-type': 'application/json'},
-        body: JSON.stringify({answer_id: answerId, question_id: questionId}),
+        body: JSON.stringify({answer_id: id, question_id: questionId}),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error ?? 'Grading failed');
@@ -112,33 +113,31 @@ function InterviewStartInner() {
 
   const phaseStatus = grade
     ? 'Graded'
-    : transcription
-      ? 'Ready to grade'
-      : 'Practice & get feedback';
+    : isGrading
+      ? 'Scoring…'
+      : transcription
+        ? 'Answer saved'
+        : 'Your turn';
 
   return (
-    <>
+    <div className="aced-room">
       <nav className="aced-crumb" aria-label="Breadcrumb">
-        <Link href="/studio">← Studio</Link>
-        <span aria-hidden="true">/</span>
-        <Link href="/interview">Practice interview</Link>
+        <Link href="/studio">← Home</Link>
       </nav>
-      <header className="aced-masthead aced-masthead--question">
+
+      <header className="aced-room__head">
         {questions.length > 0 ? (
           <SessionProgress
-            label="Session questions"
+            label="Questions"
             current={questionIndex + 1}
             total={questions.length}
             status={phaseStatus}
           />
         ) : null}
-        <div className="aced-masthead__copy">
-          <h1>{questionText ?? 'Loading question…'}</h1>
-          <p className="aced-masthead__lead">
-            Speak out loud. Your browser turns speech into a transcript, then we
-            score that text against the cues for this question.
-          </p>
-        </div>
+        <h1>{questionText ?? 'Loading question…'}</h1>
+        <p className="aced-room__lead">
+          Speak out loud. We score your transcript against this question’s cues.
+        </p>
       </header>
 
       <Section variant="transparent" padding={0}>
@@ -148,7 +147,9 @@ function InterviewStartInner() {
               <Collapsible
                 defaultIsOpen={false}
                 trigger={
-                  <Text type="label">Before you answer · {criteria.mustCover.length} cues</Text>
+                  <Text type="label">
+                    Before you answer · {criteria.mustCover.length} cues
+                  </Text>
                 }
               >
                 <VStack gap={3} className="aced-answer-tips__body">
@@ -158,12 +159,16 @@ function InterviewStartInner() {
                     </Text>
                   ) : null}
                   <ol className="aced-answer-tips__list">
-                    {criteria.mustCover.slice(0, 4).map(item => (
+                    {criteria.mustCover.slice(0, 4).map((item) => (
                       <li key={item}>{item}</li>
                     ))}
                   </ol>
                   {criteria.strongSignals[0] ? (
-                    <Text as="p" color="secondary" className="aced-answer-tips__nudge">
+                    <Text
+                      as="p"
+                      color="secondary"
+                      className="aced-answer-tips__nudge"
+                    >
                       Strong answers often include: {criteria.strongSignals[0]}
                     </Text>
                   ) : null}
@@ -172,61 +177,63 @@ function InterviewStartInner() {
             </div>
           ) : null}
 
-          <div className="aced-panel">
-            <VStack gap={4}>
-              <Heading level={3}>Practice and get feedback</Heading>
-              {!ready ? (
-                <Banner
-                  status="warning"
-                  title="Missing session"
-                  description="Start from the interview page so a session and question are created."
-                />
-              ) : (
-                <VoiceRecorder
-                  key={questionId}
-                  sessionId={sessionId}
-                  questionId={questionId}
-                  onComplete={({answerId: id, transcription: text, source}) => {
-                    setAnswerId(id);
-                    setTranscription(text);
-                    setTranscriptSource(source);
-                    setGrade(null);
-                  }}
-                />
-              )}
+          <section className="aced-room__stage" aria-label="Answer">
+            {!ready ? (
+              <Banner
+                status="warning"
+                title="Missing session"
+                description="Start from Home so a session and question are created."
+              />
+            ) : (
+              <VoiceRecorder
+                key={questionId}
+                sessionId={sessionId}
+                questionId={questionId}
+                onComplete={({answerId: id, transcription: text, source}) => {
+                  setAnswerId(id);
+                  setTranscription(text);
+                  setTranscriptSource(source);
+                  setGrade(null);
+                  void gradeAnswer(id);
+                }}
+              />
+            )}
 
-              {transcription ? (
-                <VStack gap={2}>
-                  <Heading level={3}>Captured transcript</Heading>
-                  <Text type="supporting" color="secondary" as="p">
-                    Source: {transcriptSource ?? 'browser'}. Graded against the
-                    criteria above.
-                  </Text>
-                  <div className="aced-record__transcript">
-                    <Text as="p">{transcription}</Text>
-                  </div>
-                  <Button
-                    label="Grade this answer"
-                    variant="primary"
-                    clickAction={gradeCurrentAnswer}
-                    isDisabled={!answerId}
-                    isLoading={isGrading}
-                  />
-                </VStack>
-              ) : null}
+            {isGrading ? (
+              <Text type="label" color="secondary">
+                Scoring your answer…
+              </Text>
+            ) : null}
 
-              {grade ? <GradeFeedback grade={grade} /> : null}
+            {transcription && !isGrading ? (
+              <div className="aced-room__transcript">
+                <Text type="label" color="secondary">
+                  Transcript · {transcriptSource ?? 'browser'}
+                </Text>
+                <Text as="p">{transcription}</Text>
+              </div>
+            ) : null}
 
-              {error ? (
-                <Banner
-                  status="error"
-                  title="Interview error"
-                  description={error}
-                />
-              ) : null}
+            {grade ? <GradeFeedback grade={grade} /> : null}
 
-              <nav className="aced-next-steps" aria-label="Next steps">
-                <p className="aced-next-steps__label">Next steps</p>
+            {error ? (
+              <Banner
+                status="error"
+                title="Interview error"
+                description={error}
+              />
+            ) : null}
+
+            {error && answerId && !grade && !isGrading ? (
+              <Button
+                label="Retry scoring"
+                variant="secondary"
+                onClick={() => void gradeAnswer(answerId)}
+              />
+            ) : null}
+
+            {grade ? (
+              <nav className="aced-room__next" aria-label="Continue">
                 <HStack gap={2} wrap="wrap">
                   {nextQuestion ? (
                     <Button
@@ -234,10 +241,20 @@ function InterviewStartInner() {
                       variant="primary"
                       onClick={() => goToQuestion(nextQuestion.id)}
                     />
-                  ) : null}
-                  {sessionId ? (
+                  ) : (
                     <Button
-                      label="View session results"
+                      label="See session results"
+                      variant="primary"
+                      onClick={() =>
+                        router.push(
+                          `/interview/results?session_id=${sessionId}`,
+                        )
+                      }
+                    />
+                  )}
+                  {nextQuestion && sessionId ? (
+                    <Button
+                      label="End session"
                       variant="secondary"
                       onClick={() =>
                         router.push(
@@ -248,11 +265,11 @@ function InterviewStartInner() {
                   ) : null}
                 </HStack>
               </nav>
-            </VStack>
-          </div>
+            ) : null}
+          </section>
         </VStack>
       </Section>
-    </>
+    </div>
   );
 }
 

@@ -1,7 +1,6 @@
 'use client';
 
 import {useState} from 'react';
-import Link from 'next/link';
 import {useRouter} from 'next/navigation';
 import {FileInput} from '@astryxdesign/core/FileInput';
 import {TextArea} from '@astryxdesign/core/TextArea';
@@ -10,8 +9,7 @@ import {VStack} from '@astryxdesign/core/Layout';
 import {Text} from '@astryxdesign/core/Text';
 import {Heading} from '@astryxdesign/core/Heading';
 import {Banner} from '@astryxdesign/core/Banner';
-import {Divider} from '@astryxdesign/core/Divider';
-import {PrepStepper} from '@/components/PrepStepper';
+import {Collapsible} from '@astryxdesign/core/Collapsible';
 import {CVAtsReport} from '@/components/CVAtsReport';
 import {CVWritingReport} from '@/components/CVWritingReport';
 import type {AtsAuditResult} from '@/lib/cv-ats';
@@ -29,12 +27,6 @@ type CvPreview = {
   writing: WritingAuditResult;
 };
 
-type WhiteboardRecommendation = {
-  recommended: boolean;
-  reason: string | null;
-  matchedTerms: string[];
-};
-
 type JdPreview = {
   job_description_id: string;
   role_title: string | null;
@@ -42,7 +34,6 @@ type JdPreview = {
   requirements: string[];
   keywords: string[];
   source_type: string;
-  whiteboard_recommendation?: WhiteboardRecommendation;
 };
 
 export function CVUploadForm() {
@@ -56,8 +47,7 @@ export function CVUploadForm() {
   const [error, setError] = useState<string | null>(null);
   const [preview, setPreview] = useState<CvPreview | null>(null);
   const [jdPreview, setJdPreview] = useState<JdPreview | null>(null);
-  const [whiteboardHint, setWhiteboardHint] =
-    useState<WhiteboardRecommendation | null>(null);
+  const [jdOpen, setJdOpen] = useState(false);
 
   async function handleAnalyzeCv() {
     if (!file) {
@@ -111,9 +101,7 @@ export function CVUploadForm() {
         requirements: data.requirements ?? [],
         keywords: data.keywords ?? [],
         source_type: data.source_type,
-        whiteboard_recommendation: data.whiteboard_recommendation,
       });
-      setWhiteboardHint(data.whiteboard_recommendation ?? null);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Something went wrong');
     } finally {
@@ -142,9 +130,6 @@ export function CVUploadForm() {
       if (!startRes.ok) {
         throw new Error(startData.error ?? 'Could not start interview');
       }
-      if (startData.whiteboard_recommendation?.recommended) {
-        setWhiteboardHint(startData.whiteboard_recommendation);
-      }
       router.push(
         `/interview/start?session_id=${startData.session_id}&question_id=${startData.question_id}`,
       );
@@ -155,224 +140,163 @@ export function CVUploadForm() {
     }
   }
 
-  const cvDone = Boolean(preview);
-  const jdDone = Boolean(jdPreview);
-  const steps = [
-    {
-      id: 'cv',
-      label: 'Your CV',
-      hint: 'Upload and analyse your design CV',
-      done: cvDone,
-      current: !cvDone,
-    },
-    {
-      id: 'jd',
-      label: 'Job description',
-      hint: 'Optional. Add a JD to sharpen role-fit scoring',
-      done: jdDone,
-      current: false,
-      optional: true,
-    },
-    {
-      id: 'start',
-      label: 'Start practice',
-      hint: cvDone
-        ? jdDone
-          ? 'CV + JD ready. Begin the interview'
-          : 'CV ready. Add a JD above, or start now'
-        : 'Unlocks after your CV is analysed',
-      done: false,
-      current: cvDone,
-    },
-  ];
-
   return (
-    <VStack gap={4}>
+    <VStack gap={5} className="aced-prep">
       {error ? (
         <Banner status="error" title="Prep error" description={error} />
       ) : null}
 
-      <PrepStepper steps={steps} />
-
-      <header
-        className={`aced-section-head${!cvDone ? ' aced-section-head--active' : ''}`}
-      >
-        <p className="aced-section-head__eyebrow">Step 1 · Required</p>
-        <Heading level={3}>Your CV</Heading>
-      </header>
-      <FileInput
-        label="Design CV (PDF)"
-        description="We extract text, check ATS readability and writing tone, then personalise interview questions."
-        accept="application/pdf,.pdf"
-        maxSize={10 * 1024 * 1024}
-        mode="dropzone"
-        value={file}
-        onChange={(next) => {
-          setFile(next instanceof File ? next : null);
-          setPreview(null);
-        }}
-        isRequired
-        isLoading={isAnalyzing}
-        placeholder="Drop your CV here"
-      />
-      <Button
-        label="Analyse CV"
-        variant="secondary"
-        isLoading={isAnalyzing}
-        isDisabled={!file}
-        clickAction={handleAnalyzeCv}
-      />
-
-      {preview ? (
-        <VStack gap={3}>
-          {preview.ats ? <CVAtsReport audit={preview.ats} /> : null}
-          {preview.writing ? <CVWritingReport audit={preview.writing} /> : null}
-          <Banner
-            status={preview.text_extracted ? 'success' : 'warning'}
-            title={
-              preview.text_extracted
-                ? 'CV text extracted for practice'
-                : 'Little CV text extracted'
-            }
-            description={`Skills spotted: ${preview.skills.join(', ') || 'none yet'}`}
+      <section className="aced-prep__block" aria-labelledby="aced-prep-cv">
+        <Heading level={2} id="aced-prep-cv">
+          Your CV
+        </Heading>
+        <Text as="p" color="secondary">
+          PDF only. We’ll extract text and personalise five questions.
+        </Text>
+        <FileInput
+          label="Design CV (PDF)"
+          description="Max 10MB"
+          accept="application/pdf,.pdf"
+          maxSize={10 * 1024 * 1024}
+          mode="dropzone"
+          value={file}
+          onChange={(next) => {
+            setFile(next instanceof File ? next : null);
+            setPreview(null);
+          }}
+          isRequired
+          isLoading={isAnalyzing}
+          placeholder="Drop your CV here"
+        />
+        {!preview ? (
+          <Button
+            label="Analyse CV"
+            variant="primary"
+            isLoading={isAnalyzing}
+            isDisabled={!file}
+            clickAction={handleAnalyzeCv}
           />
-          {preview.projects.length > 0 ? (
-            <Text as="p" color="secondary">
-              Projects: {preview.projects.slice(0, 3).join(' · ')}
-            </Text>
-          ) : null}
-        </VStack>
-      ) : null}
-
-      <Divider />
-
-      <header className="aced-section-head">
-        <p className="aced-section-head__eyebrow">Step 2 · Optional</p>
-        <Heading level={3}>Target job description</Heading>
-      </header>
-      <Text as="p" color="secondary">
-        Upload a screenshot/image of the JD, a PDF, or paste text. We OCR images
-        for free and use requirements to tailor questions and “good answer”
-        criteria. You can skip this and still start practice.
-      </Text>
-      <FileInput
-        label="Job description image or PDF"
-        description="PNG, JPG, WEBP, or PDF"
-        accept="image/png,image/jpeg,image/webp,application/pdf,.png,.jpg,.jpeg,.webp,.pdf"
-        maxSize={10 * 1024 * 1024}
-        mode="dropzone"
-        value={jdFile}
-        onChange={(next) => {
-          setJdFile(next instanceof File ? next : null);
-          setJdPreview(null);
-        }}
-        isOptional
-        isLoading={isJdLoading}
-        placeholder="Drop JD screenshot or PDF"
-      />
-      <TextArea
-        label="Or paste JD text"
-        value={jdText}
-        onChange={setJdText}
-        isOptional
-        rows={5}
-        placeholder="Paste the role summary, requirements, and responsibilities…"
-      />
-      <Button
-        label="Analyse job description"
-        variant="secondary"
-        isLoading={isJdLoading}
-        isDisabled={!jdFile && !jdText.trim()}
-        clickAction={handleAnalyzeJd}
-      />
-
-      {jdPreview ? (
-        <VStack gap={2}>
-          <Banner
-            status="success"
-            title={
-              jdPreview.role_title
-                ? `Target role: ${jdPreview.role_title}`
-                : 'Job description captured'
-            }
-            description={
-              jdPreview.company_name
-                ? `${jdPreview.company_name} · source: ${jdPreview.source_type}`
-                : `Source: ${jdPreview.source_type}`
-            }
-          />
-          {jdPreview.requirements.length > 0 ? (
-            <VStack gap={1}>
-              <Text type="label">Requirements we’ll score against</Text>
-              {jdPreview.requirements.slice(0, 4).map((req) => (
-                <Text key={req} as="p" color="secondary">
-                  • {req}
-                </Text>
-              ))}
-            </VStack>
-          ) : null}
-          {jdPreview.keywords.length > 0 ? (
-            <Text as="p" color="secondary">
-              Keywords: {jdPreview.keywords.slice(0, 8).join(', ')}
-            </Text>
-          ) : null}
-          {jdPreview.whiteboard_recommendation?.recommended ? (
+        ) : (
+          <VStack gap={3}>
             <Banner
-              status="info"
-              title="This role likely includes a live design exercise"
+              status={preview.text_extracted ? 'success' : 'warning'}
+              title={
+                preview.text_extracted ? 'CV ready' : 'Little CV text extracted'
+              }
               description={
-                jdPreview.whiteboard_recommendation.reason ??
-                'Practice on the timed whiteboard before verbal Q&A alone.'
+                preview.skills.length
+                  ? `Skills spotted: ${preview.skills.slice(0, 6).join(', ')}`
+                  : 'You can still start — questions will be more general.'
               }
             />
+
+            <div className="aced-cta-bar">
+              <div className="aced-cta-bar__copy">
+                <Text type="label">
+                  {jdPreview
+                    ? 'CV + role ready'
+                    : 'CV ready — enter the interview'}
+                </Text>
+                <Text type="supporting" color="secondary" as="p">
+                  About 15 minutes. Five questions out loud.
+                </Text>
+              </div>
+              <Button
+                label="Enter interview"
+                variant="primary"
+                isLoading={isLoading}
+                clickAction={handleStart}
+              />
+            </div>
+
+            {(preview.ats || preview.writing) ? (
+              <Collapsible
+                defaultIsOpen={false}
+                trigger={<Text type="label">CV health check</Text>}
+              >
+                <VStack gap={3}>
+                  {preview.ats ? <CVAtsReport audit={preview.ats} /> : null}
+                  {preview.writing ? (
+                    <CVWritingReport audit={preview.writing} />
+                  ) : null}
+                </VStack>
+              </Collapsible>
+            ) : null}
+          </VStack>
+        )}
+      </section>
+
+      {preview ? (
+        <section className="aced-prep__block" aria-labelledby="aced-prep-jd">
+          <button
+            type="button"
+            className="aced-prep__toggle"
+            aria-expanded={jdOpen}
+            onClick={() => setJdOpen((v) => !v)}
+          >
+            <span id="aced-prep-jd">
+              {jdPreview
+                ? `Role added${jdPreview.role_title ? `: ${jdPreview.role_title}` : ''}`
+                : 'Add a job description (optional)'}
+            </span>
+            <span aria-hidden="true">{jdOpen ? '−' : '+'}</span>
+          </button>
+
+          {jdOpen ? (
+            <VStack gap={3}>
+              <Text as="p" color="secondary">
+                Sharpens questions to a target role. Skip if you just want to
+                rehearse.
+              </Text>
+              <FileInput
+                label="Job description image or PDF"
+                description="PNG, JPG, WEBP, or PDF"
+                accept="image/png,image/jpeg,image/webp,application/pdf,.png,.jpg,.jpeg,.webp,.pdf"
+                maxSize={10 * 1024 * 1024}
+                mode="dropzone"
+                value={jdFile}
+                onChange={(next) => {
+                  setJdFile(next instanceof File ? next : null);
+                  setJdPreview(null);
+                }}
+                isOptional
+                isLoading={isJdLoading}
+                placeholder="Drop JD screenshot or PDF"
+              />
+              <TextArea
+                label="Or paste JD text"
+                value={jdText}
+                onChange={setJdText}
+                isOptional
+                rows={4}
+                placeholder="Paste the role summary and requirements…"
+              />
+              <Button
+                label="Add role"
+                variant="secondary"
+                isLoading={isJdLoading}
+                isDisabled={!jdFile && !jdText.trim()}
+                clickAction={handleAnalyzeJd}
+              />
+              {jdPreview ? (
+                <Banner
+                  status="success"
+                  title={
+                    jdPreview.role_title
+                      ? `Target role: ${jdPreview.role_title}`
+                      : 'Job description captured'
+                  }
+                  description={
+                    jdPreview.company_name
+                      ? `${jdPreview.company_name} · questions will lean toward this role`
+                      : 'Questions will lean toward this role'
+                  }
+                />
+              ) : null}
+            </VStack>
           ) : null}
-        </VStack>
+        </section>
       ) : null}
-
-      {whiteboardHint?.recommended && !jdPreview?.whiteboard_recommendation?.recommended ? (
-        <Banner
-          status="info"
-          title="Whiteboard practice recommended"
-          description={whiteboardHint.reason ?? 'Add a timed canvas run to your prep.'}
-        />
-      ) : null}
-
-      {jdPreview?.whiteboard_recommendation?.recommended ||
-      whiteboardHint?.recommended ? (
-        <Link href="/whiteboard" className="aced-orient__cta">
-          Open timed whiteboard practice →
-        </Link>
-      ) : null}
-
-      <Divider />
-
-      <header
-        className={`aced-section-head${cvDone ? ' aced-section-head--active' : ''}`}
-      >
-        <p className="aced-section-head__eyebrow">Step 3 · Start</p>
-        <Heading level={3}>Begin the interview</Heading>
-      </header>
-      <div className="aced-cta-bar">
-        <div className="aced-cta-bar__copy">
-          <Text type="label">
-            {preview
-              ? jdPreview
-                ? 'CV + JD ready. Start when you are'
-                : 'CV ready. A JD is optional but sharpens scoring'
-              : 'Analyse a CV to unlock practice'}
-          </Text>
-          <Text type="supporting" color="secondary" as="p">
-            Personalised questions and a clear strong / weak rubric come next.
-          </Text>
-        </div>
-        <Button
-          label="Start personalised practice interview"
-          variant="primary"
-          isLoading={isLoading}
-          isDisabled={!preview}
-          clickAction={handleStart}
-        />
-      </div>
     </VStack>
   );
 }
