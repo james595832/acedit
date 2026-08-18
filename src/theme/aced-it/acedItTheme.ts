@@ -20,7 +20,7 @@ export const acedItTheme = defineTheme({
         'ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif',
     },
     heading: {
-      family: 'var(--font-aced-heading), "Plus Jakarta Sans"',
+      family: 'var(--font-aced-heading), Outfit',
       fallbacks: 'ui-sans-serif, system-ui, sans-serif',
       weights: {1: '600', 2: '600', 3: '600', 4: '600'},
     },

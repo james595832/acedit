@@ -1,5 +1,5 @@
 import type {Metadata} from 'next';
-import {Plus_Jakarta_Sans} from 'next/font/google';
+import {Outfit, Plus_Jakarta_Sans} from 'next/font/google';
 import {Providers} from '@/components/providers';
 import {AppShellServer} from '@/components/AppShellServer';
 import '@astryxdesign/core/reset.css';
@@ -13,7 +13,7 @@ const jakarta = Plus_Jakarta_Sans({
   weight: ['400', '500', '600', '700'],
 });
 
-const jakartaHeading = Plus_Jakarta_Sans({
+const outfit = Outfit({
   subsets: ['latin'],
   variable: '--font-aced-heading',
   display: 'swap',
@@ -26,7 +26,6 @@ export const metadata: Metadata = {
     'Interview practice made just for designers. Answer real questions out loud, sketch on a timed whiteboard, and get clear feedback.',
   icons: {
     icon: [
-      // Self-adapting SVG first; explicit variants for browsers that honor media
       {url: '/img/favicon.svg', type: 'image/svg+xml'},
       {
         url: '/img/favicon-light.svg',
@@ -48,10 +47,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html
-      lang="en"
-      className={`${jakarta.variable} ${jakartaHeading.variable}`}
-    >
+    <html lang="en" className={`${jakarta.variable} ${outfit.variable}`}>
       <body className={jakarta.className}>
         <Providers>
           <AppShellServer>{children}</AppShellServer>
