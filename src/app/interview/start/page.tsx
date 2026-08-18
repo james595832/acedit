@@ -126,6 +126,9 @@ function InterviewStartInner() {
       </nav>
 
       <header className="aced-room__head">
+        <Text type="label" color="secondary" as="p">
+          Interview · Room · step 2 of 3
+        </Text>
         {questions.length > 0 ? (
           <SessionProgress
             label="Questions"

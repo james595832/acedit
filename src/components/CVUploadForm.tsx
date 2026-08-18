@@ -51,7 +51,7 @@ export function CVUploadForm() {
 
   async function handleAnalyzeCv() {
     if (!file) {
-      setError('Choose a PDF CV first.');
+      setError('Add your PDF CV first.');
       return;
     }
     setIsAnalyzing(true);
@@ -111,7 +111,7 @@ export function CVUploadForm() {
 
   async function handleStart() {
     if (!preview?.cv_id) {
-      setError('Analyse a CV before starting the interview.');
+      setError('Confirm your CV before entering the interview.');
       return;
     }
     setIsLoading(true);
@@ -143,7 +143,7 @@ export function CVUploadForm() {
   return (
     <VStack gap={5} className="aced-prep">
       {error ? (
-        <Banner status="error" title="Prep error" description={error} />
+        <Banner status="error" title="Couldn’t continue" description={error} />
       ) : null}
 
       <section className="aced-prep__block" aria-labelledby="aced-prep-cv">
@@ -151,11 +151,12 @@ export function CVUploadForm() {
           Your CV
         </Heading>
         <Text as="p" color="secondary">
-          PDF only. We’ll extract text and personalise five questions.
+          PDF only. We’ll read it and shape five interview questions around your
+          experience.
         </Text>
         <FileInput
           label="Design CV (PDF)"
-          description="Max 10MB"
+          description="Required · max 10MB"
           accept="application/pdf,.pdf"
           maxSize={10 * 1024 * 1024}
           mode="dropzone"
@@ -170,7 +171,7 @@ export function CVUploadForm() {
         />
         {!preview ? (
           <Button
-            label="Analyse CV"
+            label="Continue with this CV"
             variant="primary"
             isLoading={isAnalyzing}
             isDisabled={!file}
@@ -181,12 +182,14 @@ export function CVUploadForm() {
             <Banner
               status={preview.text_extracted ? 'success' : 'warning'}
               title={
-                preview.text_extracted ? 'CV ready' : 'Little CV text extracted'
+                preview.text_extracted
+                  ? 'CV ready for your interview'
+                  : 'We couldn’t read much text from this PDF'
               }
               description={
                 preview.skills.length
                   ? `Skills spotted: ${preview.skills.slice(0, 6).join(', ')}`
-                  : 'You can still start — questions will be more general.'
+                  : 'You can still continue — questions will be more general.'
               }
             />
 
@@ -194,11 +197,11 @@ export function CVUploadForm() {
               <div className="aced-cta-bar__copy">
                 <Text type="label">
                   {jdPreview
-                    ? 'CV + role ready'
-                    : 'CV ready — enter the interview'}
+                    ? 'Ready — CV and role set'
+                    : 'Ready — enter the interview room'}
                 </Text>
                 <Text type="supporting" color="secondary" as="p">
-                  About 15 minutes. Five questions out loud.
+                  About 15 minutes. Five questions out loud. Mic on.
                 </Text>
               </div>
               <Button
