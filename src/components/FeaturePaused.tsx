@@ -9,7 +9,7 @@ type FeaturePausedProps = {
 export function FeaturePaused({
   title,
   lead,
-  roadmapHash = '#next',
+  roadmapHash = '#september-2026',
 }: FeaturePausedProps) {
   return (
     <div className="aced-paused">

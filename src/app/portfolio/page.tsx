@@ -14,7 +14,7 @@ export default function PortfolioPage() {
         <FeaturePaused
           title="Portfolio review"
           lead="Case study checks and JD fit will come back once the interview loop is rock solid."
-          roadmapHash="#next"
+          roadmapHash="#september-2026"
         />
       </>
     );

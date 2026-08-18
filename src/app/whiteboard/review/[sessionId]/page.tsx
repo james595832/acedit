@@ -75,7 +75,7 @@ export default function WhiteboardReviewPage() {
         <FeaturePaused
           title="Whiteboard challenges"
           lead="Timed design prompts and clarifying questions will return after we lock interview practice."
-          roadmapHash="#next"
+          roadmapHash="#september-2026"
         />
       </>
     );

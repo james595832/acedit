@@ -19,8 +19,8 @@ export function isFeatureEnabled(feature: FeatureKey): boolean {
 export function featurePausedPayload(feature: 'whiteboard' | 'portfolio') {
   const label = feature === 'whiteboard' ? 'Whiteboard' : 'Portfolio review';
   return {
-    error: `${label} is paused while we focus on interview practice. See /roadmap#next.`,
+    error: `${label} is paused while we focus on interview practice. See /roadmap#september-2026.`,
     code: 'FEATURE_PAUSED' as const,
-    roadmap: '/roadmap#next',
+    roadmap: '/roadmap#september-2026',
   };
 }

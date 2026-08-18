@@ -4,108 +4,84 @@ import Link from 'next/link';
 export const metadata: Metadata = {
   title: 'Roadmap | ACED-IT',
   description:
-    'What is live on ACED-IT today, what is next (whiteboard and portfolio), and where we are headed.',
+    'What we have shipped and what we plan to release, month by month.',
 };
 
-type RoadmapItem = {
+type RoadmapEntry = {
   title: string;
   body: string;
-  tag?: string;
+  /** Plain status text — not a pill. */
+  status?: 'Shipped' | 'In progress' | 'Planned';
 };
 
-type RoadmapPhase = {
+type RoadmapMonth = {
   id: string;
-  label: string;
-  title: string;
-  lead: string;
-  status: 'live' | 'next' | 'building' | 'later';
-  items: RoadmapItem[];
+  period: string;
+  entries: RoadmapEntry[];
 };
 
-const PHASES: RoadmapPhase[] = [
+const MONTHS: RoadmapMonth[] = [
   {
-    id: 'now',
-    label: 'Now',
-    title: 'Live today',
-    lead: 'The practice loop we are shipping and hardening first.',
-    status: 'live',
-    items: [
+    id: 'august-2026',
+    period: 'August 2026',
+    entries: [
       {
         title: 'Practice interviews',
-        body: 'Upload your CV and an optional job ad. Answer out loud. Get a score and clear notes on what to fix.',
-        tag: 'Live',
+        body: 'CV upload, optional job description, five spoken answers, graded feedback.',
+        status: 'Shipped',
       },
       {
-        title: 'Results and feedback',
-        body: 'See how you scored, revisit answers, and tell us what to improve in the product.',
-        tag: 'Live',
+        title: 'Session results',
+        body: 'Overall score, answer-by-answer notes, and a clear path to practise again.',
+        status: 'Shipped',
       },
     ],
   },
   {
-    id: 'next',
-    label: 'Next',
-    title: 'Coming next',
-    lead: 'Paused for soft launch so interview practice can feel seamless first.',
-    status: 'next',
-    items: [
+    id: 'september-2026',
+    period: 'September 2026',
+    entries: [
+      {
+        title: 'Interview loop hardening',
+        body: 'Mic, transcript, grading, and save reliability — the soft-launch priority.',
+        status: 'In progress',
+      },
       {
         title: 'Whiteboard challenges',
-        body: 'Timed design prompts, a marker board, and clarifying questions — practice like an onsite. Returning once the interview room is rock solid.',
-        tag: 'Paused',
+        body: 'Timed design prompts, marker board, clarifying questions. Returns when the interview room is solid.',
+        status: 'Planned',
       },
       {
         title: 'Portfolio review',
-        body: 'Check whether your case studies tell a story a hiring manager can follow, with optional JD fit. Returning after interview practice.',
-        tag: 'Paused',
-      },
-      {
-        title: 'Leaderboard',
-        body: 'Keep practising to climb. See how you compare, track streaks, and push for a higher score over time.',
-        tag: 'Planned',
+        body: 'Case study check with optional JD fit. Same bar as interviews before it goes live again.',
+        status: 'Planned',
       },
     ],
   },
   {
-    id: 'building',
-    label: 'Building',
-    title: 'Hiring that finds you',
-    lead: 'When practice is trusted, companies can come to strong candidates.',
-    status: 'building',
-    items: [
+    id: 'october-2026',
+    period: 'October 2026',
+    entries: [
       {
-        title: 'Company partners',
-        body: 'Work with employers who want a real pipeline of design talent. Banks, product companies, and teams tired of 100 LinkedIn applications where 90 are a bad fit.',
-        tag: 'Partners',
-      },
-      {
-        title: 'Score opens doors',
-        body: 'High practice scores and hire-ready signals can unlock a small set of interview intros. Proof first. Then introductions.',
-        tag: 'Matching',
-      },
-      {
-        title: 'Retainer pipeline for employers',
-        body: 'Companies pay for a steady flow of candidates who already match the role. A real revenue line for ACED-IT, and a fairer path for designers than spray-and-pray applications.',
-        tag: 'Revenue',
+        title: 'Practice streaks',
+        body: 'A light reason to come back each week — progress on your last score, not a vanity board.',
+        status: 'Planned',
       },
     ],
   },
   {
-    id: 'later',
-    label: 'Later',
-    title: 'A better network for design careers',
-    lead: 'People stay on LinkedIn because there is nowhere else. We want somewhere else.',
-    status: 'later',
-    items: [
+    id: '2027',
+    period: '2027',
+    entries: [
       {
-        title: 'Smarter AI for designers and hiring',
-        body: 'Models that understand design work, interview craft, and what recruiters actually need. Better matches. Less noise. Feedback that gets more useful the more you practise.',
-        tag: 'AI',
+        title: 'Employer introductions',
+        body: 'Only after practice scores are trusted. Proof first, then a small set of intros.',
+        status: 'Planned',
       },
       {
-        title: 'The LinkedIn breaker',
-        body: 'A place built for showing you are ready, not for posting. Practice, proof, and introductions in one product people choose because it works.',
-        tag: 'Vision',
+        title: 'Hiring partner pipeline',
+        body: 'Companies pay for candidates who already match the role. Fairer than LinkedIn spray-and-pray.',
+        status: 'Planned',
       },
     ],
   },
@@ -114,52 +90,35 @@ const PHASES: RoadmapPhase[] = [
 export default function RoadmapPage() {
   return (
     <article className="aced-roadmap">
-      <header className="aced-masthead">
-        <div className="aced-masthead__copy">
-          <h1>Where ACED-IT is going</h1>
-          <p className="aced-masthead__lead">
-            Soft launch focus: make practice interviews seamless. Whiteboard and
-            portfolio are next — then proof, then real opportunities.
-          </p>
-        </div>
+      <header className="aced-roadmap__intro">
+        <h1>Roadmap</h1>
+        <p>
+          What we have shipped and what we expect to release. Dates can move —
+          we update this page when they do.
+        </p>
       </header>
 
-      <nav className="aced-roadmap__tabs" aria-label="Roadmap phases">
-        {PHASES.map((phase) => (
-          <a key={phase.id} href={`#${phase.id}`} className="aced-roadmap__tab">
-            <span
-              className={`aced-roadmap__dot aced-roadmap__dot--${phase.status}`}
-            />
-            {phase.label}
-          </a>
-        ))}
-      </nav>
-
-      <div className="aced-roadmap__board">
-        {PHASES.map((phase) => (
+      <div className="aced-roadmap__timeline">
+        {MONTHS.map((month) => (
           <section
-            key={phase.id}
-            id={phase.id}
-            className="aced-roadmap__column"
-            aria-labelledby={`${phase.id}-title`}
+            key={month.id}
+            id={month.id}
+            className="aced-roadmap__month"
+            aria-labelledby={`${month.id}-label`}
           >
-            <header className="aced-roadmap__column-head">
-              <p
-                className={`aced-roadmap__status aced-roadmap__status--${phase.status}`}
-              >
-                {phase.label}
-              </p>
-              <h2 id={`${phase.id}-title`}>{phase.title}</h2>
-              <p>{phase.lead}</p>
-            </header>
-            <ul className="aced-roadmap__list">
-              {phase.items.map((item) => (
-                <li key={item.title} className="aced-roadmap__card">
-                  {item.tag ? (
-                    <span className="aced-roadmap__tag">{item.tag}</span>
-                  ) : null}
-                  <h3>{item.title}</h3>
-                  <p>{item.body}</p>
+            <h2 id={`${month.id}-label`}>{month.period}</h2>
+            <ul className="aced-roadmap__entries">
+              {month.entries.map((entry) => (
+                <li key={entry.title}>
+                  <div className="aced-roadmap__entry-head">
+                    <h3>{entry.title}</h3>
+                    {entry.status ? (
+                      <span className="aced-roadmap__status">
+                        {entry.status}
+                      </span>
+                    ) : null}
+                  </div>
+                  <p>{entry.body}</p>
                 </li>
               ))}
             </ul>
@@ -167,20 +126,10 @@ export default function RoadmapPage() {
         ))}
       </div>
 
-      <section className="aced-roadmap__why" aria-labelledby="roadmap-why">
-        <h2 id="roadmap-why">Why this order</h2>
-        <p>
-          Designers need a practice room they can trust before they apply. We
-          are locking interview rehearsal first. Whiteboard and portfolio return
-          when they meet that same bar — then strong scores can open doors
-          employers will pay for.
-        </p>
-        <p>
-          Ideas change. If something here shifts, we will update this page. Want
-          a say? Use Feedback in the app, or{' '}
-          <Link href="/contact">contact us</Link>.
-        </p>
-      </section>
+      <p className="aced-roadmap__note">
+        Ideas change. Tell us what to prioritise via Feedback in the app, or{' '}
+        <Link href="/contact">contact us</Link>.
+      </p>
     </article>
   );
 }

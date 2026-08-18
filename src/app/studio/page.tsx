@@ -127,13 +127,13 @@ export default async function StudioPage({searchParams}: StudioPageProps) {
         <p className="aced-home__more-label">Coming next</p>
         <ul className="aced-home__more-list">
           <li>
-            <Link href="/roadmap#next">
+            <Link href="/roadmap#september-2026">
               <span className="aced-home__more-title">Whiteboard</span>
               <span className="aced-home__more-meta">On the roadmap</span>
             </Link>
           </li>
           <li>
-            <Link href="/roadmap#next">
+            <Link href="/roadmap#september-2026">
               <span className="aced-home__more-title">Portfolio review</span>
               <span className="aced-home__more-meta">On the roadmap</span>
             </Link>
