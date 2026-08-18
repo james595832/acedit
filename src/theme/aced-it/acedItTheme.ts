@@ -66,5 +66,11 @@ export const acedItTheme = defineTheme({
           'background-color 150ms ease, border-color 150ms ease, color 150ms ease',
       },
     },
+    'list-item': {
+      base: {
+        paddingInline: 'var(--spacing-4)',
+        borderRadius: 'var(--radius-element)',
+      },
+    },
   },
 });

@@ -58,6 +58,16 @@ export function AuthNav({email, configured}: AuthNavProps) {
           <VStack gap={0} className="aced-account-menu">
             <VStack gap={1} className="aced-account-menu__actions">
               <Button
+                label="Home"
+                variant="ghost"
+                size="sm"
+                className="aced-account-menu__item"
+                onClick={() => {
+                  setIsOpen(false);
+                  window.location.assign('/studio');
+                }}
+              />
+              <Button
                 label="Settings"
                 variant="ghost"
                 size="sm"

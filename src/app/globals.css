@@ -5411,6 +5411,26 @@ dialog.aced-feedback-dialog::backdrop {
     var(--ease-standard, cubic-bezier(0.24, 1, 0.4, 1)) both;
 }
 
+/*
+ * Astryx List/Item rows are edge-to-edge by design (tracker archetype).
+ * Interactive rows still need inset padding so hover/focus wash doesn't
+ * kiss the label and clip end content like “View”.
+ */
+.aced-app-page .astryx-list-item:has(a),
+.aced-app-page a.astryx-list-item,
+.aced-app-page .astryx-list-item:has(button) {
+  box-sizing: border-box;
+  padding-inline: var(--spacing-4, 1rem) !important;
+  padding-block: var(--spacing-3, 0.75rem) !important;
+  border-radius: var(--radius-element, 0.5rem);
+}
+
+.aced-app-page .astryx-list-item:has(a):hover,
+.aced-app-page a.astryx-list-item:hover,
+.aced-app-page .astryx-list-item:has(button):hover {
+  background-color: var(--color-background-muted, #f0f4f8);
+}
+
 .aced-paused {
   display: grid;
   gap: 0.85rem;

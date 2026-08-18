@@ -1,5 +1,5 @@
 import type {ReactNode} from 'react';
-import Link from 'next/link';
+import {LegalBackLink} from '@/components/LegalBackLink';
 
 type LegalPageProps = {
   title: string;
@@ -20,12 +20,7 @@ export function LegalPage({title, lastUpdated, children}: LegalPageProps) {
         </div>
       </header>
       <div className="aced-legal__body">{children}</div>
-      <nav className="aced-legal__nav" aria-label="Legal">
-        <Link href="/roadmap">Roadmap</Link>
-        <Link href="/privacy">Privacy Policy</Link>
-        <Link href="/terms">Terms &amp; Conditions</Link>
-        <Link href="/contact">Contact</Link>
-      </nav>
+      <LegalBackLink />
     </article>
   );
 }

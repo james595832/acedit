@@ -11,6 +11,7 @@ import {TopNav, TopNavHeading, TopNavItem} from '@astryxdesign/core/TopNav';
 import {AuthNav} from '@/components/AuthNav';
 import {SiteFooter} from '@/components/SiteFooter';
 import {FeedbackWidget} from '@/components/FeedbackWidget';
+import {AuthSessionProvider} from '@/components/AuthSession';
 
 type AppFrameProps = {
   children: ReactNode;
@@ -88,13 +89,19 @@ export function AppFrame({
 
   if (isHome || isStart) {
     // Marketing / trial start pages own their own chrome.
-    return children;
+    return (
+      <AuthSessionProvider email={userEmail}>{children}</AuthSessionProvider>
+    );
   }
 
   const navItems = isSignedIn ? (
     <>
       <TopNavItem label="Home" href="/studio" isSelected={isStudio} />
-      <TopNavItem label="Practice" href="/interview" isSelected={isInterview} />
+      <TopNavItem
+        label="Interview"
+        href="/interview"
+        isSelected={isInterview}
+      />
       <TopNavItem
         label="Results"
         href="/interview/results"
@@ -105,6 +112,7 @@ export function AppFrame({
   ) : null;
 
   return (
+    <AuthSessionProvider email={userEmail}>
     <AppShell
       height="auto"
       variant="wash"
@@ -122,7 +130,7 @@ export function AppFrame({
                     isSelected={isStudio}
                   />
                   <SideNavItem
-                    label="Practice"
+                    label="Interview"
                     href="/interview"
                     isSelected={isInterview}
                   />
@@ -152,7 +160,7 @@ export function AppFrame({
           className="aced-top-nav"
           heading={
             <TopNavHeading
-              headingHref="/"
+              headingHref={isSignedIn ? '/studio' : '/'}
               logo={
                 <Image
                   src="/ACED-IT.svg"
@@ -194,5 +202,6 @@ export function AppFrame({
       <FeedbackWidget userEmail={userEmail} />
       <SiteFooter variant="app" />
     </AppShell>
+    </AuthSessionProvider>
   );
 }

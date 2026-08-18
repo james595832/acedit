@@ -1,6 +1,7 @@
 import type {Metadata} from 'next';
 import Link from 'next/link';
 import {SUPPORT_EMAIL} from '@/components/SiteFooter';
+import {LegalBackLink} from '@/components/LegalBackLink';
 
 export const metadata: Metadata = {
   title: 'Contact | ACED-IT',
@@ -29,8 +30,8 @@ export default function ContactPage() {
             </a>
           </p>
           <p>
-            We aim to reply within two business days (UK time). Billing and account
-            security issues are prioritised.
+            We aim to reply within two business days (UK time). Billing and
+            account security issues are prioritised.
           </p>
         </section>
 
@@ -49,7 +50,10 @@ export default function ContactPage() {
             <li>The email address on your ACED-IT account</li>
             <li>A short description of the issue</li>
             <li>Screenshots or session IDs if relevant</li>
-            <li>For billing: date of charge and last four digits of card (never full card numbers)</li>
+            <li>
+              For billing: date of charge and last four digits of card (never
+              full card numbers)
+            </li>
           </ul>
         </section>
 
@@ -73,12 +77,7 @@ export default function ContactPage() {
         </section>
       </div>
 
-      <nav className="aced-legal__nav" aria-label="Legal">
-        <Link href="/roadmap">Roadmap</Link>
-        <Link href="/privacy">Privacy Policy</Link>
-        <Link href="/terms">Terms &amp; Conditions</Link>
-        <Link href="/contact">Contact</Link>
-      </nav>
+      <LegalBackLink />
     </article>
   );
 }
