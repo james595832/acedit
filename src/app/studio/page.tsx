@@ -18,6 +18,45 @@ function daysAgoLabel(iso: string): string {
   return `${days} days ago`;
 }
 
+function looksLikePersonName(value: string): boolean {
+  const cleaned = value.trim();
+  if (cleaned.length < 2) return false;
+  if (/aced[\s_-]*it|acedit/i.test(cleaned)) return false;
+  if (/^(qa|test|demo|user|admin)([\s._-]|$)/i.test(cleaned)) return false;
+  if (/^\d+$/.test(cleaned)) return false;
+  return true;
+}
+
+function formatFirstName(raw: string): string {
+  const first = raw.trim().split(/[\s._+-]+/)[0] ?? '';
+  if (!first || !looksLikePersonName(first)) return '';
+  return first.charAt(0).toUpperCase() + first.slice(1).toLowerCase();
+}
+
+/** Prefer a real given name; never greet with the product brand. */
+function resolveGreetingName(input: {
+  profileName?: string | null;
+  metaName?: string | null;
+  givenName?: string | null;
+  email?: string | null;
+}): string {
+  for (const candidate of [
+    input.givenName,
+    input.profileName,
+    input.metaName,
+  ]) {
+    if (!candidate) continue;
+    const formatted = formatFirstName(candidate);
+    if (formatted) return formatted;
+  }
+
+  const local = input.email?.split('@')[0] ?? '';
+  const fromEmail = formatFirstName(local);
+  if (fromEmail) return fromEmail;
+
+  return 'there';
+}
+
 export default async function StudioPage({searchParams}: StudioPageProps) {
   let firstName = 'there';
   let billingBanner: string | null = null;
@@ -30,10 +69,23 @@ export default async function StudioPage({searchParams}: StudioPageProps) {
         data: {user},
       } = await supabase.auth.getUser();
       userId = user?.id ?? null;
-      const metaName = user?.user_metadata?.full_name as string | undefined;
-      const emailName = user?.email?.split('@')[0];
-      const raw = metaName?.trim() || emailName || 'there';
-      firstName = raw.split(/\s+/)[0] ?? 'there';
+
+      let profileName: string | null = null;
+      if (user) {
+        const {data: profile} = await supabase
+          .from('profiles')
+          .select('full_name')
+          .eq('id', user.id)
+          .maybeSingle();
+        profileName = (profile?.full_name as string | null) ?? null;
+      }
+
+      firstName = resolveGreetingName({
+        profileName,
+        metaName: (user?.user_metadata?.full_name as string | undefined) ?? null,
+        givenName: (user?.user_metadata?.given_name as string | undefined) ?? null,
+        email: user?.email ?? null,
+      });
 
       const params = await searchParams;
       if (
@@ -94,13 +146,13 @@ export default async function StudioPage({searchParams}: StudioPageProps) {
         <p className="aced-home__hello">Hi {firstName}</p>
         <h1>
           {hasPractice
-            ? 'Ready for another practice?'
-            : 'Ready for a 15-minute practice?'}
+            ? 'Ready for your next interview?'
+            : 'Design interview prep'}
         </h1>
         <p className="aced-home__lead">
           {hasPractice
-            ? 'Answer out loud. Get scored. Improve the weak spots.'
-            : 'Upload your CV, answer five questions out loud, and get clear feedback.'}
+            ? 'Another run sharpens the weak spots. Same format as last time — speak your answers, get scored.'
+            : 'You’ve signed up to rehearse design interviews out loud. About 15 minutes. CV in, five questions, clear feedback.'}
         </p>
         {billingBanner ? (
           <p className="aced-masthead__note" role="status">
@@ -110,7 +162,7 @@ export default async function StudioPage({searchParams}: StudioPageProps) {
 
         <div className="aced-home__actions">
           <Link className="aced-home__primary" href="/interview">
-            Start interview
+            {hasPractice ? 'Start interview' : 'Get started'}
           </Link>
           {resultsHref ? (
             <Link className="aced-home__secondary" href={resultsHref}>
@@ -123,23 +175,72 @@ export default async function StudioPage({searchParams}: StudioPageProps) {
         </div>
       </header>
 
-      <section className="aced-home__more" aria-label="Coming next">
-        <p className="aced-home__more-label">Coming next</p>
-        <ul className="aced-home__more-list">
-          <li>
-            <Link href="/roadmap#september-2026">
-              <span className="aced-home__more-title">Whiteboard</span>
-              <span className="aced-home__more-meta">On the roadmap</span>
-            </Link>
-          </li>
-          <li>
-            <Link href="/roadmap#september-2026">
-              <span className="aced-home__more-title">Portfolio review</span>
-              <span className="aced-home__more-meta">On the roadmap</span>
-            </Link>
-          </li>
-        </ul>
-      </section>
+      {!hasPractice ? (
+        <>
+          <section className="aced-home__how" aria-labelledby="aced-home-how">
+            <h2 id="aced-home-how">How it works</h2>
+            <ol className="aced-home__steps">
+              <li>
+                <span className="aced-home__step-num">1</span>
+                <span>
+                  <strong>Upload your CV</strong>
+                  <span>PDF only. Add a job description if you have one.</span>
+                </span>
+              </li>
+              <li>
+                <span className="aced-home__step-num">2</span>
+                <span>
+                  <strong>Answer five questions out loud</strong>
+                  <span>Use your mic. We transcribe and score each answer.</span>
+                </span>
+              </li>
+              <li>
+                <span className="aced-home__step-num">3</span>
+                <span>
+                  <strong>Review your results</strong>
+                  <span>See what worked, what to fix, then practise again.</span>
+                </span>
+              </li>
+            </ol>
+          </section>
+
+          <section className="aced-home__need" aria-labelledby="aced-home-need">
+            <h2 id="aced-home-need">What you need</h2>
+            <ul className="aced-home__need-list">
+              <li>A quiet spot and a working microphone</li>
+              <li>About 15 minutes uninterrupted</li>
+              <li>Your design CV as a PDF</li>
+            </ul>
+          </section>
+        </>
+      ) : (
+        <section className="aced-home__how" aria-labelledby="aced-home-how">
+          <h2 id="aced-home-how">Each interview</h2>
+          <ol className="aced-home__steps">
+            <li>
+              <span className="aced-home__step-num">1</span>
+              <span>
+                <strong>Prepare</strong>
+                <span>CV ready — optional JD to sharpen the questions.</span>
+              </span>
+            </li>
+            <li>
+              <span className="aced-home__step-num">2</span>
+              <span>
+                <strong>Room</strong>
+                <span>Five spoken answers. Scored before you move on.</span>
+              </span>
+            </li>
+            <li>
+              <span className="aced-home__step-num">3</span>
+              <span>
+                <strong>Debrief</strong>
+                <span>Overall score and notes on every answer.</span>
+              </span>
+            </li>
+          </ol>
+        </section>
+      )}
     </div>
   );
 }

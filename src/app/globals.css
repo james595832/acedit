@@ -5393,17 +5393,20 @@ dialog.aced-feedback-dialog::backdrop {
   border-bottom-color: var(--aced-terra);
 }
 
-.aced-home__more {
+.aced-home__how,
+.aced-home__need {
   display: grid;
-  gap: 0.75rem;
+  gap: 0.85rem;
   padding-top: 0.25rem;
   border-top: 1px solid var(--aced-rule);
   animation: aced-fade-up 520ms 80ms
     var(--ease-standard, cubic-bezier(0.24, 1, 0.4, 1)) both;
 }
 
-.aced-home__more-label {
+.aced-home__how h2,
+.aced-home__need h2 {
   margin: 0;
+  font-family: var(--font-aced-heading), 'Outfit', 'Plus Jakarta Sans', sans-serif;
   font-size: 0.78rem;
   font-weight: 600;
   letter-spacing: 0.04em;
@@ -5411,41 +5414,80 @@ dialog.aced-feedback-dialog::backdrop {
   color: var(--aced-mute);
 }
 
-.aced-home__more-list {
+.aced-home__steps {
   list-style: none;
   margin: 0;
   padding: 0;
   display: grid;
-  gap: 0.35rem;
+  gap: 0;
 }
 
-.aced-home__more-list a {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: 1rem;
-  padding: 0.7rem 0;
-  text-decoration: none;
-  color: var(--aced-ink);
+.aced-home__steps li {
+  display: grid;
+  grid-template-columns: 1.75rem 1fr;
+  gap: 0.85rem;
+  align-items: start;
+  padding: 0.85rem 0;
   border-bottom: 1px solid var(--aced-rule);
-  transition: color var(--duration-fast, 150ms)
-    var(--ease-standard, cubic-bezier(0.24, 1, 0.4, 1));
 }
 
-.aced-home__more-list a:hover {
-  color: var(--aced-terra);
+.aced-home__steps li:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
 }
 
-.aced-home__more-title {
+.aced-home__step-num {
   font-family: var(--font-aced-heading), 'Outfit', 'Plus Jakarta Sans', sans-serif;
+  font-size: 0.85rem;
   font-weight: 600;
-  font-size: 1rem;
+  color: var(--aced-mute);
+  line-height: 1.45;
+  padding-top: 0.1rem;
 }
 
-.aced-home__more-meta {
-  font-size: 0.88rem;
+.aced-home__steps li > span:last-child {
+  display: grid;
+  gap: 0.2rem;
+}
+
+.aced-home__steps strong {
+  font-family: var(--font-aced-heading), 'Outfit', 'Plus Jakarta Sans', sans-serif;
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--aced-ink);
+}
+
+.aced-home__steps li > span:last-child > span {
+  font-size: 0.95rem;
+  line-height: 1.45;
   color: var(--aced-mute);
-  white-space: nowrap;
+}
+
+.aced-home__need-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.55rem;
+}
+
+.aced-home__need-list li {
+  position: relative;
+  padding-left: 1.1rem;
+  font-size: 0.98rem;
+  line-height: 1.45;
+  color: var(--aced-ink);
+}
+
+.aced-home__need-list li::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0.55em;
+  width: 0.35rem;
+  height: 0.35rem;
+  border-radius: 50%;
+  background: var(--aced-mute);
 }
 
 .aced-paused {

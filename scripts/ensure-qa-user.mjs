@@ -107,7 +107,8 @@ if (!user) {
       password,
       email_confirm: true,
       user_metadata: {
-        full_name: 'ACED-IT QA',
+        full_name: 'Jane QA',
+        given_name: 'Jane',
         qa_manual: true,
       },
     }),
@@ -128,7 +129,8 @@ if (!user) {
       email_confirm: true,
       user_metadata: {
         ...(user.user_metadata ?? {}),
-        full_name: 'ACED-IT QA',
+        full_name: 'Jane QA',
+        given_name: 'Jane',
         qa_manual: true,
       },
     }),
@@ -150,7 +152,7 @@ const patchRes = await fetch(`${base}/rest/v1/profiles?id=eq.${user.id}`, {
   },
   body: JSON.stringify({
     email,
-    full_name: 'ACED-IT QA',
+    full_name: 'Jane QA',
     subscription_status: 'trialing',
     subscription_tier: 'pro',
     trial_ends_at: trialEnds,
