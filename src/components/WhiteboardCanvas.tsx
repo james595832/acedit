@@ -364,7 +364,7 @@ export function WhiteboardCanvas({
       ctx.shadowColor = 'transparent';
       ctx.strokeRect(note.x + 0.5, note.y + 0.5, NOTE_W - 1, NOTE_H - 1);
       ctx.fillStyle = '#1c1b18';
-      ctx.font = '600 13px "Public Sans", ui-sans-serif, system-ui, sans-serif';
+      ctx.font = '600 13px "Plus Jakarta Sans", ui-sans-serif, system-ui, sans-serif';
       const text = note.text.trim() || '…';
       const lines = wrapText(ctx, text, NOTE_W - 20);
       let ty = note.y + 22;
