@@ -559,6 +559,54 @@ export async function getAnswerForUser(
   return owned(answer, userId);
 }
 
+/** Latest answer per question for a user (by created_at). */
+export async function listAnswersForQuestions(
+  questionIds: string[],
+  userId: string,
+): Promise<UserAnswer[]> {
+  if (questionIds.length === 0) return [];
+
+  if (useRemoteStore()) {
+    const admin = createServiceClient();
+    const {data, error} = await admin
+      .from('user_answers')
+      .select('*')
+      .eq('user_id', userId)
+      .in('question_id', questionIds)
+      .order('created_at', {ascending: false});
+    if (error) throw new Error(error.message);
+
+    const latestByQuestion = new Map<string, UserAnswer>();
+    for (const row of (data ?? []) as Record<string, unknown>[]) {
+      const answer = mapAnswer(row);
+      if (!latestByQuestion.has(answer.question_id)) {
+        latestByQuestion.set(answer.question_id, answer);
+      }
+    }
+    return questionIds
+      .map((id) => latestByQuestion.get(id))
+      .filter((a): a is UserAnswer => Boolean(a));
+  }
+
+  const answers = await readJson<UserAnswer[]>('answers.json', []);
+  const latestByQuestion = new Map<string, UserAnswer>();
+  for (const answer of answers) {
+    if (answer.user_id !== userId) continue;
+    if (!questionIds.includes(answer.question_id)) continue;
+    const existing = latestByQuestion.get(answer.question_id);
+    if (
+      !existing ||
+      new Date(answer.created_at).getTime() >
+        new Date(existing.created_at).getTime()
+    ) {
+      latestByQuestion.set(answer.question_id, answer);
+    }
+  }
+  return questionIds
+    .map((id) => latestByQuestion.get(id))
+    .filter((a): a is UserAnswer => Boolean(a));
+}
+
 export async function updateAnswerGrade(
   answerId: string,
   grade: GradeResult,

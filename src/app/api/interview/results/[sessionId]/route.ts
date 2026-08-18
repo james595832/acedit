@@ -1,9 +1,10 @@
 import {NextResponse} from 'next/server';
 import {requireInterviewUser} from '@/lib/interview/auth';
-import {getSession, getSessionQuestions} from '@/lib/store';
-import {promises as fs} from 'fs';
-import path from 'path';
-import type {UserAnswer} from '@/lib/types';
+import {
+  getSession,
+  getSessionQuestions,
+  listAnswersForQuestions,
+} from '@/lib/store';
 
 type Params = {params: Promise<{sessionId: string}>};
 
@@ -22,17 +23,24 @@ export async function GET(_request: Request, {params}: Params) {
     }
 
     const questions = await getSessionQuestions(sessionId);
-    const answers = await readAnswers();
+    const answers = await listAnswersForQuestions(
+      questions.map((q) => q.id),
+      auth.userId,
+    );
+    const answerByQuestion = new Map(
+      answers.map((answer) => [answer.question_id, answer]),
+    );
 
     const questionRows = questions.map((question) => {
-      const answer = answers.find(
-        (a) => a.question_id === question.id && a.user_id === auth.userId,
-      );
+      const answer = answerByQuestion.get(question.id);
       let feedback = answer?.feedback ?? null;
       let score = answer?.score ?? null;
       if (feedback) {
         try {
-          const parsed = JSON.parse(feedback) as {feedback?: string; score?: number};
+          const parsed = JSON.parse(feedback) as {
+            feedback?: string;
+            score?: number;
+          };
           feedback = parsed.feedback ?? feedback;
           score = parsed.score ?? score;
         } catch {
@@ -52,8 +60,12 @@ export async function GET(_request: Request, {params}: Params) {
     const scored = questionRows.filter((q) => typeof q.score === 'number');
     const overall =
       scored.length > 0
-        ? scored.reduce((sum, q) => sum + (q.score as number), 0) / scored.length
-        : null;
+        ? scored.reduce((sum, q) => sum + (q.score as number), 0) /
+          scored.length
+        : session.overall_score !== null &&
+            session.overall_score !== undefined
+          ? Number(session.overall_score)
+          : null;
 
     return NextResponse.json({
       session_id: session.id,
@@ -66,17 +78,5 @@ export async function GET(_request: Request, {params}: Params) {
       {error: 'Failed to load results', code: 'SERVER_ERROR'},
       {status: 500},
     );
-  }
-}
-
-async function readAnswers(): Promise<UserAnswer[]> {
-  try {
-    const raw = await fs.readFile(
-      path.join(process.cwd(), '.data', 'answers.json'),
-      'utf8',
-    );
-    return JSON.parse(raw) as UserAnswer[];
-  } catch {
-    return [];
   }
 }

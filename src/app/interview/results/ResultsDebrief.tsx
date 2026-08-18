@@ -28,7 +28,12 @@ function outcomeTone(overall: number | null): OutcomeTone {
   return 'weak';
 }
 
-function outcomeCopy(tone: OutcomeTone, overall: number | null) {
+function outcomeCopy(
+  tone: OutcomeTone,
+  overall: number | null,
+  gradedCount: number,
+  questionCount: number,
+) {
   if (tone === 'strong') {
     return {
       title: 'You aced this interview',
@@ -56,12 +61,21 @@ function outcomeCopy(tone: OutcomeTone, overall: number | null) {
       ctaHint: 'You’ve done the hard part — starting',
     };
   }
+  if (questionCount > 0 && gradedCount === 0) {
+    return {
+      title: 'Interview started — not graded yet',
+      lead: 'These questions are waiting for spoken answers. Jump back in to record and get scored.',
+      badge: 'In progress',
+      cta: 'Continue interview',
+      ctaHint: 'Mic on. Answer out loud.',
+    };
+  }
   return {
-    title: 'Interview saved',
-    lead: 'Finish and grade at least one answer to see your overall score.',
+    title: 'No interview to review yet',
+    lead: 'Start an interview, answer out loud, then come back here for your debrief.',
     badge: 'No score yet',
     cta: 'Start interview',
-    ctaHint: 'Head back in when you’re ready',
+    ctaHint: 'About 15 minutes',
   };
 }
 
@@ -81,19 +95,23 @@ export function ResultsDebrief({sessionId}: {sessionId: string}) {
         setLoading(false);
         return;
       }
-      setOverall(data.overall_score);
+      setOverall(
+        data.overall_score === null || data.overall_score === undefined
+          ? null
+          : Number(data.overall_score),
+      );
       setRows(data.questions ?? []);
       setLoading(false);
     })();
   }, [sessionId]);
 
   const tone = outcomeTone(overall);
-  const copy = outcomeCopy(tone, overall);
   const scoredRows = useMemo(() => {
     return rows
       .map((row, index) => ({row, index}))
       .filter((x) => x.row.score !== null);
   }, [rows]);
+  const copy = outcomeCopy(tone, overall, scoredRows.length, rows.length);
 
   const weakest = useMemo(() => {
     if (!scoredRows.length) return null;
@@ -110,6 +128,7 @@ export function ResultsDebrief({sessionId}: {sessionId: string}) {
   }, [scoredRows]);
 
   const graded = scoredRows;
+  const showScore = overall !== null;
 
   return (
     <div className={`aced-debrief aced-debrief--${tone}`}>
@@ -118,7 +137,7 @@ export function ResultsDebrief({sessionId}: {sessionId: string}) {
       </nav>
 
       <Section variant="transparent" padding={0}>
-        <VStack gap={5}>
+        <VStack gap={6}>
           <SessionProgress
             label="Interview"
             current={3}
@@ -145,56 +164,53 @@ export function ResultsDebrief({sessionId}: {sessionId: string}) {
                   {copy.badge}
                 </p>
                 <Heading level={1}>{copy.title}</Heading>
-                <Text as="p" color="secondary" className="aced-debrief__lead">
+                <Text as="p" color="secondary" type="large">
                   {copy.lead}
                 </Text>
               </header>
 
-              <section
-                className={`aced-score-hero aced-score-hero--${tone === 'empty' ? 'okay' : tone}`}
-                aria-label="Overall interview score"
-              >
-                {overall !== null ? (
-                  <>
-                    <div
-                      className="aced-score-hero__ring"
-                      style={
-                        {'--score-pct': overall} as React.CSSProperties
-                      }
+              {showScore ? (
+                <section
+                  className={`aced-score-hero aced-score-hero--${tone}`}
+                  aria-label="Overall interview score"
+                >
+                  <div
+                    className="aced-score-hero__ring"
+                    style={{'--score-pct': overall} as React.CSSProperties}
+                  >
+                    <p
+                      className="aced-score-hero__value"
+                      aria-label={`${overall.toFixed(0)} out of 100`}
                     >
-                      <p
-                        className="aced-score-hero__value"
-                        aria-label={`${overall.toFixed(0)} out of 100`}
-                      >
-                        {overall.toFixed(0)}
-                        <span className="aced-score-hero__denom">/100</span>
+                      {overall.toFixed(0)}
+                      <span className="aced-score-hero__denom">/100</span>
+                    </p>
+                  </div>
+                  <div className="aced-score-hero__meta">
+                    <p className="aced-score-hero__label">Overall score</p>
+                    <p className="aced-score-hero__count">
+                      {graded.length} of {rows.length} answers graded
+                    </p>
+                    {strongest && weakest && strongest !== weakest ? (
+                      <p className="aced-score-hero__range">
+                        Best Q{strongest.index + 1} · {strongest.row.score}
+                        /100 · Needs work Q{weakest.index + 1} ·{' '}
+                        {weakest.row.score}/100
                       </p>
-                    </div>
-                    <div className="aced-score-hero__meta">
-                      <p className="aced-score-hero__label">Overall score</p>
-                      <p className="aced-score-hero__count">
-                        {graded.length} of {rows.length} answers graded
-                      </p>
-                      {strongest && weakest && strongest !== weakest ? (
-                        <p className="aced-score-hero__range">
-                          Best Q{strongest.index + 1} ·{' '}
-                          {strongest.row.score}/100 · Needs work Q
-                          {weakest.index + 1} · {weakest.row.score}/100
-                        </p>
-                      ) : null}
-                    </div>
-                  </>
-                ) : (
-                  <Text as="p" color="secondary">
-                    Complete at least one graded answer to see an overall score.
-                  </Text>
-                )}
-              </section>
+                    ) : null}
+                  </div>
+                </section>
+              ) : null}
 
               <div className="aced-debrief__cta">
-                <Link className="aced-home__primary" href="/interview">
-                  {copy.cta}
-                </Link>
+                <HStack gap={3} align="center" wrap="wrap">
+                  <Link className="aced-home__primary" href="/interview">
+                    {copy.cta}
+                  </Link>
+                  <Link className="aced-home__secondary" href="/studio">
+                    Back to Home
+                  </Link>
+                </HStack>
                 <p className="aced-debrief__cta-hint">{copy.ctaHint}</p>
               </div>
 
@@ -229,108 +245,97 @@ export function ResultsDebrief({sessionId}: {sessionId: string}) {
                 </aside>
               ) : null}
 
-              <section
-                className="aced-debrief__answers"
-                aria-labelledby="aced-debrief-answers"
-              >
-                <Heading level={2} id="aced-debrief-answers">
-                  Answer by answer
-                </Heading>
-                <Text as="p" color="secondary">
-                  Skim scores first. Open a transcript only if you want the
-                  detail.
-                </Text>
+              {rows.length > 0 ? (
+                <section
+                  className="aced-debrief__answers"
+                  aria-labelledby="aced-debrief-answers"
+                >
+                  <div className="aced-debrief__answers-head">
+                    <Heading level={2} id="aced-debrief-answers">
+                      Answer by answer
+                    </Heading>
+                    <Text as="p" color="secondary">
+                      {graded.length > 0
+                        ? 'Skim scores first. Open a transcript only if you want the detail.'
+                        : 'Record answers in the room to unlock scores and coaching notes.'}
+                    </Text>
+                  </div>
 
-                {rows.length === 0 ? (
-                  <Text as="p" color="secondary">
-                    No answers in this interview yet.
-                  </Text>
-                ) : null}
-
-                <ul className="aced-result-list">
-                  {rows.map((row, index) => {
-                    const scored = row.score !== null;
-                    const rowTone = !scored
-                      ? 'neutral'
-                      : (row.score as number) >= 70
-                        ? 'strong'
-                        : (row.score as number) >= 50
-                          ? 'okay'
-                          : 'weak';
-                    return (
-                      <li
-                        key={`${row.question_text}-${index}`}
-                        className={`aced-result-list__item aced-result-list__item--${rowTone}`}
-                      >
-                        <div className="aced-result-list__top">
-                          <span
-                            className={`aced-result-list__score aced-result-list__score--${rowTone}`}
-                          >
-                            {scored ? `${row.score}` : '—'}
-                          </span>
-                          <div className="aced-result-list__copy">
-                            <div className="aced-result-list__head">
-                              <StatusDot
-                                variant={
-                                  !scored
-                                    ? 'neutral'
-                                    : (row.score as number) >= 70
-                                      ? 'success'
-                                      : (row.score as number) >= 50
-                                        ? 'warning'
-                                        : 'error'
-                                }
-                                label={
-                                  scored
-                                    ? `Score ${row.score} of 100`
-                                    : 'Not graded yet'
-                                }
-                              />
+                  <ul className="aced-result-list">
+                    {rows.map((row, index) => {
+                      const scored = row.score !== null;
+                      const rowTone = !scored
+                        ? 'neutral'
+                        : (row.score as number) >= 70
+                          ? 'strong'
+                          : (row.score as number) >= 50
+                            ? 'okay'
+                            : 'weak';
+                      const statusLabel = scored
+                        ? `Score ${row.score} of 100`
+                        : 'Not graded yet';
+                      return (
+                        <li
+                          key={`${row.question_text}-${index}`}
+                          className={`aced-result-list__item aced-result-list__item--${rowTone}`}
+                        >
+                          <div className="aced-result-list__top">
+                            <div className="aced-result-list__copy">
                               <Heading level={3}>
                                 Q{index + 1}. {row.question_text}
                               </Heading>
+                              <div className="aced-result-list__meta">
+                                <StatusDot
+                                  variant={
+                                    !scored
+                                      ? 'neutral'
+                                      : (row.score as number) >= 70
+                                        ? 'success'
+                                        : (row.score as number) >= 50
+                                          ? 'warning'
+                                          : 'error'
+                                  }
+                                  label={statusLabel}
+                                />
+                                <Text type="supporting" color="secondary">
+                                  {row.category.replaceAll('_', ' ')}
+                                  {' · '}
+                                  {statusLabel}
+                                </Text>
+                              </div>
                             </div>
-                            <Text type="label" color="secondary">
-                              {row.category.replaceAll('_', ' ')}
-                              {scored
-                                ? ` · ${row.score}/100`
-                                : ' · Not graded'}
-                            </Text>
+                            <span
+                              className={`aced-result-list__score aced-result-list__score--${rowTone}`}
+                              aria-hidden={!scored}
+                            >
+                              {scored ? `${row.score}` : '—'}
+                            </span>
                           </div>
-                        </div>
 
-                        {row.feedback ? (
-                          <p className="aced-result-list__feedback">
-                            {row.feedback}
-                          </p>
-                        ) : null}
-
-                        {row.transcription ? (
-                          <Collapsible
-                            defaultIsOpen={false}
-                            trigger={<Text type="label">Show transcript</Text>}
-                          >
-                            <p className="aced-result-list__transcript">
-                              {row.transcription}
+                          {row.feedback ? (
+                            <p className="aced-result-list__feedback">
+                              {row.feedback}
                             </p>
-                          </Collapsible>
-                        ) : null}
-                      </li>
-                    );
-                  })}
-                </ul>
-              </section>
+                          ) : null}
 
-              <nav className="aced-debrief__foot" aria-label="Next steps">
-                <HStack gap={2} wrap="wrap">
-                  <Link className="aced-home__primary" href="/interview">
-                    {copy.cta}
-                  </Link>
-                  <Link className="aced-orient__cta" href="/studio">
-                    Back to Home →
-                  </Link>
-                </HStack>
-              </nav>
+                          {row.transcription ? (
+                            <Collapsible
+                              defaultIsOpen={false}
+                              trigger={
+                                <Text type="label">Show transcript</Text>
+                              }
+                            >
+                              <p className="aced-result-list__transcript">
+                                {row.transcription}
+                              </p>
+                            </Collapsible>
+                          ) : null}
+                        </li>
+                      );
+                    })}
+                  </ul>
+                </section>
+              ) : null}
             </>
           )}
         </VStack>

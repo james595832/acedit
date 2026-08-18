@@ -3555,13 +3555,14 @@ dialog.aced-feedback-dialog::backdrop {
 
 .aced-debrief {
   display: grid;
-  gap: 0.25rem;
-  max-width: 40rem;
+  gap: var(--spacing-4, 1rem);
+  max-width: 42rem;
+  width: 100%;
 }
 
 .aced-debrief__head {
   display: grid;
-  gap: 0.65rem;
+  gap: var(--spacing-3, 0.75rem);
   animation: aced-fade-up 420ms var(--ease-standard, cubic-bezier(0.24, 1, 0.4, 1))
     both;
 }
@@ -3628,8 +3629,8 @@ dialog.aced-feedback-dialog::backdrop {
 
 .aced-debrief__focus {
   display: grid;
-  gap: 0.35rem;
-  padding: 1rem 1.1rem;
+  gap: var(--spacing-2, 0.5rem);
+  padding: var(--spacing-5, 1.25rem);
   border: 1px solid var(--aced-rule);
   border-left: 3px solid var(--aced-ochre);
   background: #f0f4f8;
@@ -3664,12 +3665,18 @@ dialog.aced-feedback-dialog::backdrop {
 
 .aced-debrief__answers {
   display: grid;
-  gap: 0.75rem;
-  padding-top: 0.5rem;
+  gap: var(--spacing-4, 1rem);
+  padding-top: var(--spacing-4, 1rem);
+  border-top: 1px solid var(--aced-rule);
+}
+
+.aced-debrief__answers-head {
+  display: grid;
+  gap: var(--spacing-2, 0.5rem);
 }
 
 .aced-debrief__foot {
-  padding-top: 0.5rem;
+  padding-top: var(--spacing-2, 0.5rem);
   border-top: 1px solid var(--aced-rule);
 }
 
@@ -3960,45 +3967,55 @@ dialog.aced-feedback-dialog::backdrop {
   margin: 0;
   padding: 0;
   display: grid;
-  gap: 0.75rem;
+  gap: 0;
+  border-top: 1px solid var(--aced-rule);
 }
 
 .aced-result-list__item {
-  border: 1px solid var(--aced-rule);
-  background: #ffffff;
-  padding: 1.1rem 1.15rem;
+  border: 0;
+  border-bottom: 1px solid var(--aced-rule);
+  background: transparent;
+  padding: var(--spacing-5, 1.25rem) var(--spacing-1, 0.25rem);
   display: grid;
-  gap: 0.65rem;
+  gap: var(--spacing-4, 1rem);
 }
 
 .aced-result-list__item--strong {
-  border-left: 3px solid var(--aced-blue);
+  box-shadow: inset 3px 0 0 var(--aced-blue);
+  padding-inline-start: calc(var(--spacing-4, 1rem) + 3px);
 }
 
 .aced-result-list__item--okay {
-  border-left: 3px solid var(--aced-ochre);
+  box-shadow: inset 3px 0 0 var(--aced-ochre);
+  padding-inline-start: calc(var(--spacing-4, 1rem) + 3px);
 }
 
 .aced-result-list__item--weak {
-  border-left: 3px solid var(--aced-brick);
+  box-shadow: inset 3px 0 0 var(--aced-brick);
+  padding-inline-start: calc(var(--spacing-4, 1rem) + 3px);
+}
+
+.aced-result-list__item--neutral {
+  padding-inline-start: calc(var(--spacing-4, 1rem) + 3px);
+  box-shadow: inset 3px 0 0 #d8d4cb;
 }
 
 .aced-result-list__top {
   display: grid;
-  grid-template-columns: auto minmax(0, 1fr);
-  gap: 0.85rem;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: var(--spacing-4, 1rem) var(--spacing-5, 1.25rem);
   align-items: start;
 }
 
 .aced-result-list__score {
   display: grid;
   place-items: center;
-  min-width: 2.75rem;
-  height: 2.75rem;
-  padding: 0 0.35rem;
-  border-radius: 0.45rem;
+  min-width: 3.25rem;
+  min-height: 3.25rem;
+  padding: var(--spacing-2, 0.5rem);
+  border-radius: 0.5rem;
   font-family: var(--font-aced-heading), 'Outfit', 'Plus Jakarta Sans', sans-serif;
-  font-size: 1.15rem;
+  font-size: 1.2rem;
   font-weight: 700;
   letter-spacing: -0.03em;
   background: #f0f4f8;
@@ -4022,39 +4039,56 @@ dialog.aced-feedback-dialog::backdrop {
 
 .aced-result-list__copy {
   display: grid;
-  gap: 0.3rem;
+  gap: var(--spacing-3, 0.75rem);
   min-width: 0;
+}
+
+.aced-result-list__meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--spacing-2, 0.5rem) var(--spacing-3, 0.75rem);
 }
 
 .aced-result-list__head {
   display: grid;
-  grid-template-columns: auto 1fr;
-  gap: 0.65rem;
-  align-items: start;
+  gap: var(--spacing-2, 0.5rem);
 }
 
-.aced-result-list__head h3 {
+.aced-result-list__head h3,
+.aced-result-list__copy h3 {
   margin: 0;
-  font-size: 1.02rem;
-  line-height: 1.3;
+  font-size: 1.05rem;
+  line-height: 1.4;
 }
 
 .aced-result-list__feedback {
   margin: 0;
-  line-height: 1.5;
-  color: var(--aced-ink);
+  padding: var(--spacing-3, 0.75rem) var(--spacing-4, 1rem);
+  line-height: 1.55;
+  color: var(--aced-mute);
+  background: #f7f8fa;
+  border-radius: 0.45rem;
 }
 
 .aced-result-list__transcript {
-  margin: 0.35rem 0 0;
-  padding: 0.8rem 0.95rem;
+  margin: 0;
+  padding: var(--spacing-3, 0.75rem) var(--spacing-4, 1rem);
   border: 1px solid var(--aced-rule);
-  border-radius: 0.55rem;
+  border-radius: 0.45rem;
   background: #f0f4f8;
   color: var(--aced-mute);
-  line-height: 1.45;
+  line-height: 1.55;
   font-size: 0.95rem;
 }
+
+.aced-result-list__item .astryx-collapsible-trigger,
+.aced-result-list__item [data-slot='trigger'] {
+  min-height: 2.5rem;
+  padding-block: var(--spacing-2, 0.5rem);
+  padding-inline: var(--spacing-3, 0.75rem);
+}
+
 
 .aced-cta-bar {
   display: flex;
