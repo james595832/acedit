@@ -1,8 +1,11 @@
 import {NextResponse} from 'next/server';
 import {promises as fs} from 'fs';
 import path from 'path';
-import {analyzeCvBuffer} from '@/lib/ai';
-import {extractPdfContent} from '@/lib/cv-parse';
+import {analyzeCvBuffer, extractCvTextFromPageImages} from '@/lib/ai';
+import {
+  extractCvDocument,
+  MIN_USEFUL_CV_CHARS,
+} from '@/lib/cv-parse';
 import {auditCvForAts} from '@/lib/cv-ats';
 import {auditCvWriting} from '@/lib/cv-writing-audit';
 import {requireInterviewUser} from '@/lib/interview/auth';
@@ -22,17 +25,7 @@ export async function POST(request: Request) {
 
     if (!(file instanceof File)) {
       return NextResponse.json(
-        {error: 'Missing PDF file', code: 'VALIDATION_ERROR'},
-        {status: 400},
-      );
-    }
-
-    const isPdf =
-      file.type === 'application/pdf' ||
-      file.name.toLowerCase().endsWith('.pdf');
-    if (!isPdf) {
-      return NextResponse.json(
-        {error: 'PDF only', code: 'INVALID_FILE_TYPE'},
+        {error: 'Add a CV file first.', code: 'VALIDATION_ERROR'},
         {status: 400},
       );
     }
@@ -45,6 +38,31 @@ export async function POST(request: Request) {
     }
 
     const bytes = Buffer.from(await file.arrayBuffer());
+    let extracted;
+    try {
+      extracted = await extractCvDocument(file.name, file.type, bytes);
+    } catch (err) {
+      const message =
+        err instanceof Error ? err.message : 'Could not read that file.';
+      return NextResponse.json(
+        {error: message, code: 'INVALID_FILE_TYPE'},
+        {status: 400},
+      );
+    }
+
+    let cvText = extracted.text;
+    let usedVision = false;
+    if (
+      cvText.length < MIN_USEFUL_CV_CHARS &&
+      extracted.pageImages.length > 0
+    ) {
+      const visionText = await extractCvTextFromPageImages(extracted.pageImages);
+      if (visionText.length > cvText.length) {
+        cvText = visionText;
+        usedVision = true;
+      }
+    }
+
     // Prefer durable DB metadata; local disk is only for stub/dev hosts.
     let fileUrl = `cv://${auth.userId}/${Date.now()}-${file.name.replace(/[^\w.-]/g, '_')}`;
 
@@ -63,28 +81,16 @@ export async function POST(request: Request) {
       }
     }
 
-    let pdfText = '';
-    let pageCount: number | null = null;
-    let usedOcr = false;
-    try {
-      const extracted = await extractPdfContent(bytes);
-      pdfText = extracted.text;
-      pageCount = extracted.pageCount;
-      usedOcr = extracted.usedOcr;
-    } catch (err) {
-      console.error('PDF extract failed', err);
-      pdfText = '';
-    }
-
-    const analysis = await analyzeCvBuffer(file.name, pdfText);
+    const textExtracted = cvText.trim().length >= MIN_USEFUL_CV_CHARS;
+    const analysis = await analyzeCvBuffer(file.name, cvText);
     const ats = auditCvForAts({
-      text: pdfText,
+      text: cvText,
       fileName: file.name,
       fileSizeBytes: file.size,
-      pageCount,
-      usedOcr,
+      pageCount: extracted.pageCount,
+      usedOcr: extracted.usedOcr || usedVision,
     });
-    const writing = await auditCvWriting(pdfText);
+    const writing = await auditCvWriting(cvText);
     const cv = await saveCv(
       {
         file_name: file.name,
@@ -104,8 +110,10 @@ export async function POST(request: Request) {
       projects: analysis.projects,
       companies: analysis.companies,
       roles: analysis.roles,
-      text_extracted: Boolean(pdfText.trim()),
-      used_ocr: usedOcr,
+      text_extracted: textExtracted,
+      used_ocr: extracted.usedOcr,
+      used_vision: usedVision,
+      kind: extracted.kind,
       ats,
       writing,
       stub: !process.env.ANTHROPIC_API_KEY || process.env.USE_STUBS === 'true',

@@ -40,6 +40,18 @@ export type QuestionCategory =
   | 'communication'
   | 'design_thinking';
 
+export type InterviewQuestionKind =
+  | 'intro'
+  | 'motivation'
+  | 'self_awareness'
+  | 'conflict'
+  | 'ambition'
+  | 'cv_project'
+  | 'ai'
+  | 'jd_fit'
+  | 'stakeholder'
+  | 'horizon';
+
 export type CV = {
   id: string;
   user_id: string;
@@ -117,6 +129,7 @@ export type GeneratedQuestion = {
   category: QuestionCategory;
   is_personal: boolean;
   criteria?: {
+    kind?: InterviewQuestionKind;
     mustCover: string[];
     strongSignals: string[];
     weakSignals: string[];

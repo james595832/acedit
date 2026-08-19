@@ -103,8 +103,8 @@ export default async function StudioPage({searchParams}: StudioPageProps) {
           </Heading>
           <Text as="p" color="secondary" type="large" className="aced-home__lead">
             {hasRuns
-              ? 'Same loop as last time: prepare with your CV, answer five questions out loud, then debrief your scores.'
-              : 'About 15 minutes. Upload your CV, speak five answers, get clear feedback on what to improve.'}
+              ? 'Same loop as last time: prepare with your CV, sit with Tom for about an hour, then debrief your scores.'
+              : 'About an hour. Upload your CV, speak your answers, get clear feedback on what to improve.'}
           </Text>
           {billingBanner ? (
             <Banner status="success" title={billingBanner} />
@@ -141,11 +141,11 @@ export default async function StudioPage({searchParams}: StudioPageProps) {
             >
               <ListItem
                 label="Prepare"
-                description="Upload your design CV (PDF). Add a job description if you have a target role."
+                description="Upload your design CV (PDF or Word). Add a job description if you have a target role."
               />
               <ListItem
                 label="Room"
-                description="Answer five questions out loud. We transcribe and score each one."
+                description="Answer ten questions out loud — five classics, then five from your CV. We transcribe and score each one."
               />
               <ListItem
                 label="Debrief"
@@ -163,8 +163,8 @@ export default async function StudioPage({searchParams}: StudioPageProps) {
               }
             >
               <ListItem label="A quiet spot and a working microphone" />
-              <ListItem label="About 15 minutes uninterrupted" />
-              <ListItem label="Your design CV as a PDF" />
+              <ListItem label="About an hour uninterrupted" />
+              <ListItem label="Your design CV as a PDF or Word (.docx)" />
             </List>
           </>
         ) : (
@@ -185,7 +185,7 @@ export default async function StudioPage({searchParams}: StudioPageProps) {
               />
               <ListItem
                 label="Room"
-                description="Five spoken answers. Scored before you move on."
+                description="Ten spoken answers. Scored before you move on."
               />
               <ListItem
                 label="Debrief"

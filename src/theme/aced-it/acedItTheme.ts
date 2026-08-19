@@ -72,5 +72,12 @@ export const acedItTheme = defineTheme({
         borderRadius: 'var(--radius-element)',
       },
     },
+    'file-input': {
+      base: {
+        paddingInline: 'var(--spacing-5)',
+        paddingBlock: 'var(--spacing-5)',
+        borderRadius: 'var(--radius-container)',
+      },
+    },
   },
 });

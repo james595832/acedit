@@ -1,5 +1,5 @@
 import type {Metadata} from 'next';
-import {Outfit, Plus_Jakarta_Sans} from 'next/font/google';
+import {Outfit, Plus_Jakarta_Sans, Fraunces} from 'next/font/google';
 import {Providers} from '@/components/providers';
 import {AppShellServer} from '@/components/AppShellServer';
 import '@astryxdesign/core/reset.css';
@@ -18,6 +18,14 @@ const outfit = Outfit({
   variable: '--font-aced-heading',
   display: 'swap',
   weight: ['500', '600', '700'],
+});
+
+const fraunces = Fraunces({
+  subsets: ['latin'],
+  variable: '--font-aced-display',
+  display: 'swap',
+  weight: ['400', '500', '600'],
+  style: ['normal', 'italic'],
 });
 
 export const metadata: Metadata = {
@@ -47,7 +55,10 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={`${jakarta.variable} ${outfit.variable}`}>
+    <html
+      lang="en"
+      className={`${jakarta.variable} ${outfit.variable} ${fraunces.variable}`}
+    >
       <body className={jakarta.className}>
         <Providers>
           <AppShellServer>{children}</AppShellServer>

@@ -61,7 +61,7 @@ export default async function ResultsPage({searchParams}: ResultsPageProps) {
             <EmptyState
               headingLevel={2}
               title="No interviews yet"
-              description="Start with your CV, answer five questions out loud, then come back here for the debrief."
+              description="Start with your CV, answer ten questions out loud, then come back here for the debrief."
               actions={
                 <Link className="aced-home__primary" href="/interview">
                   Start interview

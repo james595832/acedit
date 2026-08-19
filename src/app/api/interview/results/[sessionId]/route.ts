@@ -1,10 +1,12 @@
 import {NextResponse} from 'next/server';
 import {requireInterviewUser} from '@/lib/interview/auth';
+import {summarizeInterview} from '@/lib/interview/summary';
 import {
   getSession,
   getSessionQuestions,
   listAnswersForQuestions,
 } from '@/lib/store';
+import type {GradeResult} from '@/lib/types';
 
 type Params = {params: Promise<{sessionId: string}>};
 
@@ -35,14 +37,15 @@ export async function GET(_request: Request, {params}: Params) {
       const answer = answerByQuestion.get(question.id);
       let feedback = answer?.feedback ?? null;
       let score = answer?.score ?? null;
+      let strengths: string[] = [];
+      let improvements: string[] = [];
       if (feedback) {
         try {
-          const parsed = JSON.parse(feedback) as {
-            feedback?: string;
-            score?: number;
-          };
+          const parsed = JSON.parse(feedback) as Partial<GradeResult>;
           feedback = parsed.feedback ?? feedback;
           score = parsed.score ?? score;
+          strengths = parsed.strengths ?? [];
+          improvements = parsed.improvements ?? [];
         } catch {
           // keep raw string
         }
@@ -54,6 +57,8 @@ export async function GET(_request: Request, {params}: Params) {
         score,
         feedback,
         transcription: answer?.transcription ?? null,
+        strengths,
+        improvements,
       };
     });
 
@@ -70,6 +75,16 @@ export async function GET(_request: Request, {params}: Params) {
     return NextResponse.json({
       session_id: session.id,
       overall_score: overall,
+      summary: summarizeInterview({
+        overall,
+        answers: questionRows.map((row) => ({
+          question: row.question_text,
+          score: row.score,
+          feedback: row.feedback,
+          strengths: row.strengths,
+          improvements: row.improvements,
+        })),
+      }),
       questions: questionRows,
     });
   } catch (error) {

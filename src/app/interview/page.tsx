@@ -23,8 +23,9 @@ export default function InterviewPage() {
           />
           <Heading level={1}>Prepare</Heading>
           <Text as="p" color="secondary" type="large" className="aced-masthead__lead">
-            Step 1 of 3 — add your CV so we can personalise five interview
-            questions. A job description is optional.
+            Step 1 of 3 — add your CV so Tom can brief you, then run a full
+            interview: five classic questions, then five from your work. A job
+            description is optional.
           </Text>
         </div>
       </header>

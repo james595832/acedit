@@ -17,6 +17,15 @@ type ResultRow = {
   score: number | null;
   feedback: string | null;
   transcription: string | null;
+  strengths?: string[];
+  improvements?: string[];
+};
+
+type DebriefSummary = {
+  headline: string;
+  body: string;
+  wins: string[];
+  next: string[];
 };
 
 type OutcomeTone = 'strong' | 'okay' | 'weak' | 'empty';
@@ -75,13 +84,14 @@ function outcomeCopy(
     lead: 'Start an interview, answer out loud, then come back here for your debrief.',
     badge: 'No score yet',
     cta: 'Start interview',
-    ctaHint: 'About 15 minutes',
+    ctaHint: 'About an hour',
   };
 }
 
 export function ResultsDebrief({sessionId}: {sessionId: string}) {
   const [overall, setOverall] = useState<number | null>(null);
   const [rows, setRows] = useState<ResultRow[]>([]);
+  const [summary, setSummary] = useState<DebriefSummary | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -101,6 +111,7 @@ export function ResultsDebrief({sessionId}: {sessionId: string}) {
           : Number(data.overall_score),
       );
       setRows(data.questions ?? []);
+      setSummary(data.summary ?? null);
       setLoading(false);
     })();
   }, [sessionId]);
@@ -112,6 +123,8 @@ export function ResultsDebrief({sessionId}: {sessionId: string}) {
       .filter((x) => x.row.score !== null);
   }, [rows]);
   const copy = outcomeCopy(tone, overall, scoredRows.length, rows.length);
+  const title = summary?.headline ?? copy.title;
+  const lead = summary?.body ?? copy.lead;
 
   const weakest = useMemo(() => {
     if (!scoredRows.length) return null;
@@ -163,9 +176,9 @@ export function ResultsDebrief({sessionId}: {sessionId: string}) {
                 <p className={`aced-debrief__badge aced-debrief__badge--${tone}`}>
                   {copy.badge}
                 </p>
-                <Heading level={1}>{copy.title}</Heading>
+                <Heading level={1}>{title}</Heading>
                 <Text as="p" color="secondary" type="large">
-                  {copy.lead}
+                  {lead}
                 </Text>
               </header>
 
@@ -213,6 +226,31 @@ export function ResultsDebrief({sessionId}: {sessionId: string}) {
                 </HStack>
                 <p className="aced-debrief__cta-hint">{copy.ctaHint}</p>
               </div>
+
+              {showScore && summary ? (
+                <section className="aced-debrief__focus" aria-label="Debrief">
+                  {summary.wins.length > 0 ? (
+                    <>
+                      <p className="aced-debrief__focus-label">What landed</p>
+                      <ul className="aced-signal aced-signal--up">
+                        {summary.wins.map((item) => (
+                          <li key={item}>{item}</li>
+                        ))}
+                      </ul>
+                    </>
+                  ) : null}
+                  {summary.next.length > 0 ? (
+                    <>
+                      <p className="aced-debrief__focus-label">Practise next</p>
+                      <ul className="aced-signal aced-signal--next">
+                        {summary.next.map((item) => (
+                          <li key={item}>{item}</li>
+                        ))}
+                      </ul>
+                    </>
+                  ) : null}
+                </section>
+              ) : null}
 
               {weakest && tone !== 'strong' ? (
                 <aside className="aced-debrief__focus" aria-label="Focus next">

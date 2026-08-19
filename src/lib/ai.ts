@@ -3,8 +3,9 @@ import {CHEAP_ANTHROPIC_MODEL, useStubs} from '@/lib/config';
 import {gradeTranscriptLocally, RUBRIC_CRITERIA} from '@/lib/grading';
 import {
   analyzeCvLocally,
-  buildQuestionsFromCv,
+  assembleInterviewSet,
   type CvAnalysis,
+  type CvPageImage,
 } from '@/lib/cv-parse';
 import {
   buildAnswerCriteria,
@@ -21,8 +22,8 @@ export async function analyzeCvBuffer(
   if (!pdfText.trim()) {
     return {
       ...local,
-      parsed_text: `Could not extract text from ${fileName}. The PDF may be image-only. Try a text-based export.`,
-      skills_extracted: local.skills_extracted,
+      parsed_text: `Could not extract text from ${fileName}.`,
+      skills_extracted: [],
     };
   }
 
@@ -82,6 +83,72 @@ ${pdfText.slice(0, 6000)}`,
   }
 }
 
+/** Read CV copy from page screenshots when native PDF text is empty. */
+export async function extractCvTextFromPageImages(
+  images: CvPageImage[],
+): Promise<string> {
+  if (!images.length || useStubs()) return '';
+
+  const apiKey = process.env.ANTHROPIC_API_KEY;
+  if (!apiKey) return '';
+
+  const content: Array<
+    | {type: 'text'; text: string}
+    | {
+        type: 'image';
+        source: {type: 'base64'; media_type: 'image/png' | 'image/jpeg'; data: string};
+      }
+  > = [
+    {
+      type: 'text',
+      text: `This is a designer's CV as page images (often a designed PDF with no selectable text).
+Transcribe ALL readable text in reading order: name, contact, roles, companies, dates, skills, project names, and bullet points.
+Return plain text only. No markdown, no commentary.`,
+    },
+  ];
+
+  for (const image of images.slice(0, 3)) {
+    if (image.base64.length > 5_000_000) continue;
+    content.push({
+      type: 'image',
+      source: {
+        type: 'base64',
+        media_type: image.mime,
+        data: image.base64,
+      },
+    });
+  }
+
+  if (content.length < 2) return '';
+
+  try {
+    const response = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'content-type': 'application/json',
+        'x-api-key': apiKey,
+        'anthropic-version': '2023-06-01',
+      },
+      body: JSON.stringify({
+        model: CHEAP_ANTHROPIC_MODEL,
+        max_tokens: 2500,
+        messages: [{role: 'user', content}],
+      }),
+    });
+    if (!response.ok) {
+      console.error('[cv-vision]', response.status, await response.text());
+      return '';
+    }
+    const data = (await response.json()) as {
+      content: Array<{type: string; text?: string}>;
+    };
+    return (data.content.find((c) => c.type === 'text')?.text ?? '').trim();
+  } catch (err) {
+    console.error('[cv-vision]', err);
+    return '';
+  }
+}
+
 export async function generateQuestions(input: {
   cvText?: string | null;
   company?: string;
@@ -104,7 +171,7 @@ export async function generateQuestions(input: {
       : null);
 
   if (useStubs()) {
-    return buildQuestionsFromCv(
+    return assembleInterviewSet(
       {
         ...analysis,
         companies: input.company
@@ -126,13 +193,19 @@ export async function generateQuestions(input: {
     },
     body: JSON.stringify({
       model: CHEAP_ANTHROPIC_MODEL,
-      max_tokens: 1500,
+        max_tokens: 2500,
       messages: [
         {
           role: 'user',
-          content: `You are a design interview coach. Generate exactly 8 interview questions.
-3-4 must be personal and reference specific projects/skills/companies from the CV.
-Tailor several to the job description when provided.
+          content: `You are a design interview coach writing a realistic 10-question spoken interview.
+The first 5 must be classic openers (personalised with CV/company names):
+1. Tell me about yourself
+2. Why this company/role (or why this kind of role if no JD)
+3. Strengths and a genuine weakness
+4. A conflict you’ve dealt with
+5. Where do you see yourself in five years
+Then 5 CV-grounded craft questions. Include exactly one about using AI in the design process (tools, judgement of output, what stays human). If the CV mentions AI, ground that question in their work. If not, use a realistic template tied to a project on the CV.
+If a job description is provided, tailor the “why here”, JD-fit, and 90-days questions to it.
 
 Skills: ${analysis.skills_extracted.join(', ')}
 Projects: ${analysis.projects.join(' | ')}
@@ -152,7 +225,7 @@ Return ONLY JSON:
   });
 
   if (!response.ok) {
-    return buildQuestionsFromCv(analysis, jd);
+    return assembleInterviewSet(analysis, jd);
   }
 
   const data = (await response.json()) as {
@@ -162,7 +235,7 @@ Return ONLY JSON:
   try {
     const parsed = JSON.parse(text) as {questions: GeneratedQuestion[]};
     if (parsed.questions?.length) {
-      return parsed.questions.map((q) => ({
+      const mapped = parsed.questions.map((q) => ({
         ...q,
         criteria:
           q.criteria ??
@@ -174,11 +247,12 @@ Return ONLY JSON:
             jd,
           }),
       }));
+      return assembleInterviewSet(analysis, jd, mapped);
     }
   } catch {
     // fall through
   }
-  return buildQuestionsFromCv(analysis, jd);
+  return assembleInterviewSet(analysis, jd);
 }
 
 export async function gradeAnswer(input: {
@@ -214,12 +288,14 @@ export async function gradeAnswer(input: {
       messages: [
         {
           role: 'user',
-          content: `You are a senior design interview evaluator for a PERSONALIZED practice tool.
+          content: `You are a senior design interviewer giving a debrief after a stressful spoken interview.
 
-Score the candidate against:
-1) The interview question
-2) Core rubric axes 0-10: designThinking, communication, depth, knowledge, roleFit
-3) These personalized criteria:
+Be direct and human. If they did well, say so clearly. If they were thin, say what would fail in the room and how to fix it — not a pep talk that hides the gap.
+
+Score against:
+1) The interview question (kind: ${criteria?.kind ?? 'craft'})
+2) Axes 0-10: designThinking, communication, depth, knowledge, roleFit
+3) Personalized criteria:
 Must cover: ${(criteria?.mustCover ?? []).join(' | ')}
 Strong signals: ${(criteria?.strongSignals ?? []).join(' | ')}
 Weak signals (penalize): ${(criteria?.weakSignals ?? []).join(' | ')}
@@ -229,6 +305,8 @@ Personal question: ${input.isPersonal ? 'yes — penalize generic answers withou
 
 Question: ${input.questionText}
 Transcript: ${input.transcription}
+
+"feedback" should be 2–4 spoken sentences: verdict first, then one concrete improvement (or none if they nailed it).
 
 Return ONLY JSON matching:
 {

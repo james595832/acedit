@@ -159,7 +159,9 @@ export function GradeFeedback({grade}: GradeFeedbackProps) {
 
       {grade.improvements.length > 0 ? (
         <VStack gap={2}>
-          <Heading level={3}>Improve next time</Heading>
+          <Heading level={3}>
+            {grade.score >= 78 ? 'One polish' : 'Improve next time'}
+          </Heading>
           <ul className="aced-signal aced-signal--next">
             {grade.improvements.map((item) => (
               <li key={item}>{item}</li>

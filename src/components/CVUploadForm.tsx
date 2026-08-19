@@ -15,6 +15,9 @@ import {CVWritingReport} from '@/components/CVWritingReport';
 import type {AtsAuditResult} from '@/lib/cv-ats';
 import type {WritingAuditResult} from '@/lib/cv-writing-audit';
 
+const CV_ACCEPT =
+  'application/pdf,.pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document,.docx';
+
 type CvPreview = {
   cv_id: string;
   skills: string[];
@@ -36,6 +39,10 @@ type JdPreview = {
   source_type: string;
 };
 
+function fileFromValue(next: File | File[] | null): File | null {
+  return next instanceof File ? next : null;
+}
+
 export function CVUploadForm() {
   const router = useRouter();
   const [file, setFile] = useState<File | null>(null);
@@ -49,16 +56,13 @@ export function CVUploadForm() {
   const [jdPreview, setJdPreview] = useState<JdPreview | null>(null);
   const [jdOpen, setJdOpen] = useState(false);
 
-  async function handleAnalyzeCv() {
-    if (!file) {
-      setError('Add your PDF CV first.');
-      return;
-    }
+  async function uploadCv(selected: File) {
     setIsAnalyzing(true);
     setError(null);
+    setPreview(null);
     try {
       const form = new FormData();
-      form.append('file', file);
+      form.append('file', selected);
       const res = await fetch('/api/cv/upload', {method: 'POST', body: form});
       const data = await res.json();
       if (!res.ok) throw new Error(data.error ?? 'Upload failed');
@@ -111,7 +115,7 @@ export function CVUploadForm() {
 
   async function handleStart() {
     if (!preview?.cv_id) {
-      setError('Confirm your CV before entering the interview.');
+      setError('Add your CV first.');
       return;
     }
     setIsLoading(true);
@@ -130,15 +134,19 @@ export function CVUploadForm() {
       if (!startRes.ok) {
         throw new Error(startData.error ?? 'Could not start interview');
       }
-      router.push(
-        `/interview/start?session_id=${startData.session_id}&question_id=${startData.question_id}`,
-      );
+      router.push(`/interview/start?session_id=${startData.session_id}`);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Something went wrong');
     } finally {
       setIsLoading(false);
     }
   }
+
+  const readyCopy = preview?.text_extracted
+    ? preview.skills.length
+      ? `Read your CV · ${preview.skills.slice(0, 5).join(', ')}`
+      : 'Read your CV and ready for a full interview.'
+    : 'We couldn’t read enough text from this file. Upload the Word .docx instead of a PDF export — we read that more reliably.';
 
   return (
     <VStack gap={5} className="aced-prep">
@@ -151,46 +159,40 @@ export function CVUploadForm() {
           Your CV
         </Heading>
         <Text as="p" color="secondary">
-          PDF only. We’ll read it and shape five interview questions around your
-          experience.
+          PDF or Word (.docx). We read it, then ask ten spoken questions: the
+          classics first, then five from your actual work.
         </Text>
         <FileInput
-          label="Design CV (PDF)"
-          description="Required · max 10MB"
-          accept="application/pdf,.pdf"
+          label="Design CV"
+          description="PDF or .docx · required · max 10MB"
+          accept={CV_ACCEPT}
           maxSize={10 * 1024 * 1024}
-          mode="dropzone"
+          mode={file ? 'input' : 'dropzone'}
           value={file}
           onChange={(next) => {
-            setFile(next instanceof File ? next : null);
+            const selected = fileFromValue(next);
+            setFile(selected);
             setPreview(null);
+            if (!selected) setError(null);
+          }}
+          changeAction={async (next) => {
+            const selected = fileFromValue(next);
+            if (selected) await uploadCv(selected);
           }}
           isRequired
           isLoading={isAnalyzing}
-          placeholder="Drop your CV here"
+          placeholder="Drop your CV here, or choose a file"
         />
-        {!preview ? (
-          <Button
-            label="Continue with this CV"
-            variant="primary"
-            isLoading={isAnalyzing}
-            isDisabled={!file}
-            clickAction={handleAnalyzeCv}
-          />
-        ) : (
+        {preview ? (
           <VStack gap={3}>
             <Banner
               status={preview.text_extracted ? 'success' : 'warning'}
               title={
                 preview.text_extracted
                   ? 'CV ready for your interview'
-                  : 'We couldn’t read much text from this PDF'
+                  : 'Couldn’t read enough text'
               }
-              description={
-                preview.skills.length
-                  ? `Skills spotted: ${preview.skills.slice(0, 6).join(', ')}`
-                  : 'You can still continue — questions will be more general.'
-              }
+              description={readyCopy}
             />
 
             <div className="aced-cta-bar">
@@ -201,7 +203,7 @@ export function CVUploadForm() {
                     : 'Ready — enter the interview room'}
                 </Text>
                 <Text type="supporting" color="secondary" as="p">
-                  About 15 minutes. Five questions out loud. Mic on.
+                  About an hour. Ten questions out loud. Mic on.
                 </Text>
               </div>
               <Button
@@ -212,7 +214,7 @@ export function CVUploadForm() {
               />
             </div>
 
-            {(preview.ats || preview.writing) ? (
+            {preview.ats || preview.writing ? (
               <Collapsible
                 defaultIsOpen={false}
                 trigger={<Text type="label">CV health check</Text>}
@@ -226,7 +228,7 @@ export function CVUploadForm() {
               </Collapsible>
             ) : null}
           </VStack>
-        )}
+        ) : null}
       </section>
 
       {preview ? (
@@ -256,10 +258,10 @@ export function CVUploadForm() {
                 description="PNG, JPG, WEBP, or PDF"
                 accept="image/png,image/jpeg,image/webp,application/pdf,.png,.jpg,.jpeg,.webp,.pdf"
                 maxSize={10 * 1024 * 1024}
-                mode="dropzone"
+                mode={jdFile ? 'input' : 'dropzone'}
                 value={jdFile}
                 onChange={(next) => {
-                  setJdFile(next instanceof File ? next : null);
+                  setJdFile(fileFromValue(next));
                   setJdPreview(null);
                 }}
                 isOptional

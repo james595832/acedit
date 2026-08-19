@@ -12,6 +12,7 @@ import {Collapsible} from '@astryxdesign/core/Collapsible';
 import {VoiceRecorder} from '@/components/VoiceRecorder';
 import {GradeFeedback} from '@/components/GradeFeedback';
 import {SessionProgress} from '@/components/SessionProgress';
+import {InterviewBrief} from '@/components/InterviewBrief';
 import type {GradeResult} from '@/lib/types';
 import type {AnswerCriteria} from '@/lib/criteria';
 
@@ -22,6 +23,11 @@ type QuestionRow = {
   is_personal: boolean;
   criteria_json: string | null;
   question_order: number;
+};
+
+type Briefing = {
+  firstName: string;
+  position: string;
 };
 
 function InterviewStartInner() {
@@ -39,7 +45,9 @@ function InterviewStartInner() {
   const [grade, setGrade] = useState<GradeResult | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isGrading, setIsGrading] = useState(false);
+  const [briefing, setBriefing] = useState<Briefing | null>(null);
 
+  const showBrief = Boolean(sessionId && !questionId);
   const ready = useMemo(
     () => Boolean(sessionId && questionId),
     [sessionId, questionId],
@@ -66,6 +74,23 @@ function InterviewStartInner() {
       }
       const list = (data.questions ?? []) as QuestionRow[];
       setQuestions(list);
+      if (data.briefing) {
+        setBriefing({
+          firstName: data.briefing.firstName ?? 'there',
+          position: data.briefing.position ?? 'a product design role',
+        });
+      }
+      if (!questionId) {
+        setQuestionText(null);
+        setCriteria(null);
+        setTranscription(null);
+        setTranscriptSource(null);
+        setAnswerId(null);
+        setGrade(null);
+        setError(null);
+        setIsGrading(false);
+        return;
+      }
       const match =
         list.find((q) => q.id === questionId) ?? data.first_question;
       setQuestionText(match?.question_text ?? null);
@@ -119,6 +144,37 @@ function InterviewStartInner() {
         ? 'Answer saved'
         : 'Your turn';
 
+  if (showBrief) {
+    return (
+      <section className="aced-room aced-room--brief">
+        <nav className="aced-crumb" aria-label="Breadcrumb">
+          <Link href="/studio">← Home</Link>
+        </nav>
+        {error ? (
+          <Banner
+            status="error"
+            title="Couldn’t open the room"
+            description={error}
+          />
+        ) : briefing ? (
+          <InterviewBrief
+            firstName={briefing.firstName}
+            position={briefing.position}
+            questionCount={questions.length}
+            onReady={() => {
+              const first = questions[0];
+              if (first) goToQuestion(first.id);
+            }}
+          />
+        ) : (
+          <Text as="p" color="secondary" className="aced-loading">
+            Taking a seat…
+          </Text>
+        )}
+      </section>
+    );
+  }
+
   return (
     <div className="aced-room">
       <nav className="aced-crumb" aria-label="Breadcrumb">
@@ -139,7 +195,10 @@ function InterviewStartInner() {
         ) : null}
         <h1>{questionText ?? 'Loading question…'}</h1>
         <p className="aced-room__lead">
-          Speak out loud. We score your transcript against this question’s cues.
+          Speak out loud, as you would in the room. Take a breath, then answer.
+          {questions.length
+            ? ` ${questions.length} questions — this is meant to feel like the real thing.`
+            : ''}
         </p>
       </header>
 

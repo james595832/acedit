@@ -428,11 +428,14 @@ body:has(.aced-app-page),
   border-style: solid !important;
 }
 
-/* File drop zones: dashed boundary so the target is visible */
+/* File drop zones: dashed target, compact once a file is attached */
 .aced-app-page .astryx-file-input {
+  box-sizing: border-box !important;
   border: 1.5px dashed #cfcabf !important;
   border-radius: 0.75rem;
   background: #fbfaf8;
+  padding: var(--spacing-5, 1.25rem) var(--spacing-5, 1.25rem) !important;
+  min-height: 8.5rem !important;
   transition:
     border-color var(--duration-fast, 150ms) ease,
     background-color var(--duration-fast, 150ms) ease;
@@ -441,6 +444,13 @@ body:has(.aced-app-page),
 .aced-app-page .astryx-file-input:hover {
   border-color: var(--aced-terra) !important;
   background: #fff;
+}
+
+.aced-app-page .astryx-file-input[data-mode='input'] {
+  min-height: 3.25rem !important;
+  padding: var(--spacing-3, 0.75rem) var(--spacing-4, 1rem) !important;
+  border-style: solid !important;
+  gap: var(--spacing-3, 0.75rem);
 }
 
 .astryx-button[data-size='sm'] {
@@ -5563,8 +5573,77 @@ dialog.aced-feedback-dialog::backdrop {
   background: #f0f4f8;
 }
 
-.aced-room__next {
-  padding-top: 0.35rem;
+/* —— Interview brief (Tom) —— */
+.aced-room--brief {
+  max-width: 40rem;
+}
+
+.aced-brief {
+  display: grid;
+  gap: var(--spacing-8, 2rem);
+  padding-block: clamp(2rem, 10vh, 5.5rem) 1.5rem;
+  animation: aced-fade-up 480ms var(--ease-standard, cubic-bezier(0.24, 1, 0.4, 1))
+    both;
+}
+
+.aced-brief h1 {
+  margin: 0;
+  max-width: 12ch;
+  font-family: var(--font-aced-display), Fraunces, Georgia, 'Times New Roman',
+    serif;
+  font-size: calc(var(--font-size-5xl, 2.625rem) * 1.35);
+  font-weight: 500;
+  font-style: normal;
+  line-height: 1.12;
+  letter-spacing: -0.04em;
+  color: var(--color-text-primary, var(--aced-ink));
+}
+
+.aced-brief h1 em {
+  font-style: italic;
+  font-weight: 500;
+}
+
+.aced-brief__copy {
+  max-width: 36ch;
+}
+
+.aced-brief__lead {
+  margin: 0;
+  font-size: var(--text-large-size, 1.0625rem);
+  font-weight: var(--font-weight-normal, 400);
+  line-height: 1.5;
+  color: var(--color-text-primary, var(--aced-ink));
+}
+
+.aced-brief__body {
+  margin: 0;
+  line-height: 1.55;
+}
+
+.aced-brief__body strong {
+  font-weight: var(--font-weight-semibold, 600);
+  color: var(--color-text-primary, var(--aced-ink));
+}
+
+.aced-brief__actions {
+  padding-top: var(--spacing-2, 0.5rem);
+}
+
+.aced-brief__back {
+  color: var(--color-text-secondary, var(--aced-mute));
+  font-size: var(--text-supporting-size, 0.75rem);
+  text-decoration: none;
+}
+
+.aced-brief__back:hover {
+  color: var(--color-text-primary, var(--aced-ink));
+}
+
+.aced-brief__meta {
+  margin: 0;
+  letter-spacing: 0.04em;
+  text-transform: lowercase;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -5581,6 +5660,7 @@ dialog.aced-feedback-dialog::backdrop {
   .aced-home__more,
   .aced-room__head,
   .aced-room__stage,
+  .aced-brief,
   .aced-orient__hero-path,
   .aced-app-page,
   .aced-nav-links .astryx-top-nav-item,
