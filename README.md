@@ -87,7 +87,7 @@ npm run astryx -- build "interview results page"
 npm run astryx -- docs theme
 ```
 
-Agent conventions live in `AGENTS.md`. Theme source: `src/theme/aced-it/`.
+Agent conventions live in `AGENTS.md`. Theme: `@astryxdesign/theme-stone`.
 
 ## Cheap / stub mode
 

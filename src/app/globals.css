@@ -4,20 +4,30 @@
 @import "tailwindcss/preflight.css" layer(base);
 /* Relative path: Tailwind PostCSS sometimes fails to resolve package exports for CSS */
 @import "../../node_modules/@astryxdesign/core/src/tailwind-theme.css";
+@import "../../node_modules/@astryxdesign/theme-stone/dist/theme.css";
 @import "tailwindcss/utilities.css" layer(utilities);
 
 :root {
-  /* Stripe-leaning product palette (cool canvas, navy ink, indigo accent) */
-  --aced-bone: #ffffff;
-  --aced-surface: #ffffff;
-  --aced-ink: #0a2540;
-  --aced-mute: #697386;
-  --aced-rule: #e3e8ee;
-  --aced-brick: #df1b41;
-  --aced-ochre: #c44d00;
-  --aced-terra: #533afd;
-  --aced-blue: #0a2540;
-  --aced-canvas: #f6f9fc;
+  /* Product aliases → Astryx Stone tokens (resolved on the themed tree) */
+  --aced-bone: var(--color-background-surface);
+  --aced-surface: var(--color-background-surface);
+  --aced-ink: var(--color-text-primary);
+  --aced-mute: var(--color-text-secondary);
+  --aced-rule: var(--color-border);
+  --aced-brick: var(--color-error);
+  --aced-ochre: var(--color-warning);
+  --aced-terra: var(--color-accent);
+  --aced-blue: var(--color-accent);
+  --aced-canvas: var(--color-background-body);
+}
+
+[data-astryx-theme='stone'] {
+  --font-family-body: var(--font-figtree), Figtree, ui-sans-serif, system-ui,
+    sans-serif;
+  --font-family-heading: var(--font-montserrat), Montserrat, ui-sans-serif,
+    system-ui, sans-serif;
+  --font-family-code: var(--font-jetbrains), 'JetBrains Mono', ui-monospace,
+    monospace;
 }
 
 html {
@@ -30,23 +40,9 @@ body {
 }
 
 body {
-  background-color: #ffffff;
+  background-color: var(--color-background-body);
   background-image: none;
-  color: var(--aced-ink);
-  font-family: var(--font-aced-body), 'Plus Jakarta Sans', ui-sans-serif,
-    system-ui, sans-serif;
-  letter-spacing: -0.011em;
-}
-
-h1,
-h2,
-h3,
-h4,
-h5,
-h6 {
-  font-family: var(--font-aced-heading), Outfit, 'Plus Jakarta Sans', ui-sans-serif,
-    system-ui, sans-serif;
-  letter-spacing: -0.02em;
+  color: var(--color-text-primary);
 }
 
 /* Logged-in app chrome: reliable gutters (StyleX contentPadding is easy to miss) */
@@ -62,7 +58,7 @@ h6 {
     var(--ease-standard, cubic-bezier(0.24, 1, 0.4, 1)) both;
 }
 
-/* Cool product canvas — white surfaces read against soft blue-gray */
+/* Stone canvas — white surfaces sit on the body wash */
 body:has(.aced-app-page),
 .astryx-app-shell:has(.aced-app-page) {
   background: var(--aced-canvas);
@@ -106,7 +102,7 @@ body:has(.aced-app-page),
   left: 0;
   height: 2.15rem;
   border-radius: 0.5rem;
-  background: rgba(10, 37, 64, 0.06);
+  background: var(--color-accent-muted);
   opacity: 0;
   pointer-events: none;
   z-index: 0;
@@ -127,7 +123,7 @@ body:has(.aced-app-page),
   padding: 0.45rem 0.85rem !important;
   border-radius: 999px;
   color: var(--aced-mute);
-  font-family: var(--font-aced-heading), 'Outfit', 'Plus Jakarta Sans', sans-serif;
+  font-family: var(--font-family-heading);
   font-weight: 600;
   letter-spacing: -0.01em;
   background: transparent !important;
@@ -163,7 +159,7 @@ body:has(.aced-app-page),
   box-sizing: border-box;
   padding: 0.85rem 1rem !important;
   border-radius: 0.55rem;
-  font-family: var(--font-aced-heading), 'Outfit', 'Plus Jakarta Sans', sans-serif;
+  font-family: var(--font-family-heading);
   font-weight: 600;
   font-size: 1.05rem;
   color: var(--aced-ink);
@@ -267,7 +263,7 @@ body:has(.aced-app-page),
 .aced-account-menu__identity {
   margin: 0;
   padding: 0.85rem 0.95rem;
-  background: #f6f9fc;
+  background: var(--color-background-body);
   border-radius: 0 0 0.65rem 0.65rem;
 }
 
@@ -337,7 +333,7 @@ body:has(.aced-app-page),
   backdrop-filter: none;
 }
 
-/* Form fields: clear affordance on white cards (Stripe-style).
+/* Form fields: clear affordance on white cards.
    Explicit border + padding: Astryx reset zeroes input padding, and StyleX
    wrapper padding is easy to lose in the cascade — force both globally. */
 .astryx-text-input,
@@ -467,7 +463,7 @@ body:has(.aced-app-page),
   letter-spacing: 0.04em;
   text-transform: uppercase;
   font-size: 0.78rem !important;
-  font-family: var(--font-aced-heading), 'Outfit', 'Plus Jakarta Sans', sans-serif;
+  font-family: var(--font-family-heading);
   color: #ffffff !important;
   background-color: var(--aced-ink) !important;
   border-color: var(--aced-ink) !important;
@@ -485,8 +481,8 @@ body:has(.aced-app-page),
   min-height: 100dvh;
   background:
     radial-gradient(120% 80% at 100% -10%, rgba(200, 62, 61, 0.08), transparent 55%),
-    radial-gradient(90% 60% at -10% 20%, rgba(83, 58, 253, 0.07), transparent 50%),
-    #ffffff;
+    radial-gradient(90% 60% at -10% 20%, var(--color-accent-muted), transparent 50%),
+    var(--color-background-body);
   color: var(--aced-ink);
   overflow-x: clip;
 }
@@ -678,7 +674,7 @@ body:has(.aced-app-page),
   border-radius: 0.55rem;
   color: var(--aced-ink);
   text-decoration: none;
-  font-family: var(--font-aced-heading), 'Outfit', 'Plus Jakarta Sans', sans-serif;
+  font-family: var(--font-family-heading);
   font-size: 1.1rem;
   font-weight: 600;
   letter-spacing: -0.01em;
@@ -709,7 +705,7 @@ body:has(.aced-app-page),
   padding: 0.75rem 1.25rem;
   border-radius: 0.55rem;
   border: 1px solid transparent;
-  font-family: var(--font-aced-heading), 'Outfit', 'Plus Jakarta Sans', sans-serif;
+  font-family: var(--font-family-heading);
   font-size: 0.84rem;
   font-weight: 600;
   letter-spacing: -0.01em;
@@ -778,7 +774,7 @@ body:has(.aced-app-page),
 
 .aced-mkt-hero__brand {
   margin: 0 0 1.25rem;
-  font-family: var(--font-aced-heading), 'Outfit', 'Plus Jakarta Sans', sans-serif;
+  font-family: var(--font-family-heading);
   font-weight: 700;
   font-size: clamp(3.4rem, 9vw, 6.5rem);
   line-height: 0.88;
@@ -789,7 +785,7 @@ body:has(.aced-app-page),
 
 .aced-mkt-hero__title {
   margin: 0 0 1rem;
-  font-family: var(--font-aced-heading), 'Outfit', 'Plus Jakarta Sans', sans-serif;
+  font-family: var(--font-family-heading);
   font-weight: 600;
   font-size: clamp(1.55rem, 3.2vw, 2.15rem);
   line-height: 1.15;
@@ -899,7 +895,7 @@ body:has(.aced-app-page),
 
 .aced-mkt-stage__q {
   margin: 0;
-  font-family: var(--font-aced-heading), 'Outfit', 'Plus Jakarta Sans', sans-serif;
+  font-family: var(--font-family-heading);
   font-size: clamp(1.15rem, 2.2vw, 1.45rem);
   line-height: 1.3;
   letter-spacing: -0.02em;
@@ -985,7 +981,7 @@ body:has(.aced-app-page),
 .aced-mkt-section--tint {
   max-width: none;
   width: 100%;
-  background: #f0f4f8;
+  background: var(--color-background-muted);
   border-block: 1px solid var(--aced-rule);
   padding-inline: var(--aced-mkt-gutter);
 }
@@ -1010,7 +1006,7 @@ body:has(.aced-app-page),
 
 .aced-mkt-h2 {
   margin: 0 auto 0.9rem;
-  font-family: var(--font-aced-heading), 'Outfit', 'Plus Jakarta Sans', sans-serif;
+  font-family: var(--font-family-heading);
   font-weight: 600;
   font-size: clamp(1.7rem, 3.4vw, 2.55rem);
   line-height: 1.12;
@@ -1095,7 +1091,7 @@ body:has(.aced-app-page),
 }
 
 .aced-mkt-audience strong {
-  font-family: var(--font-aced-heading), 'Outfit', 'Plus Jakarta Sans', sans-serif;
+  font-family: var(--font-family-heading);
   font-size: 1.1rem;
   letter-spacing: -0.02em;
 }
@@ -1131,7 +1127,7 @@ body:has(.aced-app-page),
 
 .aced-mkt-bento__card h3 {
   margin: 0;
-  font-family: var(--font-aced-heading), 'Outfit', 'Plus Jakarta Sans', sans-serif;
+  font-family: var(--font-family-heading);
   font-weight: 600;
   font-size: 1.15rem;
   letter-spacing: -0.02em;
@@ -1159,7 +1155,7 @@ body:has(.aced-app-page),
 }
 
 .aced-mkt-bento__art--cv {
-  background: rgba(83, 58, 253, 0.08);
+  background: var(--color-accent-muted);
 }
 
 .aced-mkt-bento__art--voice {
@@ -1198,7 +1194,7 @@ body:has(.aced-app-page),
 
 .aced-art-cv i:first-child {
   width: 62%;
-  background: rgba(83, 58, 253, 0.55);
+  background: var(--color-accent);
 }
 
 .aced-art-cv__bubble {
@@ -1338,7 +1334,7 @@ body:has(.aced-app-page),
 }
 
 .aced-art-score__num {
-  font-family: var(--font-aced-heading), 'Outfit', 'Plus Jakarta Sans', sans-serif;
+  font-family: var(--font-family-heading);
   font-size: 1.7rem;
   font-weight: 700;
   letter-spacing: -0.03em;
@@ -1475,7 +1471,7 @@ body:has(.aced-app-page),
 }
 
 .aced-mkt-compare__row--head {
-  background: #f0f4f8;
+  background: var(--color-background-muted);
   font-size: 0.75rem;
   letter-spacing: 0.08em;
   text-transform: uppercase;
@@ -1517,7 +1513,7 @@ body:has(.aced-app-page),
   display: flex;
   align-items: baseline;
   gap: 0.4rem;
-  font-family: var(--font-aced-heading), 'Outfit', 'Plus Jakarta Sans', sans-serif;
+  font-family: var(--font-family-heading);
 }
 
 .aced-mkt-plan__price span {
@@ -1579,7 +1575,7 @@ body:has(.aced-app-page),
 .aced-mkt-cta {
   padding: clamp(3.5rem, 10vh, 6.5rem) var(--aced-mkt-gutter);
   text-align: center;
-  background: linear-gradient(180deg, #ffffff 0%, #f0f4f8 100%);
+  background: linear-gradient(180deg, #ffffff 0%, var(--color-background-muted) 100%);
   border-top: 1px solid var(--aced-rule);
 }
 
@@ -1838,7 +1834,7 @@ body:has(.aced-app-page),
 
 .aced-legal__section h2 {
   margin: 0 0 0.75rem;
-  font-family: var(--font-aced-heading), 'Outfit', 'Plus Jakarta Sans', sans-serif;
+  font-family: var(--font-family-heading);
   font-weight: 600;
   font-size: 1.15rem;
   letter-spacing: -0.02em;
@@ -1891,7 +1887,7 @@ body:has(.aced-app-page),
 }
 
 .aced-contact__email {
-  font-family: var(--font-aced-heading), 'Outfit', 'Plus Jakarta Sans', sans-serif;
+  font-family: var(--font-family-heading);
   font-size: 1.25rem;
   font-weight: 600;
   color: var(--aced-ink);
@@ -1921,7 +1917,7 @@ body:has(.aced-app-page),
 
 .aced-price-panel__name {
   margin: 0;
-  font-family: var(--font-aced-heading), 'Outfit', 'Plus Jakarta Sans', sans-serif;
+  font-family: var(--font-family-heading);
   font-weight: 600;
   font-size: 1.05rem;
   color: var(--aced-ink);
@@ -1932,7 +1928,7 @@ body:has(.aced-app-page),
   display: flex;
   align-items: baseline;
   gap: 0.25rem;
-  font-family: var(--font-aced-heading), 'Outfit', 'Plus Jakarta Sans', sans-serif;
+  font-family: var(--font-family-heading);
   font-weight: 600;
   font-size: 1.45rem;
   color: var(--aced-ink);
@@ -1965,7 +1961,7 @@ body:has(.aced-app-page),
 }
 
 .aced-price-panel__due span {
-  font-family: var(--font-aced-heading), 'Outfit', 'Plus Jakarta Sans', sans-serif;
+  font-family: var(--font-family-heading);
   font-weight: 700;
   font-size: 1.05rem;
 }
@@ -2006,7 +2002,7 @@ body:has(.aced-app-page),
 .aced-trial-day {
   display: inline-block;
   min-width: 1.5rem;
-  font-family: var(--font-aced-heading), 'Outfit', 'Plus Jakarta Sans', sans-serif;
+  font-family: var(--font-family-heading);
   font-size: 0.75rem;
   font-weight: 700;
   letter-spacing: 0.04em;
@@ -2040,8 +2036,8 @@ body:has(.aced-app-page),
   min-height: 100dvh;
   background:
     radial-gradient(120% 80% at 100% -10%, rgba(200, 62, 61, 0.08), transparent 55%),
-    radial-gradient(90% 60% at -10% 20%, rgba(83, 58, 253, 0.07), transparent 50%),
-    #ffffff;
+    radial-gradient(90% 60% at -10% 20%, var(--color-accent-muted), transparent 50%),
+    var(--color-background-body);
   color: var(--aced-ink);
 }
 
@@ -2106,7 +2102,7 @@ body:has(.aced-app-page),
   align-content: start;
   padding: 1.35rem 1.4rem;
   border-radius: 1rem;
-  background: #f6f9fc;
+  background: var(--color-background-body);
   border: 1px solid var(--aced-rule);
 }
 
@@ -2145,7 +2141,7 @@ body:has(.aced-app-page),
 .aced-start__intro h1 {
   margin: 0;
   max-width: 14ch;
-  font-family: var(--font-aced-heading), 'Outfit', 'Plus Jakarta Sans', sans-serif;
+  font-family: var(--font-family-heading);
   font-weight: 600;
   font-size: clamp(1.85rem, 3.2vw, 2.45rem);
   line-height: 1.12;
@@ -2216,7 +2212,7 @@ body:has(.aced-app-page),
 }
 
 .aced-masthead h1 {
-  font-family: var(--font-aced-heading), 'Outfit', 'Plus Jakarta Sans', sans-serif;
+  font-family: var(--font-family-heading);
   font-weight: 600;
   font-size: clamp(1.65rem, 2.8vw, 2.15rem);
   letter-spacing: -0.03em;
@@ -2298,7 +2294,7 @@ body:has(.aced-app-page),
 }
 
 .aced-settings-price {
-  font-family: var(--font-aced-heading), 'Outfit', 'Plus Jakarta Sans', sans-serif;
+  font-family: var(--font-family-heading);
 }
 
 .aced-settings-meta {
@@ -2391,7 +2387,7 @@ body:has(.aced-app-page),
 }
 
 .aced-invoice-row__amount {
-  font-family: var(--font-aced-heading), 'Outfit', 'Plus Jakarta Sans', sans-serif;
+  font-family: var(--font-family-heading);
   font-size: 0.92rem;
   font-weight: 600;
 }
@@ -2436,7 +2432,7 @@ body:has(.aced-app-page),
 }
 
 .aced-step-rail__num {
-  font-family: var(--font-aced-heading), 'Outfit', 'Plus Jakarta Sans', sans-serif;
+  font-family: var(--font-family-heading);
   font-weight: 700;
   font-size: 1.5rem;
   letter-spacing: -0.04em;
@@ -2450,12 +2446,12 @@ body:has(.aced-app-page),
   padding: 1.05rem 1.3rem;
   border: 1px solid var(--aced-rule);
   border-radius: 0.9rem;
-  background: #f0f4f8;
+  background: var(--color-background-muted);
 }
 
 .aced-studio-hello__kicker {
   margin: 0 0 0.25rem;
-  font-family: var(--font-aced-heading), 'Outfit', 'Plus Jakarta Sans', sans-serif;
+  font-family: var(--font-family-heading);
   font-size: 0.95rem;
   font-weight: 600;
   letter-spacing: 0;
@@ -2489,7 +2485,7 @@ body:has(.aced-app-page),
 }
 
 .aced-studio-stats__value {
-  font-family: var(--font-aced-heading), 'Outfit', 'Plus Jakarta Sans', sans-serif;
+  font-family: var(--font-family-heading);
   font-size: 1.55rem;
   font-weight: 700;
   letter-spacing: -0.02em;
@@ -2558,7 +2554,7 @@ body:has(.aced-app-page),
 }
 
 .aced-orient__num {
-  font-family: var(--font-aced-heading), 'Outfit', 'Plus Jakarta Sans', sans-serif;
+  font-family: var(--font-family-heading);
   font-weight: 700;
   font-size: 1.35rem;
   letter-spacing: -0.04em;
@@ -2569,7 +2565,7 @@ body:has(.aced-app-page),
 
 .aced-orient__body h2 {
   margin: 0 0 0.4rem;
-  font-family: var(--font-aced-heading), 'Outfit', 'Plus Jakarta Sans', sans-serif;
+  font-family: var(--font-family-heading);
   font-size: 1.15rem;
   letter-spacing: -0.03em;
   font-weight: 600;
@@ -2591,7 +2587,7 @@ body:has(.aced-app-page),
 .aced-orient__cta {
   display: inline-flex;
   align-items: center;
-  font-family: var(--font-aced-heading), 'Outfit', 'Plus Jakarta Sans', sans-serif;
+  font-family: var(--font-family-heading);
   font-size: 0.78rem;
   font-weight: 600;
   letter-spacing: 0.08em;
@@ -2677,12 +2673,12 @@ body:has(.aced-app-page),
   text-transform: none;
   font-weight: 500;
   color: var(--aced-mute);
-  font-family: var(--font-aced-heading), 'Outfit', 'Plus Jakarta Sans', sans-serif;
+  font-family: var(--font-family-heading);
 }
 
 .aced-orient__hero-path h2 {
   margin: 0;
-  font-family: var(--font-aced-heading), 'Outfit', 'Plus Jakarta Sans', sans-serif;
+  font-family: var(--font-family-heading);
   font-size: clamp(1.45rem, 2.5vw, 1.85rem);
   letter-spacing: -0.035em;
   font-weight: 600;
@@ -2699,7 +2695,7 @@ body:has(.aced-app-page),
 
 .aced-orient__rail-label {
   margin: 0 0 0.35rem;
-  font-family: var(--font-aced-heading), 'Outfit', 'Plus Jakarta Sans', sans-serif;
+  font-family: var(--font-family-heading);
   font-size: 0.88rem;
   font-weight: 500;
   letter-spacing: 0;
@@ -2716,7 +2712,7 @@ body:has(.aced-app-page),
   padding: 0.9rem 1.45rem;
   border-radius: 0.55rem;
   border: 1px solid transparent;
-  font-family: var(--font-aced-heading), 'Outfit', 'Plus Jakarta Sans', sans-serif;
+  font-family: var(--font-family-heading);
   font-size: 0.88rem;
   font-weight: 600;
   letter-spacing: 0.02em;
@@ -2886,7 +2882,7 @@ body:has(.aced-app-page),
 .aced-stepper {
   margin: 0 0 0.35rem;
   border: 1px solid var(--aced-rule);
-  background: #f0f4f8;
+  background: var(--color-background-muted);
   border-radius: 0.9rem;
   padding: 1.1rem 1.25rem 1.3rem;
 }
@@ -2908,7 +2904,7 @@ body:has(.aced-app-page),
 
 .aced-stepper__now {
   margin: 0;
-  font-family: var(--font-aced-heading), 'Outfit', 'Plus Jakarta Sans', sans-serif;
+  font-family: var(--font-family-heading);
   font-size: 1.05rem;
   letter-spacing: -0.02em;
   color: var(--aced-ink);
@@ -2953,7 +2949,7 @@ body:has(.aced-app-page),
   border: 1px solid var(--aced-rule);
   border-radius: 999px;
   background: #ffffff;
-  font-family: var(--font-aced-heading), 'Outfit', 'Plus Jakarta Sans', sans-serif;
+  font-family: var(--font-family-heading);
   font-size: 0.82rem;
   font-weight: 700;
   letter-spacing: -0.02em;
@@ -3054,11 +3050,11 @@ body:has(.aced-app-page),
 }
 
 .aced-ats--strong {
-  border-color: rgba(83, 58, 253, 0.35);
+  border-color: var(--color-border-emphasized);
 }
 
 .aced-ats--good {
-  border-color: rgba(83, 58, 253, 0.22);
+  border-color: var(--color-border-emphasized);
 }
 
 .aced-ats--fair {
@@ -3071,7 +3067,7 @@ body:has(.aced-app-page),
 }
 
 .aced-writing--low {
-  border-color: rgba(83, 58, 253, 0.28);
+  border-color: var(--color-border-emphasized);
 }
 
 .aced-writing--medium {
@@ -3101,7 +3097,7 @@ body:has(.aced-app-page),
 
 .aced-ats__title {
   margin: 0 0 0.35rem;
-  font-family: var(--font-aced-heading), 'Outfit', 'Plus Jakarta Sans', sans-serif;
+  font-family: var(--font-family-heading);
   font-size: 1.1rem;
   letter-spacing: -0.02em;
 }
@@ -3116,7 +3112,7 @@ body:has(.aced-app-page),
 
 .aced-ats__score {
   margin: 0;
-  font-family: var(--font-aced-heading), 'Outfit', 'Plus Jakarta Sans', sans-serif;
+  font-family: var(--font-family-heading);
   font-size: 2rem;
   font-weight: 700;
   letter-spacing: -0.04em;
@@ -3265,9 +3261,9 @@ body:has(.aced-app-page),
   border: 1px solid rgba(28, 27, 24, 0.12);
   border-right: 0;
   border-radius: 0.55rem 0 0 0.55rem;
-  background: var(--aced-ink, #0a2540);
+  background: var(--aced-ink);
   color: #fff;
-  font-family: var(--font-aced-heading), 'Outfit', 'Plus Jakarta Sans', sans-serif;
+  font-family: var(--font-family-heading);
   font-size: 0.72rem;
   font-weight: 600;
   letter-spacing: 0.14em;
@@ -3482,7 +3478,7 @@ dialog.aced-feedback-dialog::backdrop {
 .astryx-app-shell,
 .astryx-app-shell[data-variant='wash'],
 .astryx-app-shell-content {
-  background: #f6f9fc !important;
+  background: var(--color-background-body) !important;
 }
 
 .aced-panel--soft {
@@ -3544,7 +3540,7 @@ dialog.aced-feedback-dialog::backdrop {
 
 .aced-record__clock {
   margin-left: auto;
-  font-family: var(--font-aced-heading), 'Outfit', 'Plus Jakarta Sans', sans-serif;
+  font-family: var(--font-family-heading);
   font-size: 1.35rem;
   letter-spacing: -0.03em;
   font-variant-numeric: tabular-nums;
@@ -3553,7 +3549,7 @@ dialog.aced-feedback-dialog::backdrop {
 
 .aced-record__transcript {
   border: 1px solid var(--aced-rule);
-  background: #f0f4f8;
+  background: var(--color-background-muted);
   border-radius: 0.6rem;
   padding: 0.85rem 1rem;
 }
@@ -3600,12 +3596,12 @@ dialog.aced-feedback-dialog::backdrop {
   font-size: 0.82rem;
   font-weight: 600;
   color: var(--aced-ink);
-  background: #f0f4f8;
+  background: var(--color-background-muted);
 }
 
 .aced-debrief__badge--strong {
-  color: #533afd;
-  background: rgba(83, 58, 253, 0.1);
+  color: var(--color-text-accent);
+  background: var(--color-accent-muted);
 }
 
 .aced-debrief__badge--okay {
@@ -3620,7 +3616,7 @@ dialog.aced-feedback-dialog::backdrop {
 
 .aced-debrief__badge--empty {
   color: var(--aced-mute);
-  background: #f0f4f8;
+  background: var(--color-background-muted);
 }
 
 .aced-debrief__cta {
@@ -3643,12 +3639,12 @@ dialog.aced-feedback-dialog::backdrop {
   padding: var(--spacing-5, 1.25rem);
   border: 1px solid var(--aced-rule);
   border-left: 3px solid var(--aced-ochre);
-  background: #f0f4f8;
+  background: var(--color-background-muted);
 }
 
 .aced-debrief__focus--win {
   border-left-color: var(--aced-blue);
-  background: rgba(83, 58, 253, 0.05);
+  background: var(--color-overlay-hover);
 }
 
 .aced-debrief__focus-label {
@@ -3662,7 +3658,7 @@ dialog.aced-feedback-dialog::backdrop {
 
 .aced-debrief__focus-q {
   margin: 0;
-  font-family: var(--font-aced-heading), 'Outfit', 'Plus Jakarta Sans', sans-serif;
+  font-family: var(--font-family-heading);
   font-weight: 600;
   font-size: 1rem;
 }
@@ -3724,7 +3720,7 @@ dialog.aced-feedback-dialog::backdrop {
 
 .aced-score-hero__label {
   margin: 0;
-  font-family: var(--font-aced-heading), 'Outfit', 'Plus Jakarta Sans', sans-serif;
+  font-family: var(--font-family-heading);
   font-size: 1.05rem;
   font-weight: 600;
 }
@@ -3739,7 +3735,7 @@ dialog.aced-feedback-dialog::backdrop {
 
 .aced-score-hero__value {
   margin: 0;
-  font-family: var(--font-aced-heading), 'Outfit', 'Plus Jakarta Sans', sans-serif;
+  font-family: var(--font-family-heading);
   font-size: clamp(2.2rem, 5vw, 2.85rem);
   letter-spacing: -0.06em;
   line-height: 0.9;
@@ -3755,8 +3751,8 @@ dialog.aced-feedback-dialog::backdrop {
 
 .aced-debrief--strong .aced-score-hero,
 .aced-score-hero--strong {
-  border-color: rgba(83, 58, 253, 0.35);
-  background: rgba(83, 58, 253, 0.05);
+  border-color: var(--color-border-emphasized);
+  background: var(--color-overlay-hover);
 }
 
 .aced-score-hero--okay {
@@ -3827,8 +3823,8 @@ dialog.aced-feedback-dialog::backdrop {
   margin: 0;
   padding: 0.45rem 0.85rem;
   border-radius: 999px;
-  border: 1px solid rgba(83, 58, 253, 0.35);
-  background: rgba(83, 58, 253, 0.08);
+  border: 1px solid var(--color-border-emphasized);
+  background: var(--color-accent-muted);
   color: var(--aced-blue);
   font-size: 0.88rem;
   font-weight: 600;
@@ -3913,7 +3909,7 @@ dialog.aced-feedback-dialog::backdrop {
 }
 
 .aced-check__item--hit {
-  border-color: rgba(83, 58, 253, 0.35);
+  border-color: var(--color-border-emphasized);
 }
 
 .aced-check__item--miss {
@@ -4024,17 +4020,17 @@ dialog.aced-feedback-dialog::backdrop {
   min-height: 3.25rem;
   padding: var(--spacing-2, 0.5rem);
   border-radius: 0.5rem;
-  font-family: var(--font-aced-heading), 'Outfit', 'Plus Jakarta Sans', sans-serif;
+  font-family: var(--font-family-heading);
   font-size: 1.2rem;
   font-weight: 700;
   letter-spacing: -0.03em;
-  background: #f0f4f8;
+  background: var(--color-background-muted);
   color: var(--aced-mute);
 }
 
 .aced-result-list__score--strong {
-  background: rgba(83, 58, 253, 0.1);
-  color: #533afd;
+  background: var(--color-accent-muted);
+  color: var(--color-text-accent);
 }
 
 .aced-result-list__score--okay {
@@ -4086,7 +4082,7 @@ dialog.aced-feedback-dialog::backdrop {
   padding: var(--spacing-3, 0.75rem) var(--spacing-4, 1rem);
   border: 1px solid var(--aced-rule);
   border-radius: 0.45rem;
-  background: #f0f4f8;
+  background: var(--color-background-muted);
   color: var(--aced-mute);
   line-height: 1.55;
   font-size: 0.95rem;
@@ -4246,7 +4242,7 @@ dialog.aced-feedback-dialog::backdrop {
 
 .aced-wb-list__copy h2 {
   margin: 0;
-  font-family: var(--font-aced-heading), 'Outfit', 'Plus Jakarta Sans', sans-serif;
+  font-family: var(--font-family-heading);
   font-size: 1.35rem;
   letter-spacing: -0.02em;
 }
@@ -4325,7 +4321,7 @@ dialog.aced-feedback-dialog::backdrop {
 }
 
 .aced-wb__timer-value {
-  font-family: var(--font-aced-heading), 'Outfit', 'Plus Jakarta Sans', sans-serif;
+  font-family: var(--font-family-heading);
   font-size: 1.85rem;
   font-weight: 600;
   letter-spacing: -0.03em;
@@ -4374,7 +4370,7 @@ dialog.aced-feedback-dialog::backdrop {
 
 .aced-wb__brief-block h3 {
   margin: 0;
-  font-family: var(--font-aced-heading), 'Outfit', 'Plus Jakarta Sans', sans-serif;
+  font-family: var(--font-family-heading);
   font-size: 0.78rem;
   font-weight: 600;
   letter-spacing: 0.04em;
@@ -4391,11 +4387,11 @@ dialog.aced-feedback-dialog::backdrop {
 .aced-wb__brief-block--ask {
   padding: 0.95rem 1.05rem;
   border-left: 3px solid var(--aced-ink);
-  background: #f0f4f8;
+  background: var(--color-background-muted);
 }
 
 .aced-wb__brief-block--ask p {
-  font-family: var(--font-aced-heading), 'Outfit', 'Plus Jakarta Sans', sans-serif;
+  font-family: var(--font-family-heading);
   font-size: 1.05rem;
   font-weight: 600;
   line-height: 1.35;
@@ -4449,7 +4445,7 @@ dialog.aced-feedback-dialog::backdrop {
   margin: 0 0 1rem;
   padding: 0.85rem 1rem;
   border-left: 2px solid var(--aced-rule);
-  background: #f0f4f8;
+  background: var(--color-background-muted);
   line-height: 1.45;
   color: var(--aced-ink);
 }
@@ -4486,7 +4482,7 @@ dialog.aced-feedback-dialog::backdrop {
   padding: 0.85rem 1rem;
   border: 1px solid var(--aced-rule);
   border-radius: 0.55rem;
-  background: #f0f4f8;
+  background: var(--color-background-muted);
   line-height: 1.5;
   color: var(--aced-ink);
 }
@@ -4528,7 +4524,7 @@ dialog.aced-feedback-dialog::backdrop {
 }
 
 .aced-wb__deliverable--met .aced-wb__deliverable-status {
-  background: rgba(83, 58, 253, 0.12);
+  background: var(--color-accent-muted);
   color: var(--aced-blue);
 }
 
@@ -4620,7 +4616,7 @@ dialog.aced-feedback-dialog::backdrop {
 .aced-wb__tool-btn {
   appearance: none;
   border: 1px solid var(--aced-rule);
-  background: #f0f4f8;
+  background: var(--color-background-muted);
   color: var(--aced-ink);
   border-radius: 999px;
   padding: 0.35rem 0.8rem;
@@ -4765,7 +4761,7 @@ dialog.aced-feedback-dialog::backdrop {
 .aced-wb__side-close {
   appearance: none;
   border: 1px solid var(--aced-rule);
-  background: #f0f4f8;
+  background: var(--color-background-muted);
   color: var(--aced-ink);
   border-radius: 0.45rem;
   padding: 0.35rem 0.65rem;
@@ -4796,7 +4792,7 @@ dialog.aced-feedback-dialog::backdrop {
   height: 1.8rem;
   border-radius: 999px;
   border: 1px solid var(--aced-rule);
-  background: #f0f4f8;
+  background: var(--color-background-muted);
   color: var(--aced-mute);
   font: inherit;
   font-size: 0.78rem;
@@ -4855,7 +4851,7 @@ dialog.aced-feedback-dialog::backdrop {
   border: 1px solid var(--aced-rule);
   font-size: 0.72rem;
   color: var(--aced-mute);
-  background: #f0f4f8;
+  background: var(--color-background-muted);
 }
 
 .aced-wb__talk-dot.is-filled {
@@ -4884,7 +4880,7 @@ dialog.aced-feedback-dialog::backdrop {
   padding: 0.7rem 0.85rem;
   border-radius: 0.55rem;
   border: 1px solid var(--aced-rule);
-  background: #f0f4f8;
+  background: var(--color-background-muted);
 }
 
 .aced-wb__bubble--user {
@@ -5024,7 +5020,7 @@ dialog.aced-feedback-dialog::backdrop {
   border-radius: 999px;
   border: 1px solid var(--aced-rule);
   background: #fff;
-  font-family: var(--font-aced-heading), 'Outfit', 'Plus Jakarta Sans', sans-serif;
+  font-family: var(--font-family-heading);
   font-size: 0.82rem;
   font-weight: 600;
   letter-spacing: 0;
@@ -5144,8 +5140,7 @@ dialog.aced-feedback-dialog::backdrop {
   border: 0;
   background: transparent;
   padding: 0.2rem 0.55rem 0.55rem;
-  font-family: var(--font-aced-body), 'Plus Jakarta Sans', ui-sans-serif, system-ui,
-    sans-serif;
+  font-family: var(--font-family-body);
   font-size: 0.82rem;
   font-weight: 600;
   line-height: 1.3;
@@ -5200,7 +5195,7 @@ dialog.aced-feedback-dialog::backdrop {
   width: var(--marker-size, 5px);
   height: var(--marker-size, 5px);
   border-radius: 50%;
-  background: var(--marker-color, #0a2540);
+  background: var(--marker-color, var(--color-accent));
   opacity: 0.85;
   box-shadow: 0 0 0 2px rgba(247, 246, 243, 0.95);
 }
@@ -5247,7 +5242,7 @@ dialog.aced-feedback-dialog::backdrop {
   max-width: 48rem;
   border-radius: 0.55rem;
   border: 1px solid var(--aced-rule);
-  background: #f0f4f8;
+  background: var(--color-background-muted);
 }
 
 .aced-wb-history {
@@ -5299,7 +5294,7 @@ dialog.aced-feedback-dialog::backdrop {
   object-fit: cover;
   border-radius: 0.5rem;
   border: 1px solid var(--aced-rule);
-  background: #f0f4f8;
+  background: var(--color-background-muted);
 }
 
 .aced-wb-history__thumb.is-empty {
@@ -5377,7 +5372,7 @@ dialog.aced-feedback-dialog::backdrop {
   border-radius: 0.45rem;
   background: var(--aced-ink);
   color: #fff;
-  font-family: var(--font-aced-heading), 'Outfit', 'Plus Jakarta Sans', sans-serif;
+  font-family: var(--font-family-heading);
   font-size: 0.92rem;
   font-weight: 600;
   text-decoration: none;
@@ -5438,7 +5433,7 @@ dialog.aced-feedback-dialog::backdrop {
 .aced-app-page .astryx-list-item:has(a):hover,
 .aced-app-page a.astryx-list-item:hover,
 .aced-app-page .astryx-list-item:has(button):hover {
-  background-color: var(--color-background-muted, #f0f4f8);
+  background-color: var(--color-background-muted);
 }
 
 .aced-paused {
@@ -5512,7 +5507,7 @@ dialog.aced-feedback-dialog::backdrop {
   border-bottom: 1px solid var(--aced-rule);
   background: transparent;
   color: var(--aced-ink);
-  font-family: var(--font-aced-heading), 'Outfit', 'Plus Jakarta Sans', sans-serif;
+  font-family: var(--font-family-heading);
   font-size: 0.98rem;
   font-weight: 600;
   text-align: left;
@@ -5570,7 +5565,7 @@ dialog.aced-feedback-dialog::backdrop {
   padding: 0.95rem 1rem;
   border: 1px solid var(--aced-rule);
   border-radius: 0.55rem;
-  background: #f0f4f8;
+  background: var(--color-background-muted);
 }
 
 /* —— Interview brief (Tom) —— */
@@ -5589,8 +5584,7 @@ dialog.aced-feedback-dialog::backdrop {
 .aced-brief h1 {
   margin: 0;
   max-width: 12ch;
-  font-family: var(--font-aced-display), Fraunces, Georgia, 'Times New Roman',
-    serif;
+  font-family: var(--font-family-heading);
   font-size: calc(var(--font-size-5xl, 2.625rem) * 1.35);
   font-weight: 500;
   font-style: normal;

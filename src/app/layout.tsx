@@ -1,31 +1,30 @@
 import type {Metadata} from 'next';
-import {Outfit, Plus_Jakarta_Sans, Fraunces} from 'next/font/google';
+import {Figtree, JetBrains_Mono, Montserrat} from 'next/font/google';
 import {Providers} from '@/components/providers';
 import {AppShellServer} from '@/components/AppShellServer';
 import '@astryxdesign/core/reset.css';
 import '@astryxdesign/core/astryx.css';
 import './globals.css';
 
-const jakarta = Plus_Jakarta_Sans({
+const figtree = Figtree({
   subsets: ['latin'],
-  variable: '--font-aced-body',
+  variable: '--font-figtree',
   display: 'swap',
   weight: ['400', '500', '600', '700'],
 });
 
-const outfit = Outfit({
+const montserrat = Montserrat({
   subsets: ['latin'],
-  variable: '--font-aced-heading',
+  variable: '--font-montserrat',
   display: 'swap',
-  weight: ['500', '600', '700'],
+  weight: ['400', '500', '600', '700'],
 });
 
-const fraunces = Fraunces({
+const jetbrains = JetBrains_Mono({
   subsets: ['latin'],
-  variable: '--font-aced-display',
+  variable: '--font-jetbrains',
   display: 'swap',
-  weight: ['400', '500', '600'],
-  style: ['normal', 'italic'],
+  weight: ['400', '500', '600', '700'],
 });
 
 export const metadata: Metadata = {
@@ -57,9 +56,11 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${jakarta.variable} ${outfit.variable} ${fraunces.variable}`}
+      data-theme="light"
+      data-astryx-theme="stone"
+      className={`${figtree.variable} ${montserrat.variable} ${jetbrains.variable}`}
     >
-      <body className={jakarta.className}>
+      <body className={figtree.className}>
         <Providers>
           <AppShellServer>{children}</AppShellServer>
         </Providers>
