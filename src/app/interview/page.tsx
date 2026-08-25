@@ -23,9 +23,9 @@ export default function InterviewPage() {
           />
           <Heading level={1}>Prepare</Heading>
           <Text as="p" color="secondary" type="large" className="aced-masthead__lead">
-            Step 1 of 3 — add your CV so Tom can brief you, then run a full
-            interview: five classic questions, then five from your work. A job
-            description is optional.
+            Step 1 of 3 — add your CV, then pick the role you are going for
+            (or paste a job description). Tom briefs you, then ten questions:
+            five classics, then five from your work at that craft and level.
           </Text>
         </div>
       </header>

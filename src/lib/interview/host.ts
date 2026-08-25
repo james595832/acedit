@@ -1,3 +1,5 @@
+import {inferTrackFromRole, trackPositionLine} from '@/lib/interview/tracks';
+
 export const INTERVIEWER_NAME = 'Tom';
 export const INTERVIEWER_TITLE = 'Your AI interviewer';
 export const INTERVIEW_DURATION_LABEL = 'about an hour';
@@ -9,6 +11,12 @@ export function interviewPositionLine(input: {
   const role = input.roleTitle?.trim();
   const company = input.companyName?.trim();
   if (role && company) return `${role} at ${company}`;
-  if (role) return role;
+  if (role) {
+    const track = inferTrackFromRole(role);
+    if (track && role.toLowerCase() === track.label.toLowerCase()) {
+      return trackPositionLine(track);
+    }
+    return role;
+  }
   return 'a product design role';
 }

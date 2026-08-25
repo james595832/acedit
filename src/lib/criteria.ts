@@ -53,6 +53,14 @@ const DESIGN_REQUIREMENT_HINTS = [
   'interaction',
   'user journey',
   'information architecture',
+  'typography',
+  'layout',
+  'brand',
+  'campaign',
+  'art direction',
+  'qualitative',
+  'adobe',
+  'internship',
   'ai',
   'llm',
   'machine learning',
@@ -72,8 +80,9 @@ export function analyzeJobDescriptionText(raw: string): JobDescriptionAnalysis {
     ) ||
     lines.find(
       (l) =>
-        /\b(designer|design lead|product design|ux|ui)\b/i.test(l) &&
-        l.length < 80,
+        /\b(designer|design lead|product design|ux|ui|art director|creative director|researcher)\b/i.test(
+          l,
+        ) && l.length < 80,
     ) ||
     null;
 
@@ -168,7 +177,7 @@ export function inferQuestionKind(questionText: string): InterviewQuestionKind {
   const text = questionText.toLowerCase();
   if (/tell me about yourself/.test(text)) return 'intro';
   if (
-    /why (do you want|this role|this company|this kind of role|would this be)/.test(
+    /why (do you want|this role|this company|this kind of|this intern|would this be)/.test(
       text,
     )
   ) {
@@ -177,7 +186,11 @@ export function inferQuestionKind(questionText: string): InterviewQuestionKind {
   if (/strengths? and (a |your )?weakness/.test(text)) return 'self_awareness';
   if (/conflict/.test(text) && !/stakeholder/.test(text)) return 'conflict';
   if (/five years|5 years/.test(text)) return 'ambition';
-  if (/90 days|first ninety|collaboration model with engineers/.test(text)) {
+  if (
+    /90 days|first ninety|first few months|collaboration model with engineers/.test(
+      text,
+    )
+  ) {
     return 'horizon';
   }
   if (/stakeholder|pm pushing/.test(text)) return 'stakeholder';
@@ -257,19 +270,19 @@ function criteriaForKind(
       };
     case 'motivation':
       return {
-        mustCover: ctx.jd
+        mustCover: ctx.jd?.company_name
           ? [
               `Why ${ctx.company} — product, users, or mission, not “great culture”`,
               `Why ${ctx.role} given your CV, not a generic design job`,
               'What you would contribute in the first stretch',
             ]
           : [
-              'Why this kind of product-design role next',
+              `Why this kind of ${ctx.role} role next`,
               `How recent work (e.g. ${truncate(ctx.company, 40)}) points that way`,
-              'What you want from a team: craft, users, or how they ship',
+              'What you want from a team: craft, users, or how they work',
             ],
         strongSignals: [
-          ctx.jd
+          ctx.jd?.company_name
             ? `Something specific about ${ctx.company} a stranger couldn’t guess`
             : 'A clear next-step story, not “I need a job”',
           'Link to a real CV project or employer',
@@ -280,9 +293,9 @@ function criteriaForKind(
           'Generic mission/culture praise with no evidence',
           'No connection to your actual work',
         ],
-        summary: ctx.jd
+        summary: ctx.jd?.company_name
           ? `They want to hear that you researched ${ctx.company} and can say why ${ctx.role} is the right next step. Vague flattery fails.`
-          : 'Without a JD, this still has to sound like a real interview: why this direction, why now, with proof from your CV.',
+          : 'This still has to sound like a real interview: why this direction, why now, with proof from your CV.',
       };
     case 'self_awareness':
       return {
@@ -388,27 +401,88 @@ function criteriaForKind(
         summary: `They are testing whether you can do ${ctx.role} at ${ctx.company}. Map one CV story onto the spec. Do not invent a different job.`,
       };
     case 'stakeholder':
-      return {
-        mustCover: [
-          'The pressure (timeline, PM, or exec) vs the user evidence you had',
-          'What you proposed instead of a silent yes or a stubborn no',
-          'How it landed — shipped, delayed, or a smaller test',
-        ],
-        strongSignals: [
-          'You protected users without making the PM the villain',
-          'A smaller experiment or scoped MVP as the compromise',
-          'Clear ownership of the recommendation',
-        ],
-        weakSignals: [
-          'Always say yes to stakeholders',
-          'Always say no and call it “being user-centred”',
-          'No example, only a philosophy',
-        ],
-        summary:
-          'This is the room under stress: someone wants to ship. Strong answers show backbone and a path forward. Weak answers are slogans.',
-      };
+      return /intern|graphic designer/i.test(ctx.role) &&
+        !/director|product|ux/i.test(ctx.role)
+        ? {
+            mustCover: [
+              'What the senior person changed and why it mattered',
+              'What you took on without getting defensive',
+              'One question you asked so you would learn, not only execute',
+            ],
+            strongSignals: [
+              'You can describe the feedback in craft terms (type, layout, hierarchy)',
+              'You did not make the senior designer the villain',
+              'You show what you would do earlier next time (draft, check-in)',
+            ],
+            weakSignals: [
+              '“I just did what I was told” with no learning',
+              'Defending every pixel',
+              'No example, only a philosophy',
+            ],
+            summary:
+              'Intern screens test whether you can take direction. Strong answers name the change, keep ego out, and show you learned. Weak answers sulk or go blank.',
+          }
+        : /research/i.test(ctx.role)
+          ? {
+              mustCover: [
+                'The pressure (timeline or a team wanting to skip research) vs the evidence you had',
+                'What you proposed instead of a silent yes or a stubborn no',
+                'How it landed — delayed, a smaller study, or they shipped anyway',
+              ],
+              strongSignals: [
+                'You protected the research question without making product the villain',
+                'A smaller study or sample as the compromise',
+                'Clear ownership of the recommendation',
+              ],
+              weakSignals: [
+                'Always say yes to stakeholders',
+                'Always say no and call it “being user-centred”',
+                'No example, only a philosophy',
+              ],
+              summary:
+                'This is the room under stress: someone wants to skip the evidence. Strong answers show backbone and a path forward.',
+            }
+          : {
+              mustCover: [
+                'The pressure (timeline, PM, or exec) vs the user evidence you had',
+                'What you proposed instead of a silent yes or a stubborn no',
+                'How it landed — shipped, delayed, or a smaller test',
+              ],
+              strongSignals: [
+                'You protected users without making the PM the villain',
+                'A smaller experiment or scoped MVP as the compromise',
+                'Clear ownership of the recommendation',
+              ],
+              weakSignals: [
+                'Always say yes to stakeholders',
+                'Always say no and call it “being user-centred”',
+                'No example, only a philosophy',
+              ],
+              summary:
+                'This is the room under stress: someone wants to ship. Strong answers show backbone and a path forward. Weak answers are slogans.',
+            };
     case 'horizon':
-      return {
+      return /intern/i.test(ctx.role)
+        ? {
+            mustCover: [
+              'What you want to learn in the first months (craft, tools, how the team works)',
+              'How you would get feedback without waiting to be told',
+              'What “doing well” would look like to a supervisor',
+            ],
+            strongSignals: [
+              'Specific skills (type, layout, production) not “be a sponge”',
+              'You name how you would show drafts early',
+              'Tied to this internship, not a five-year director plan',
+            ],
+            weakSignals: [
+              'A 90-day product strategy as if you were the lead',
+              'Vague “hit the ground running”',
+              'No mention of feedback or seniors',
+            ],
+            summary:
+              'Intern interviews want a learning plan, not a roadmap. Strong answers name craft, feedback, and how you’d be useful. Weak answers sound like a Head of Design.',
+          }
+        : {
         mustCover: [
           'What you would learn first (users, product, team)',
           'What you would make in the first 90 days',

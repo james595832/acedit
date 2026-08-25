@@ -141,7 +141,7 @@ export default async function StudioPage({searchParams}: StudioPageProps) {
             >
               <ListItem
                 label="Prepare"
-                description="Upload your design CV (PDF or Word). Add a job description if you have a target role."
+                description="Upload your design CV (PDF or Word). Pick the role you are going for, or add a job description if you have a spec."
               />
               <ListItem
                 label="Room"

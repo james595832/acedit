@@ -102,6 +102,12 @@ describe('interview host', () => {
       }),
     ).toBe('Junior Product Designer at Brightpath');
     expect(interviewPositionLine({})).toBe('a product design role');
+    expect(
+      interviewPositionLine({roleTitle: 'Intern graphic designer'}),
+    ).toBe('an Intern graphic designer role');
+    expect(interviewPositionLine({roleTitle: 'UX researcher'})).toBe(
+      'a UX researcher role',
+    );
   });
 });
 
@@ -177,6 +183,88 @@ describe('interview debrief summary', () => {
     });
     expect(weak?.headline).toMatch(/honest first pass/i);
     expect(weak?.next[0]).toMatch(/cv project|other person’s view/i);
+  });
+});
+
+describe('target role tracks', () => {
+  it('extracts intern graphic designer from the synthetic spec', async () => {
+    const {getTrack} = await import('@/lib/interview/tracks');
+    const {analyzeJobDescriptionText} = await import('@/lib/criteria');
+    const track = getTrack('intern_graphic_designer');
+    expect(track).toBeTruthy();
+    const jd = analyzeJobDescriptionText(track!.syntheticJd);
+    expect(jd.role_title).toMatch(/intern graphic designer/i);
+  });
+
+  it('asks intern graphic questions, not a product-design screen', async () => {
+    const {analyzeCvLocally, buildQuestionsFromCv} = await import(
+      '@/lib/cv-parse'
+    );
+    const {getTrack} = await import('@/lib/interview/tracks');
+    const {analyzeJobDescriptionText} = await import('@/lib/criteria');
+    const analysis = analyzeCvLocally(`
+Maya Chen
+Graphic Design Intern
+PROJECTS
+Campus festival poster
+SKILLS
+InDesign - Typography
+`);
+    const track = getTrack('intern_graphic_designer')!;
+    const jd = analyzeJobDescriptionText(track.syntheticJd);
+    const questions = buildQuestionsFromCv(analysis, jd, track);
+    const blob = questions.map((q) => q.text).join('\n');
+    expect(questions[1]?.text).toMatch(/intern graphic designer/i);
+    expect(blob).toMatch(/brief/i);
+    expect(blob).toMatch(/senior designer/i);
+    expect(blob).not.toMatch(/product-design role/i);
+    expect(blob).not.toMatch(/PM pushing/i);
+    expect(blob).not.toMatch(/first 90 days/i);
+    expect(blob).not.toMatch(/engineers and PMs/i);
+  });
+
+  it('asks UX researcher questions, not a PM shipping screen', async () => {
+    const {analyzeCvLocally, buildQuestionsFromCv} = await import(
+      '@/lib/cv-parse'
+    );
+    const {getTrack} = await import('@/lib/interview/tracks');
+    const {analyzeJobDescriptionText} = await import('@/lib/criteria');
+    const analysis = analyzeCvLocally(`
+Sam Ortiz
+UX Researcher - Civic Labs
+PROJECTS
+Housing waitlist study
+SKILLS
+User interviews - Synthesis
+`);
+    const track = getTrack('ux_researcher')!;
+    const jd = analyzeJobDescriptionText(track.syntheticJd);
+    const questions = buildQuestionsFromCv(analysis, jd, track);
+    const blob = questions.map((q) => q.text).join('\n');
+    expect(questions[1]?.text).toMatch(/UX research/i);
+    expect(blob).toMatch(/method/i);
+    expect(blob).toMatch(/research/i);
+    expect(blob).not.toMatch(/PM pushing to ship an AI feature/i);
+    expect(blob).not.toMatch(/product-design role/i);
+  });
+
+  it('keeps product-design wording when no JD and no track', async () => {
+    const {analyzeCvLocally, buildQuestionsFromCv} = await import(
+      '@/lib/cv-parse'
+    );
+    const analysis = analyzeCvLocally(`
+Jane Okonkwo
+Product Design Intern - Northloop Health
+PROJECTS
+Student Housing Finder
+SKILLS
+Figma - Prototyping
+`);
+    const questions = buildQuestionsFromCv(analysis, null);
+    expect(questions[1]?.text).toMatch(/why this kind of product-design role/i);
+    expect(questions.some((q) => /PM pushing|engineers and PMs/i.test(q.text))).toBe(
+      true,
+    );
   });
 });
 

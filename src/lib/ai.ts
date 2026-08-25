@@ -12,6 +12,10 @@ import {
   type JobDescriptionAnalysis,
 } from '@/lib/criteria';
 import {evaluateCvEvidence} from '@/lib/cv-evidence';
+import {
+  llmTrackGuidance,
+  resolveInterviewTrack,
+} from '@/lib/interview/tracks';
 
 export async function analyzeCvBuffer(
   fileName: string,
@@ -155,6 +159,7 @@ export async function generateQuestions(input: {
   role?: string;
   analysis?: CvAnalysis | null;
   jd?: JobDescriptionAnalysis | null;
+  trackId?: string | null;
 }): Promise<GeneratedQuestion[]> {
   const analysis = input.analysis ?? analyzeCvLocally(input.cvText ?? '');
   const jd =
@@ -169,6 +174,10 @@ export async function generateQuestions(input: {
           keywords: [],
         }
       : null);
+  const track = resolveInterviewTrack({
+    trackId: input.trackId,
+    roleTitle: jd?.role_title ?? input.role,
+  });
 
   if (useStubs()) {
     return assembleInterviewSet(
@@ -180,6 +189,8 @@ export async function generateQuestions(input: {
         roles: input.role ? [input.role, ...analysis.roles] : analysis.roles,
       },
       jd,
+      null,
+      track,
     );
   }
 
@@ -204,13 +215,15 @@ The first 5 must be classic openers (personalised with CV/company names):
 3. Strengths and a genuine weakness
 4. A conflict you’ve dealt with
 5. Where do you see yourself in five years
-Then 5 CV-grounded craft questions. Include exactly one about using AI in the design process (tools, judgement of output, what stays human). If the CV mentions AI, ground that question in their work. If not, use a realistic template tied to a project on the CV.
+Then 5 CV-grounded craft questions for THIS target role. Include exactly one about using AI in that craft (tools, judgement of output, what stays human). If the CV mentions AI, ground that question in their work. If not, use a realistic template tied to a project on the CV.
 If a job description is provided, tailor the “why here”, JD-fit, and 90-days questions to it.
+${llmTrackGuidance(track)}
 
 Skills: ${analysis.skills_extracted.join(', ')}
 Projects: ${analysis.projects.join(' | ')}
 Companies: ${analysis.companies.join(', ')}
 Roles: ${analysis.roles.join(', ')}
+Target role: ${track?.label ?? jd?.role_title ?? input.role ?? 'n/a'}
 JD role: ${jd?.role_title ?? input.role ?? 'n/a'}
 JD company: ${jd?.company_name ?? input.company ?? 'n/a'}
 JD requirements: ${(jd?.requirements ?? []).join(' | ')}
@@ -225,7 +238,7 @@ Return ONLY JSON:
   });
 
   if (!response.ok) {
-    return assembleInterviewSet(analysis, jd);
+    return assembleInterviewSet(analysis, jd, null, track);
   }
 
   const data = (await response.json()) as {
@@ -247,12 +260,12 @@ Return ONLY JSON:
             jd,
           }),
       }));
-      return assembleInterviewSet(analysis, jd, mapped);
+      return assembleInterviewSet(analysis, jd, mapped, track);
     }
   } catch {
     // fall through
   }
-  return assembleInterviewSet(analysis, jd);
+  return assembleInterviewSet(analysis, jd, null, track);
 }
 
 export async function gradeAnswer(input: {

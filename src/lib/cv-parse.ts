@@ -1,4 +1,4 @@
-import type {GeneratedQuestion, InterviewQuestionKind, QuestionCategory} from '@/lib/types';
+import type {GeneratedQuestion, QuestionCategory} from '@/lib/types';
 import {
   buildAnswerCriteria,
   inferQuestionKind,
@@ -8,6 +8,12 @@ import {
   CLASSIC_OPENER_COUNT,
   INTERVIEW_QUESTION_COUNT,
 } from '@/lib/interview/constants';
+import {
+  draftQuestionsForTrack,
+  getTrack,
+  resolveInterviewTrack,
+  type InterviewTrack,
+} from '@/lib/interview/tracks';
 
 export type CvAnalysis = {
   parsed_text: string;
@@ -503,7 +509,7 @@ function extractCompanies(text: string): string[] {
 
 function extractRoles(text: string): string[] {
   const rolePattern =
-    /\b((?:AI |Senior |Staff |Lead |Principal |Junior )?(?:Product|UX|UI|Visual|Interaction|Service|Graphic) Designer|Design Lead|Head of Design|Design Manager|VP(?:,?| of) Product Design)\b/gi;
+    /\b((?:AI |Senior |Staff |Lead |Principal |Junior |Intern )?(?:Product|UX|UI|Visual|Interaction|Service|Graphic) Designer|UX Researcher|User Researcher|Art Director|Creative Director|Design Lead|Head of Design|Design Manager|VP(?:,?| of) Product Design)\b/gi;
   const found: string[] = [];
   for (const match of text.matchAll(rolePattern)) {
     found.push(match[1]);
@@ -540,12 +546,17 @@ export function cvUsesAi(analysis: CvAnalysis): boolean {
 export function buildQuestionsFromCv(
   analysis: CvAnalysis,
   jd: JobDescriptionAnalysis | null = null,
+  track: InterviewTrack | null = null,
 ): GeneratedQuestion[] {
+  const resolved =
+    track ??
+    resolveInterviewTrack({roleTitle: jd?.role_title}) ??
+    getTrack('product_designer')!;
   const skill = analysis.skills_extracted[0] ?? 'your core design craft';
   const project = analysis.projects[0] ?? 'a recent project from your CV';
   const company =
     jd?.company_name ?? analysis.companies[0] ?? 'your most recent company';
-  const role = jd?.role_title ?? analysis.roles[0] ?? 'your current role';
+  const role = jd?.role_title ?? resolved.label ?? analysis.roles[0] ?? 'your current role';
   const years = analysis.experience_years
     ? `${analysis.experience_years} years`
     : 'your experience level';
@@ -560,88 +571,18 @@ export function buildQuestionsFromCv(
       ),
   );
 
-  const draft: Array<{
-    text: string;
-    category: QuestionCategory;
-    is_personal: boolean;
-    kind: InterviewQuestionKind;
-  }> = [
-    {
-      kind: 'intro',
-      text: `Tell me about yourself. Walk me through your path as a designer, including your recent work at ${company}.`,
-      category: 'communication',
-      is_personal: true,
-    },
-    {
-      kind: 'motivation',
-      text: jd
-        ? `Why do you want to work at ${company} as ${role}? What did you learn about the product, the users, or how they work?`
-        : `Why this kind of product-design role next? What would make a team a good fit given your work at ${company}?`,
-      category: 'communication',
-      is_personal: true,
-    },
-    {
-      kind: 'self_awareness',
-      text: `What are your greatest strengths as a designer, and what’s a genuine weakness — with examples from ${company} or “${truncate(project, 40)}”?`,
-      category: 'communication',
-      is_personal: true,
-    },
-    {
-      kind: 'conflict',
-      text: `Tell me about a time you dealt with a conflict at work. What was at stake, what did you do, and how did it land?`,
-      category: 'communication',
-      is_personal: true,
-    },
-    {
-      kind: 'ambition',
-      text: jd
-        ? `Where do you see yourself in five years, and how does ${role} at ${company} fit that path?`
-        : `Where do you see yourself in five years? How does a role like this, at your level (${years} on the CV), fit that path?`,
-      category: 'communication',
-      is_personal: Boolean(jd),
-    },
-    {
-      kind: 'cv_project',
-      text: `Walk me through “${truncate(project, 60)}” end-to-end. How did you define the problem, explore options, and decide what to ship?`,
-      category: 'ux_process',
-      is_personal: true,
-    },
-    {
-      ...aiInterviewQuestion(analysis, {
-        company,
-        project,
-        role,
-        jd,
-        jdWantsAi,
-        jdFocus,
-      }),
-      kind: 'ai',
-    },
-    {
-      kind: jd ? 'jd_fit' : 'cv_project',
-      text: jd
-        ? `This role at ${company} asks for ${truncate(String(jdFocus), 70)}. Using a CV example, how have you demonstrated that?`
-        : `Your CV highlights ${skill}. Tell me about a decision where ${skill} really changed the outcome. What alternatives did you reject?`,
-      category: jd ? 'communication' : 'design_thinking',
-      is_personal: true,
-    },
-    {
-      kind: 'stakeholder',
-      text: jd
-        ? `For ${role} at ${company}, how would you handle a PM pushing to ship an AI feature before you’ve seen user evidence?`
-        : `At ${company} as ${role}, how did you handle a conflict between stakeholder requests and user evidence?`,
-      category: 'communication',
-      is_personal: true,
-    },
-    {
-      kind: 'horizon',
-      text: jd
-        ? `For ${role}, describe how you would approach the first 90 days. What would you learn, make, and measure?`
-        : `With roughly ${years} on your CV, how has your collaboration model with engineers and PMs evolved — especially now that AI is in the toolchain?`,
-      category: 'communication',
-      is_personal: Boolean(jd),
-    },
-  ];
+  const draft = draftQuestionsForTrack(resolved, {
+    skill,
+    project,
+    company,
+    role,
+    years,
+    jdFocus: String(jdFocus),
+    hasCompany: Boolean(jd?.company_name),
+    hasJd: Boolean(jd),
+    jdWantsAi,
+    cvUsesAi: cvUsesAi(analysis),
+  });
 
   return draft.slice(0, INTERVIEW_QUESTION_COUNT).map((q) => ({
     text: q.text,
@@ -659,7 +600,7 @@ export function buildQuestionsFromCv(
 }
 
 export function looksLikeClassicOpener(text: string): boolean {
-  return /tell me about yourself|why (do you want|this kind of product-design)|strengths as a designer|dealt with a conflict|five years/i.test(
+  return /tell me about yourself|why (do you want|this kind of|this intern)|strengths as a |dealt with a conflict|five years/i.test(
     text,
   );
 }
@@ -668,8 +609,9 @@ export function assembleInterviewSet(
   analysis: CvAnalysis,
   jd: JobDescriptionAnalysis | null,
   llmQuestions?: GeneratedQuestion[] | null,
+  track: InterviewTrack | null = null,
 ): GeneratedQuestion[] {
-  const local = buildQuestionsFromCv(analysis, jd);
+  const local = buildQuestionsFromCv(analysis, jd, track);
   const classic = local.slice(0, CLASSIC_OPENER_COUNT);
   if (!llmQuestions?.length) return local;
 
@@ -692,7 +634,7 @@ export function assembleInterviewSet(
     .slice(0, INTERVIEW_QUESTION_COUNT - CLASSIC_OPENER_COUNT);
   const cv =
     cvFromLlm.length >= 4
-      ? ensureAiQuestion(cvFromLlm, analysis, jd)
+      ? ensureAiQuestion(cvFromLlm, analysis, jd, track)
       : local.slice(CLASSIC_OPENER_COUNT);
 
   return [...classic, ...cv].slice(0, INTERVIEW_QUESTION_COUNT);
@@ -702,49 +644,16 @@ export function ensureAiQuestion(
   questions: GeneratedQuestion[],
   analysis: CvAnalysis,
   jd: JobDescriptionAnalysis | null,
+  track: InterviewTrack | null = null,
 ): GeneratedQuestion[] {
   const limit = INTERVIEW_QUESTION_COUNT - CLASSIC_OPENER_COUNT;
   const trimmed = questions.slice(0, limit);
   if (trimmed.some((q) => /\bai\b/i.test(q.text))) return trimmed;
-  const ai = buildQuestionsFromCv(analysis, jd).find((q) =>
+  const ai = buildQuestionsFromCv(analysis, jd, track).find((q) =>
     /\bai\b/i.test(q.text),
   );
   if (!ai) return trimmed;
   return [trimmed[0], ai, ...trimmed.slice(1)].filter(Boolean).slice(0, limit);
-}
-
-function aiInterviewQuestion(
-  analysis: CvAnalysis,
-  ctx: {
-    company: string;
-    project: string;
-    role: string;
-    jd: JobDescriptionAnalysis | null;
-    jdWantsAi: boolean;
-    jdFocus: string;
-  },
-): Omit<GeneratedQuestion, 'criteria'> & {is_personal: boolean} {
-  if (ctx.jdWantsAi) {
-    return {
-      text: `This role at ${ctx.company} expects AI in the work (“${truncate(String(ctx.jdFocus), 50)}”). Using a CV example, how have you used AI in design — and how did you check the output was good enough to ship?`,
-      category: 'design_thinking',
-      is_personal: true,
-    };
-  }
-
-  if (cvUsesAi(analysis)) {
-    return {
-      text: `Your CV shows AI in the work at ${ctx.company}. Walk me through a real example: what did you use AI for, what did you still do yourself, and how did you judge the output?`,
-      category: 'design_thinking',
-      is_personal: true,
-    };
-  }
-
-  return {
-    text: `Most product teams now expect designers to use AI. On “${truncate(ctx.project, 50)}”, where would you bring it in, where would you refuse it, and how would you keep user evidence in the loop?`,
-    category: 'design_thinking',
-    is_personal: true,
-  };
 }
 
 function textMentionsSkill(lowerText: string, skill: string): boolean {
@@ -753,11 +662,6 @@ function textMentionsSkill(lowerText: string, skill: string): boolean {
     return new RegExp(`\\b${needle}\\b`, 'i').test(lowerText);
   }
   return lowerText.includes(needle);
-}
-
-function truncate(value: string, max: number): string {
-  if (value.length <= max) return value;
-  return `${value.slice(0, max - 1)}…`;
 }
 
 export function categoryLabel(category: QuestionCategory): string {

@@ -10,10 +10,17 @@ import {Text} from '@astryxdesign/core/Text';
 import {Heading} from '@astryxdesign/core/Heading';
 import {Banner} from '@astryxdesign/core/Banner';
 import {Collapsible} from '@astryxdesign/core/Collapsible';
+import {Selector} from '@astryxdesign/core/Selector';
 import {CVAtsReport} from '@/components/CVAtsReport';
 import {CVWritingReport} from '@/components/CVWritingReport';
+import {INTERVIEW_TRACKS} from '@/lib/interview/tracks';
 import type {AtsAuditResult} from '@/lib/cv-ats';
 import type {WritingAuditResult} from '@/lib/cv-writing-audit';
+
+const TRACK_OPTIONS = INTERVIEW_TRACKS.map((track) => ({
+  value: track.id,
+  label: track.label,
+}));
 
 const CV_ACCEPT =
   'application/pdf,.pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document,.docx';
@@ -55,6 +62,7 @@ export function CVUploadForm() {
   const [preview, setPreview] = useState<CvPreview | null>(null);
   const [jdPreview, setJdPreview] = useState<JdPreview | null>(null);
   const [jdOpen, setJdOpen] = useState(false);
+  const [targetTrackId, setTargetTrackId] = useState('');
 
   async function uploadCv(selected: File) {
     setIsAnalyzing(true);
@@ -118,6 +126,10 @@ export function CVUploadForm() {
       setError('Add your CV first.');
       return;
     }
+    if (!jdPreview && !targetTrackId) {
+      setError('Pick the role you are going for, or add a job description.');
+      return;
+    }
     setIsLoading(true);
     setError(null);
     try {
@@ -127,6 +139,7 @@ export function CVUploadForm() {
         body: JSON.stringify({
           cv_id: preview.cv_id,
           job_description_id: jdPreview?.job_description_id,
+          target_track_id: jdPreview ? undefined : targetTrackId,
           interview_type: 'practice',
         }),
       });
@@ -160,7 +173,8 @@ export function CVUploadForm() {
         </Heading>
         <Text as="p" color="secondary">
           PDF or Word (.docx). We read it, then ask ten spoken questions: the
-          classics first, then five from your actual work.
+          classics first, then five from your actual work — matched to the role
+          you pick, or to a job description if you have one.
         </Text>
         <FileInput
           label="Design CV"
@@ -195,25 +209,6 @@ export function CVUploadForm() {
               description={readyCopy}
             />
 
-            <div className="aced-cta-bar">
-              <div className="aced-cta-bar__copy">
-                <Text type="label">
-                  {jdPreview
-                    ? 'Ready — CV and role set'
-                    : 'Ready — enter the interview room'}
-                </Text>
-                <Text type="supporting" color="secondary" as="p">
-                  About an hour. Ten questions out loud. Mic on.
-                </Text>
-              </div>
-              <Button
-                label="Enter interview"
-                variant="primary"
-                isLoading={isLoading}
-                clickAction={handleStart}
-              />
-            </div>
-
             {preview.ats || preview.writing ? (
               <Collapsible
                 defaultIsOpen={false}
@@ -230,6 +225,36 @@ export function CVUploadForm() {
           </VStack>
         ) : null}
       </section>
+
+      {preview ? (
+        <section className="aced-prep__block" aria-labelledby="aced-prep-track">
+          <Heading level={2} id="aced-prep-track">
+            I am going for
+          </Heading>
+          {jdPreview ? (
+            <Banner
+              status="success"
+              title={
+                jdPreview.role_title
+                  ? `Using the job description: ${jdPreview.role_title}`
+                  : 'Using the job description'
+              }
+              description="Questions will follow that spec, so you don’t need the role list."
+            />
+          ) : (
+            <Selector
+              label="I am going for"
+              isLabelHidden
+              description="We’ll ask questions at this craft and level. Skip this if you add a job description below."
+              placeholder="Choose a role"
+              options={TRACK_OPTIONS}
+              value={targetTrackId || undefined}
+              onChange={setTargetTrackId}
+              isRequired
+            />
+          )}
+        </section>
+      ) : null}
 
       {preview ? (
         <section className="aced-prep__block" aria-labelledby="aced-prep-jd">
@@ -250,8 +275,7 @@ export function CVUploadForm() {
           {jdOpen ? (
             <VStack gap={3}>
               <Text as="p" color="secondary">
-                Sharpens questions to a target role. Skip if you just want to
-                rehearse.
+                Have a spec? We’ll tailor from that instead of the role list.
               </Text>
               <FileInput
                 label="Job description image or PDF"
@@ -301,6 +325,30 @@ export function CVUploadForm() {
             </VStack>
           ) : null}
         </section>
+      ) : null}
+
+      {preview ? (
+        <div className="aced-cta-bar">
+          <div className="aced-cta-bar__copy">
+            <Text type="label">
+              {jdPreview
+                ? 'Ready — CV and job description set'
+                : targetTrackId
+                  ? `Ready — interviewing for ${INTERVIEW_TRACKS.find((t) => t.id === targetTrackId)?.label}`
+                  : 'Pick a role, or add a job description'}
+            </Text>
+            <Text type="supporting" color="secondary" as="p">
+              About an hour. Ten questions out loud. Mic on.
+            </Text>
+          </div>
+          <Button
+            label="Enter interview"
+            variant="primary"
+            isLoading={isLoading}
+            isDisabled={!jdPreview && !targetTrackId}
+            clickAction={handleStart}
+          />
+        </div>
       ) : null}
     </VStack>
   );
