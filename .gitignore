@@ -46,3 +46,7 @@ next-env.d.ts
 
 # local stub store / uploads
 .data/
+
+# personal files — keep on disk, never commit
+/James_Reilly_CV.docx
+
