@@ -2,7 +2,12 @@ import {NextResponse} from 'next/server';
 import {requireInterviewUser} from '@/lib/interview/auth';
 import {resolveCandidateFirstName} from '@/lib/interview/candidate';
 import {interviewPositionLine} from '@/lib/interview/host';
-import {getJobDescription, getSession, getSessionQuestions} from '@/lib/store';
+import {
+  deleteSession,
+  getJobDescription,
+  getSession,
+  getSessionQuestions,
+} from '@/lib/store';
 
 type Params = {params: Promise<{sessionId: string}>};
 
@@ -44,6 +49,37 @@ export async function GET(_request: Request, {params}: Params) {
     console.error(error);
     return NextResponse.json(
       {error: 'Failed to load session', code: 'SERVER_ERROR'},
+      {status: 500},
+    );
+  }
+}
+
+export async function DELETE(_request: Request, {params}: Params) {
+  const auth = await requireInterviewUser();
+  if (auth.response) return auth.response;
+
+  try {
+    const {sessionId} = await params;
+    if (!sessionId?.trim()) {
+      return NextResponse.json(
+        {error: 'Session not found', code: 'NOT_FOUND'},
+        {status: 404},
+      );
+    }
+
+    const deleted = await deleteSession(sessionId, auth.userId);
+    if (!deleted) {
+      return NextResponse.json(
+        {error: 'Session not found', code: 'NOT_FOUND'},
+        {status: 404},
+      );
+    }
+
+    return NextResponse.json({ok: true});
+  } catch (error) {
+    console.error('[interview/session DELETE]', error);
+    return NextResponse.json(
+      {error: 'Could not delete interview', code: 'SERVER_ERROR'},
       {status: 500},
     );
   }

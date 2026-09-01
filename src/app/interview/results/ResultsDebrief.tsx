@@ -10,6 +10,7 @@ import {Banner} from '@astryxdesign/core/Banner';
 import {Collapsible} from '@astryxdesign/core/Collapsible';
 import {StatusDot} from '@astryxdesign/core/StatusDot';
 import {SessionProgress} from '@/components/SessionProgress';
+import {DeleteInterviewButton} from '@/components/DeleteInterviewButton';
 
 type ResultRow = {
   question_text: string;
@@ -223,6 +224,7 @@ export function ResultsDebrief({sessionId}: {sessionId: string}) {
                   <Link className="aced-home__secondary" href="/studio">
                     Back to Home
                   </Link>
+                  <DeleteInterviewButton sessionId={sessionId} />
                 </HStack>
                 <p className="aced-debrief__cta-hint">{copy.ctaHint}</p>
               </div>

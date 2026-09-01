@@ -3,12 +3,11 @@ import {VStack} from '@astryxdesign/core/Layout';
 import {Heading} from '@astryxdesign/core/Heading';
 import {Text} from '@astryxdesign/core/Text';
 import {Section} from '@astryxdesign/core/Section';
-import {List, ListItem} from '@astryxdesign/core/List';
 import {EmptyState} from '@astryxdesign/core/EmptyState';
 import {createClient} from '@/lib/supabase/server';
 import {isSupabaseConfigured} from '@/lib/supabase/config';
 import {demoUserId, listSessions} from '@/lib/store';
-import {daysAgoLabel} from '@/lib/greeting';
+import {InterviewHistoryList} from '@/components/InterviewHistoryList';
 import {ResultsDebrief} from './ResultsDebrief';
 
 type ResultsPageProps = {
@@ -70,42 +69,15 @@ export default async function ResultsPage({searchParams}: ResultsPageProps) {
             />
           ) : (
             <>
-              <List
-                density="balanced"
-                hasDividers
-                header={
-                  <Heading level={2} id="aced-results-list">
-                    Past interviews
-                  </Heading>
-                }
-              >
-                {sessions.map((session, index) => {
-                  const score =
-                    session.overall_score === null ||
-                    session.overall_score === undefined
-                      ? null
-                      : Math.round(Number(session.overall_score));
-                  return (
-                    <ListItem
-                      key={session.id}
-                      href={`/interview/results?session_id=${session.id}`}
-                      label={
-                        score !== null
-                          ? `Score ${score} / 100`
-                          : index === 0
-                            ? 'Latest interview'
-                            : 'Interview'
-                      }
-                      description={daysAgoLabel(session.created_at)}
-                      endContent={
-                        <Text type="supporting" color="secondary">
-                          View
-                        </Text>
-                      }
-                    />
-                  );
-                })}
-              </List>
+              <InterviewHistoryList
+                heading="Past interviews"
+                headingId="aced-results-list"
+                sessions={sessions.map((session) => ({
+                  id: session.id,
+                  overall_score: session.overall_score,
+                  created_at: session.created_at,
+                }))}
+              />
 
               <div className="aced-debrief__cta">
                 <Link className="aced-home__primary" href="/interview">

@@ -11,6 +11,7 @@ import {isStripeConfigured} from '@/lib/stripe';
 import {syncBillingFromCheckoutSession} from '@/lib/billing/sync';
 import {demoUserId, listSessions} from '@/lib/store';
 import {daysAgoLabel, resolveGreetingName} from '@/lib/greeting';
+import {InterviewHistoryList} from '@/components/InterviewHistoryList';
 
 type StudioPageProps = {
   searchParams: Promise<{billing?: string; session_id?: string}>;
@@ -193,42 +194,15 @@ export default async function StudioPage({searchParams}: StudioPageProps) {
               />
             </List>
 
-            <List
-              density="balanced"
-              hasDividers
-              header={
-                <Heading level={2} id="aced-home-recent">
-                  Recent interviews
-                </Heading>
-              }
-            >
-              {recent.map((session, index) => {
-                const score =
-                  session.overall_score === null ||
-                  session.overall_score === undefined
-                    ? null
-                    : Math.round(Number(session.overall_score));
-                return (
-                  <ListItem
-                    key={session.id}
-                    href={`/interview/results?session_id=${session.id}`}
-                    label={
-                      score !== null
-                        ? `Score ${score} / 100`
-                        : index === 0
-                          ? 'Latest interview'
-                          : 'Interview'
-                    }
-                    description={daysAgoLabel(session.created_at)}
-                    endContent={
-                      <Text type="supporting" color="secondary">
-                        View
-                      </Text>
-                    }
-                  />
-                );
-              })}
-            </List>
+            <InterviewHistoryList
+              heading="Recent interviews"
+              headingId="aced-home-recent"
+              sessions={recent.map((session) => ({
+                id: session.id,
+                overall_score: session.overall_score,
+                created_at: session.created_at,
+              }))}
+            />
           </>
         )}
       </VStack>
