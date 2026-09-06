@@ -1,35 +1,44 @@
 'use client';
 
-import {useEffect, useState} from 'react';
+import {useEffect, useState, type CSSProperties} from 'react';
+import Link from 'next/link';
 import {useRouter} from 'next/navigation';
 import {AlertDialog} from '@astryxdesign/core/AlertDialog';
 import {Banner} from '@astryxdesign/core/Banner';
 import {Button} from '@astryxdesign/core/Button';
-import {Heading} from '@astryxdesign/core/Heading';
-import {HStack} from '@astryxdesign/core/Layout';
-import {List, ListItem} from '@astryxdesign/core/List';
 import {Text} from '@astryxdesign/core/Text';
-import {daysAgoLabel} from '@/lib/greeting';
 
 export type InterviewHistoryRow = {
   id: string;
   overall_score: number | null;
   created_at: string;
+  role_title?: string | null;
+  company_name?: string | null;
 };
 
-function interviewLabel(score: number | null, index: number): string {
-  if (score !== null) return `Score ${Math.round(score)} / 100`;
-  return index === 0 ? 'Latest interview' : 'Interview';
+function formatDateTaken(iso: string): string {
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return '—';
+  const day = String(d.getDate()).padStart(2, '0');
+  const month = String(d.getMonth() + 1).padStart(2, '0');
+  const year = d.getFullYear();
+  return `${day}/${month}/${year}`;
+}
+
+function scoreTone(score: number | null): 'strong' | 'okay' | 'weak' | 'empty' {
+  if (score === null) return 'empty';
+  if (score >= 75) return 'strong';
+  if (score >= 55) return 'okay';
+  return 'weak';
 }
 
 export function InterviewHistoryList({
   sessions,
-  heading,
-  headingId,
 }: {
   sessions: InterviewHistoryRow[];
-  heading: string;
-  headingId: string;
+  /** @deprecated kept for call-site compatibility */
+  heading?: string;
+  headingId?: string;
 }) {
   const router = useRouter();
   const [rows, setRows] = useState(sessions);
@@ -68,33 +77,49 @@ export function InterviewHistoryList({
   return (
     <>
       {error ? (
-        <Banner status="error" title="Couldn’t delete interview" description={error} />
+        <Banner
+          status="error"
+          title="Couldn’t delete interview"
+          description={error}
+        />
       ) : null}
-      <List
-        density="balanced"
-        hasDividers
-        header={
-          <Heading level={2} id={headingId}>
-            {heading}
-          </Heading>
-        }
-      >
-        {rows.map((session, index) => {
+
+      <ul className="aced-history">
+        {rows.map((session) => {
           const score =
-            session.overall_score === null || session.overall_score === undefined
+            session.overall_score === null ||
+            session.overall_score === undefined
               ? null
               : Math.round(Number(session.overall_score));
+          const tone = scoreTone(score);
+          const role = session.role_title?.trim() || 'design role';
+          const company = session.company_name?.trim();
+          const resultsHref = `/interview/results?session_id=${session.id}`;
+          const retakeHref = '/interview';
+
           return (
-            <ListItem
-              key={session.id}
-              href={`/interview/results?session_id=${session.id}`}
-              label={interviewLabel(score, index)}
-              description={daysAgoLabel(session.created_at)}
-              endContent={
-                <HStack gap={2} align="center">
-                  <Text type="supporting" color="secondary">
-                    View
-                  </Text>
+            <li key={session.id} className="aced-history__card">
+              <div className="aced-history__main">
+                <Text as="p" className="aced-history__title">
+                  Interviewing for{' '}
+                  <span className="aced-history__accent">{role}</span>
+                  {company ? (
+                    <>
+                      {' '}
+                      at <span className="aced-history__accent">{company}</span>
+                    </>
+                  ) : null}
+                </Text>
+                <Text as="p" color="secondary">
+                  Date taken: {formatDateTaken(session.created_at)}
+                </Text>
+                <div className="aced-history__actions">
+                  <Link className="aced-history__ghost" href={resultsHref}>
+                    Read answers
+                  </Link>
+                  <Link className="aced-history__ghost" href={retakeHref}>
+                    Retake interview
+                  </Link>
                   <Button
                     label="Delete"
                     variant="ghost"
@@ -104,12 +129,38 @@ export function InterviewHistoryList({
                       setPendingId(session.id);
                     }}
                   />
-                </HStack>
-              }
-            />
+                </div>
+              </div>
+
+              <div
+                className={`aced-history__score aced-history__score--${tone}`}
+                aria-label={
+                  score === null
+                    ? 'Assessment score pending'
+                    : `Assessment score ${score} percent`
+                }
+              >
+                <div
+                  className="aced-history__ring"
+                  style={
+                    score === null
+                      ? undefined
+                      : ({['--score-pct']: score} as CSSProperties)
+                  }
+                >
+                  <span className="aced-history__pct">
+                    {score === null ? '—' : `${score}%`}
+                  </span>
+                </div>
+                <Text as="p" type="label" className="aced-history__score-label">
+                  Assessment score
+                </Text>
+              </div>
+            </li>
           );
         })}
-      </List>
+      </ul>
+
       <AlertDialog
         isOpen={Boolean(pendingId)}
         onOpenChange={(open) => {

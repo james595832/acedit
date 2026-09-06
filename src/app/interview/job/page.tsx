@@ -1,10 +1,10 @@
 import {Section} from '@astryxdesign/core/Section';
-import {WhoAreYouForm} from '@/components/WhoAreYouForm';
+import {JobDetailsForm} from '@/components/JobDetailsForm';
 
-export default function InterviewPage() {
+export default function InterviewJobPage() {
   return (
     <Section variant="transparent" padding={0}>
-      <WhoAreYouForm />
+      <JobDetailsForm />
     </Section>
   );
 }

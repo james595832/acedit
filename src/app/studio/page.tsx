@@ -2,15 +2,18 @@ import Link from 'next/link';
 import {Heading} from '@astryxdesign/core/Heading';
 import {Text} from '@astryxdesign/core/Text';
 import {VStack} from '@astryxdesign/core/Layout';
-import {List, ListItem} from '@astryxdesign/core/List';
 import {Section} from '@astryxdesign/core/Section';
 import {Banner} from '@astryxdesign/core/Banner';
+import {EmptyState} from '@astryxdesign/core/EmptyState';
 import {createClient} from '@/lib/supabase/server';
 import {isSupabaseConfigured} from '@/lib/supabase/config';
 import {isStripeConfigured} from '@/lib/stripe';
 import {syncBillingFromCheckoutSession} from '@/lib/billing/sync';
-import {demoUserId, listSessions} from '@/lib/store';
-import {daysAgoLabel, resolveGreetingName} from '@/lib/greeting';
+import {
+  demoUserId,
+  getJobDescription,
+  listSessions,
+} from '@/lib/store';
 import {InterviewHistoryList} from '@/components/InterviewHistoryList';
 
 type StudioPageProps = {
@@ -18,7 +21,6 @@ type StudioPageProps = {
 };
 
 export default async function StudioPage({searchParams}: StudioPageProps) {
-  let firstName = 'there';
   let billingBanner: string | null = null;
   let userId: string | null = null;
 
@@ -29,23 +31,6 @@ export default async function StudioPage({searchParams}: StudioPageProps) {
         data: {user},
       } = await supabase.auth.getUser();
       userId = user?.id ?? null;
-
-      let profileName: string | null = null;
-      if (user) {
-        const {data: profile} = await supabase
-          .from('profiles')
-          .select('full_name')
-          .eq('id', user.id)
-          .maybeSingle();
-        profileName = (profile?.full_name as string | null) ?? null;
-      }
-
-      firstName = resolveGreetingName({
-        profileName,
-        metaName: (user?.user_metadata?.full_name as string | undefined) ?? null,
-        givenName: (user?.user_metadata?.given_name as string | undefined) ?? null,
-        email: user?.email ?? null,
-      });
 
       const params = await searchParams;
       if (
@@ -66,7 +51,7 @@ export default async function StudioPage({searchParams}: StudioPageProps) {
         billingBanner = 'You’re already on Pro.';
       }
     } catch {
-      firstName = 'there';
+      // keep page usable
     }
   }
 
@@ -76,134 +61,69 @@ export default async function StudioPage({searchParams}: StudioPageProps) {
       userId ?? (isSupabaseConfigured() ? null : demoUserId());
     sessions = statsUserId ? await listSessions(statsUserId) : [];
   } catch {
-    // stats are decorative — never block the page on them
+    sessions = [];
   }
 
-  const hasRuns = sessions.length > 0;
-  const latest = sessions[0] ?? null;
-  const lastSessionScore =
-    latest?.overall_score === null || latest?.overall_score === undefined
-      ? null
-      : Math.round(Number(latest.overall_score));
-  const resultsHref = latest
-    ? `/interview/results?session_id=${latest.id}`
-    : null;
-  const recent = sessions.slice(0, 5);
+  const ownerId = userId ?? (isSupabaseConfigured() ? null : demoUserId());
+  const historyRows = await Promise.all(
+    sessions.map(async (session) => {
+      let role_title: string | null = null;
+      let company_name: string | null = null;
+      if (session.job_description_id && ownerId) {
+        try {
+          const jd = await getJobDescription(
+            session.job_description_id,
+            ownerId,
+          );
+          role_title = jd?.role_title ?? null;
+          company_name = jd?.company_name ?? null;
+        } catch {
+          // decorative metadata
+        }
+      }
+      return {
+        id: session.id,
+        overall_score: session.overall_score,
+        created_at: session.created_at,
+        role_title,
+        company_name,
+      };
+    }),
+  );
 
   return (
     <Section variant="transparent" padding={0}>
-      <VStack gap={6} className="aced-home">
-        <header className="aced-home__hero">
-          <Text type="label" color="secondary" as="p">
-            Hi {firstName}
-          </Text>
-          <Heading level={1} type="display-3">
-            {hasRuns
-              ? 'Ready for your next interview?'
-              : 'You’re here for design interview prep'}
-          </Heading>
-          <Text as="p" color="secondary" type="large" className="aced-home__lead">
-            {hasRuns
-              ? 'Same loop as last time: prepare with your CV, sit with Tom for about an hour, then debrief your scores.'
-              : 'About an hour. Upload your CV, speak your answers, get clear feedback on what to improve.'}
-          </Text>
-          {billingBanner ? (
-            <Banner status="success" title={billingBanner} />
-          ) : null}
-
-          <div className="aced-home__actions">
-            <Link className="aced-home__primary" href="/interview">
-              {hasRuns ? 'Start interview' : 'Get started'}
-            </Link>
-            {resultsHref ? (
-              <Link className="aced-home__secondary" href={resultsHref}>
-                {lastSessionScore !== null
-                  ? `Last score · ${lastSessionScore}`
-                  : 'Last interview'}
-                {latest?.created_at
-                  ? ` · ${daysAgoLabel(latest.created_at)}`
-                  : ''}
-              </Link>
-            ) : null}
+      <VStack gap={5} className="aced-interviews">
+        <header className="aced-interviews__head">
+          <div className="aced-interviews__title">
+            <Heading level={1}>Interviews</Heading>
+            <Text as="p" type="large">
+              We will keep a list of your interviews here for you to review or
+              retake
+            </Text>
           </div>
+          <Link className="aced-flow__btn" href="/interview">
+            Create an interview
+          </Link>
         </header>
 
-        {!hasRuns ? (
-          <>
-            <List
-              density="spacious"
-              hasDividers
-              listStyle="decimal"
-              header={
-                <Heading level={2} id="aced-home-how">
-                  How an interview works
-                </Heading>
-              }
-            >
-              <ListItem
-                label="Prepare"
-                description="Upload your design CV (PDF or Word). Pick the role you are going for, or add a job description if you have a spec."
-              />
-              <ListItem
-                label="Room"
-                description="Answer ten questions out loud — five classics, then five from your CV. We transcribe and score each one."
-              />
-              <ListItem
-                label="Debrief"
-                description="See what landed, what to fix, then run it again."
-              />
-            </List>
+        {billingBanner ? (
+          <Banner status="success" title={billingBanner} />
+        ) : null}
 
-            <List
-              density="spacious"
-              hasDividers
-              header={
-                <Heading level={2} id="aced-home-need">
-                  What you need
-                </Heading>
-              }
-            >
-              <ListItem label="A quiet spot and a working microphone" />
-              <ListItem label="About an hour uninterrupted" />
-              <ListItem label="Your design CV as a PDF or Word (.docx)" />
-            </List>
-          </>
+        {historyRows.length === 0 ? (
+          <EmptyState
+            headingLevel={2}
+            title="No interviews yet"
+            description="Create your first interview — pick a role or upload a CV, then add a job description if you have one."
+            actions={
+              <Link className="aced-flow__btn" href="/interview">
+                Create an interview
+              </Link>
+            }
+          />
         ) : (
-          <>
-            <List
-              density="spacious"
-              hasDividers
-              listStyle="decimal"
-              header={
-                <Heading level={2} id="aced-home-how">
-                  Each interview
-                </Heading>
-              }
-            >
-              <ListItem
-                label="Prepare"
-                description="CV ready — optional JD to sharpen the questions."
-              />
-              <ListItem
-                label="Room"
-                description="Ten spoken answers. Scored before you move on."
-              />
-              <ListItem
-                label="Debrief"
-                description="Overall score and notes on every answer."
-              />
-            </List>
-
-            <InterviewHistoryList
-              heading="Recent interviews"
-              headingId="aced-home-recent"
-              sessions={recent.map((session) => ({
-                id: session.id,
-                overall_score: session.overall_score,
-                created_at: session.created_at,
-              }))}
-            />
-          </>
+          <InterviewHistoryList sessions={historyRows} />
         )}
       </VStack>
     </Section>
