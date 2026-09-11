@@ -38,6 +38,7 @@ export async function updateSession(request: NextRequest) {
     path.startsWith('/interview') ||
     path.startsWith('/portfolio') ||
     path.startsWith('/studio') ||
+    path.startsWith('/onboarding') ||
     path.startsWith('/whiteboard') ||
     path.startsWith('/api/whiteboard') ||
     path.startsWith('/api/interview') ||

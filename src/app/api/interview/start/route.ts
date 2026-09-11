@@ -13,9 +13,25 @@ import {
   createSession,
   getCv,
   getJobDescription,
+  saveCv,
   saveJobDescription,
 } from '@/lib/store';
 import type {InterviewType} from '@/lib/types';
+
+function companyFromUrl(raw?: string): string | undefined {
+  if (!raw?.trim()) return undefined;
+  try {
+    const withProtocol = /^https?:\/\//i.test(raw.trim())
+      ? raw.trim()
+      : `https://${raw.trim()}`;
+    const host = new URL(withProtocol).hostname.replace(/^www\./i, '');
+    const label = host.split('.')[0];
+    if (!label) return undefined;
+    return label.charAt(0).toUpperCase() + label.slice(1);
+  } catch {
+    return undefined;
+  }
+}
 
 export async function POST(request: Request) {
   const auth = await requireInterviewUser();
@@ -28,15 +44,9 @@ export async function POST(request: Request) {
       target_track_id?: string;
       interview_type?: InterviewType;
       company?: string;
+      company_url?: string;
       role?: string;
     };
-
-    if (!body.cv_id) {
-      return NextResponse.json(
-        {error: 'cv_id is required', code: 'VALIDATION_ERROR'},
-        {status: 400},
-      );
-    }
 
     if (!body.job_description_id && !body.target_track_id) {
       return NextResponse.json(
@@ -60,11 +70,49 @@ export async function POST(request: Request) {
       );
     }
 
-    const cv = await getCv(body.cv_id, auth.userId);
-    if (!cv) {
+    if (!body.cv_id && !body.target_track_id) {
+      return NextResponse.json(
+        {
+          error: 'Upload a CV, or choose a role to simulate without one.',
+          code: 'VALIDATION_ERROR',
+        },
+        {status: 400},
+      );
+    }
+
+    let cv = body.cv_id ? await getCv(body.cv_id, auth.userId) : null;
+    if (body.cv_id && !cv) {
       return NextResponse.json(
         {error: 'CV not found', code: 'NOT_FOUND'},
         {status: 404},
+      );
+    }
+
+    // Role-only path: synthesise a light CV so practice still runs.
+    if (!cv && body.target_track_id) {
+      const track = getTrack(body.target_track_id);
+      if (!track) {
+        return NextResponse.json(
+          {error: 'Unknown target role', code: 'VALIDATION_ERROR'},
+          {status: 400},
+        );
+      }
+      cv = await saveCv(
+        {
+          file_name: `Role practice: ${track.label}`,
+          file_url: 'role-practice://synthetic',
+          parsed_text: `Candidate preparing for ${track.label} interviews.\n\nFocus areas from the target role:\n${track.syntheticJd}`,
+          skills_extracted: [],
+          experience_years: 0,
+        },
+        auth.userId,
+      );
+    }
+
+    if (!cv) {
+      return NextResponse.json(
+        {error: 'CV is required', code: 'VALIDATION_ERROR'},
+        {status: 400},
       );
     }
 
@@ -101,6 +149,19 @@ export async function POST(request: Request) {
       );
     }
 
+    const companyFromLink = companyFromUrl(body.company_url);
+    if (
+      jdRow &&
+      !jdRow.company_name &&
+      (body.company || companyFromLink)
+    ) {
+      // Prefer explicit company / URL hint when JD text lacked a name.
+      jdRow = {
+        ...jdRow,
+        company_name: body.company ?? companyFromLink ?? null,
+      };
+    }
+
     const jd = jdRow ? analyzeJobDescriptionText(jdRow.raw_text) : null;
     const track = resolveInterviewTrack({
       trackId: requestedTrack?.id,
@@ -113,7 +174,11 @@ export async function POST(request: Request) {
     let questions = await generateQuestions({
       cvText: cv.parsed_text,
       analysis: analyzeCvLocally(cv.parsed_text ?? ''),
-      company: body.company ?? jdRow?.company_name ?? undefined,
+      company:
+        body.company ??
+        companyFromLink ??
+        jdRow?.company_name ??
+        undefined,
       role: body.role ?? track?.label ?? jdRow?.role_title ?? undefined,
       trackId: track?.id,
       jd: jd
@@ -135,7 +200,7 @@ export async function POST(request: Request) {
 
     const {session, questions: stored} = await createSession(
       {
-        cv_id: body.cv_id,
+        cv_id: cv.id,
         job_description_id: jdRow?.id ?? null,
         interview_type: body.interview_type ?? 'practice',
         questions,

@@ -2,7 +2,7 @@ import {NextResponse} from 'next/server';
 import {promises as fs} from 'fs';
 import path from 'path';
 import {analyzeJobDescriptionText} from '@/lib/criteria';
-import {extractPdfText} from '@/lib/cv-parse';
+import {extractCvDocument, extractPdfText} from '@/lib/cv-parse';
 import {requireInterviewUser} from '@/lib/interview/auth';
 import {recommendWhiteboardFromJd} from '@/lib/interview/format';
 import {ocrImageToText} from '@/lib/ocr';
@@ -19,6 +19,23 @@ export async function POST(request: Request) {
     const form = await request.formData();
     const file = form.get('file');
     const pasted = String(form.get('text') ?? '').trim();
+    const companyUrl = String(form.get('company_url') ?? '').trim();
+
+    let companyFromUrl: string | null = null;
+    if (companyUrl) {
+      try {
+        const withProtocol = /^https?:\/\//i.test(companyUrl)
+          ? companyUrl
+          : `https://${companyUrl}`;
+        const host = new URL(withProtocol).hostname.replace(/^www\./i, '');
+        const label = host.split('.')[0];
+        if (label) {
+          companyFromUrl = label.charAt(0).toUpperCase() + label.slice(1);
+        }
+      } catch {
+        companyFromUrl = null;
+      }
+    }
 
     let rawText = pasted;
     let sourceType: 'image' | 'pdf' | 'text' = 'text';
@@ -45,6 +62,10 @@ export async function POST(request: Request) {
       const lower = file.name.toLowerCase();
       const isPdf =
         file.type === 'application/pdf' || lower.endsWith('.pdf');
+      const isDocx =
+        file.type ===
+          'application/vnd.openxmlformats-officedocument.wordprocessingml.document' ||
+        lower.endsWith('.docx');
       const isImage =
         file.type.startsWith('image/') ||
         /\.(png|jpe?g|webp|gif)$/i.test(lower);
@@ -52,13 +73,17 @@ export async function POST(request: Request) {
       if (isPdf) {
         sourceType = 'pdf';
         rawText = await extractPdfText(bytes);
+      } else if (isDocx) {
+        sourceType = 'text';
+        const doc = await extractCvDocument(file.name, file.type, bytes);
+        rawText = doc.text;
       } else if (isImage) {
         sourceType = 'image';
         rawText = await ocrImageToText(bytes);
       } else {
         return NextResponse.json(
           {
-            error: 'Upload a JD image (PNG/JPG), PDF, or paste text',
+            error: 'Upload a JD image (PNG/JPG), PDF, Word (.docx), or paste text',
             code: 'INVALID_FILE_TYPE',
           },
           {status: 400},
@@ -77,7 +102,11 @@ export async function POST(request: Request) {
       );
     }
 
-    const analysis = analyzeJobDescriptionText(rawText);
+    const analysis = analyzeJobDescriptionText(
+      companyUrl
+        ? `${rawText}\n\nCompany website: ${companyUrl}`
+        : rawText,
+    );
     const whiteboard = recommendWhiteboardFromJd(analysis);
     const jd = await saveJobDescription(
       {
@@ -86,7 +115,7 @@ export async function POST(request: Request) {
         file_url: fileUrl,
         raw_text: analysis.raw_text,
         role_title: analysis.role_title,
-        company_name: analysis.company_name,
+        company_name: analysis.company_name ?? companyFromUrl,
         requirements: analysis.requirements,
         responsibilities: analysis.responsibilities,
         keywords: analysis.keywords,

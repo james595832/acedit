@@ -1,25 +1,23 @@
-import Link from 'next/link';
-import {Heading} from '@astryxdesign/core/Heading';
-import {Text} from '@astryxdesign/core/Text';
-import {VStack} from '@astryxdesign/core/Layout';
-import {List, ListItem} from '@astryxdesign/core/List';
-import {Section} from '@astryxdesign/core/Section';
-import {Banner} from '@astryxdesign/core/Banner';
 import {createClient} from '@/lib/supabase/server';
 import {isSupabaseConfigured} from '@/lib/supabase/config';
 import {isStripeConfigured} from '@/lib/stripe';
 import {syncBillingFromCheckoutSession} from '@/lib/billing/sync';
-import {demoUserId, listSessions} from '@/lib/store';
-import {daysAgoLabel, resolveGreetingName} from '@/lib/greeting';
+import {
+  demoUserId,
+  getJobDescription,
+  listSessions,
+} from '@/lib/store';
+import {resolveGreetingName} from '@/lib/greeting';
+import {StudioDashboard} from '@/components/StudioDashboard';
 
 type StudioPageProps = {
   searchParams: Promise<{billing?: string; session_id?: string}>;
 };
 
 export default async function StudioPage({searchParams}: StudioPageProps) {
-  let firstName = 'there';
   let billingBanner: string | null = null;
   let userId: string | null = null;
+  let firstName = 'there';
 
   if (isSupabaseConfigured()) {
     try {
@@ -65,7 +63,7 @@ export default async function StudioPage({searchParams}: StudioPageProps) {
         billingBanner = 'You’re already on Pro.';
       }
     } catch {
-      firstName = 'there';
+      // keep page usable
     }
   }
 
@@ -75,163 +73,41 @@ export default async function StudioPage({searchParams}: StudioPageProps) {
       userId ?? (isSupabaseConfigured() ? null : demoUserId());
     sessions = statsUserId ? await listSessions(statsUserId) : [];
   } catch {
-    // stats are decorative — never block the page on them
+    sessions = [];
   }
 
-  const hasRuns = sessions.length > 0;
-  const latest = sessions[0] ?? null;
-  const lastSessionScore =
-    latest?.overall_score === null || latest?.overall_score === undefined
-      ? null
-      : Math.round(Number(latest.overall_score));
-  const resultsHref = latest
-    ? `/interview/results?session_id=${latest.id}`
-    : null;
-  const recent = sessions.slice(0, 5);
+  const ownerId = userId ?? (isSupabaseConfigured() ? null : demoUserId());
+  const historyRows = await Promise.all(
+    sessions.map(async (session) => {
+      let role_title: string | null = null;
+      let company_name: string | null = null;
+      if (session.job_description_id && ownerId) {
+        try {
+          const jd = await getJobDescription(
+            session.job_description_id,
+            ownerId,
+          );
+          role_title = jd?.role_title ?? null;
+          company_name = jd?.company_name ?? null;
+        } catch {
+          // decorative metadata
+        }
+      }
+      return {
+        id: session.id,
+        overall_score: session.overall_score,
+        created_at: session.created_at,
+        role_title,
+        company_name,
+      };
+    }),
+  );
 
   return (
-    <Section variant="transparent" padding={0}>
-      <VStack gap={6} className="aced-home">
-        <header className="aced-home__hero">
-          <Text type="label" color="secondary" as="p">
-            Hi {firstName}
-          </Text>
-          <Heading level={1} type="display-3">
-            {hasRuns
-              ? 'Ready for your next interview?'
-              : 'You’re here for design interview prep'}
-          </Heading>
-          <Text as="p" color="secondary" type="large" className="aced-home__lead">
-            {hasRuns
-              ? 'Same loop as last time: prepare with your CV, sit with Tom for about an hour, then debrief your scores.'
-              : 'About an hour. Upload your CV, speak your answers, get clear feedback on what to improve.'}
-          </Text>
-          {billingBanner ? (
-            <Banner status="success" title={billingBanner} />
-          ) : null}
-
-          <div className="aced-home__actions">
-            <Link className="aced-home__primary" href="/interview">
-              {hasRuns ? 'Start interview' : 'Get started'}
-            </Link>
-            {resultsHref ? (
-              <Link className="aced-home__secondary" href={resultsHref}>
-                {lastSessionScore !== null
-                  ? `Last score · ${lastSessionScore}`
-                  : 'Last interview'}
-                {latest?.created_at
-                  ? ` · ${daysAgoLabel(latest.created_at)}`
-                  : ''}
-              </Link>
-            ) : null}
-          </div>
-        </header>
-
-        {!hasRuns ? (
-          <>
-            <List
-              density="spacious"
-              hasDividers
-              listStyle="decimal"
-              header={
-                <Heading level={2} id="aced-home-how">
-                  How an interview works
-                </Heading>
-              }
-            >
-              <ListItem
-                label="Prepare"
-                description="Upload your design CV (PDF or Word). Pick the role you are going for, or add a job description if you have a spec."
-              />
-              <ListItem
-                label="Room"
-                description="Answer ten questions out loud — five classics, then five from your CV. We transcribe and score each one."
-              />
-              <ListItem
-                label="Debrief"
-                description="See what landed, what to fix, then run it again."
-              />
-            </List>
-
-            <List
-              density="spacious"
-              hasDividers
-              header={
-                <Heading level={2} id="aced-home-need">
-                  What you need
-                </Heading>
-              }
-            >
-              <ListItem label="A quiet spot and a working microphone" />
-              <ListItem label="About an hour uninterrupted" />
-              <ListItem label="Your design CV as a PDF or Word (.docx)" />
-            </List>
-          </>
-        ) : (
-          <>
-            <List
-              density="spacious"
-              hasDividers
-              listStyle="decimal"
-              header={
-                <Heading level={2} id="aced-home-how">
-                  Each interview
-                </Heading>
-              }
-            >
-              <ListItem
-                label="Prepare"
-                description="CV ready — optional JD to sharpen the questions."
-              />
-              <ListItem
-                label="Room"
-                description="Ten spoken answers. Scored before you move on."
-              />
-              <ListItem
-                label="Debrief"
-                description="Overall score and notes on every answer."
-              />
-            </List>
-
-            <List
-              density="balanced"
-              hasDividers
-              header={
-                <Heading level={2} id="aced-home-recent">
-                  Recent interviews
-                </Heading>
-              }
-            >
-              {recent.map((session, index) => {
-                const score =
-                  session.overall_score === null ||
-                  session.overall_score === undefined
-                    ? null
-                    : Math.round(Number(session.overall_score));
-                return (
-                  <ListItem
-                    key={session.id}
-                    href={`/interview/results?session_id=${session.id}`}
-                    label={
-                      score !== null
-                        ? `Score ${score} / 100`
-                        : index === 0
-                          ? 'Latest interview'
-                          : 'Interview'
-                    }
-                    description={daysAgoLabel(session.created_at)}
-                    endContent={
-                      <Text type="supporting" color="secondary">
-                        View
-                      </Text>
-                    }
-                  />
-                );
-              })}
-            </List>
-          </>
-        )}
-      </VStack>
-    </Section>
+    <StudioDashboard
+      firstName={firstName}
+      billingBanner={billingBanner}
+      sessions={historyRows}
+    />
   );
 }

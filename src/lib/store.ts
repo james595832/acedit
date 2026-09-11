@@ -451,6 +451,64 @@ export async function listSessions(userId: string): Promise<InterviewSession[]> 
   return sessions.filter(s => s.user_id === userId);
 }
 
+async function removeLocalSessionAudio(sessionId: string): Promise<void> {
+  if (process.env.VERCEL) return;
+  try {
+    const uploadsDir = path.join(DATA_DIR, 'audio');
+    const files = await fs.readdir(uploadsDir);
+    const prefix = `${sessionId}-`;
+    await Promise.all(
+      files
+        .filter((name) => name.startsWith(prefix))
+        .map((name) => fs.unlink(path.join(uploadsDir, name)).catch(() => undefined)),
+    );
+  } catch {
+    // Local audio is optional — missing files should not block delete.
+  }
+}
+
+/** Delete an interview the user owns. Questions and answers cascade. */
+export async function deleteSession(
+  id: string,
+  userId: string,
+): Promise<boolean> {
+  const session = await getSession(id, userId);
+  if (!session) return false;
+
+  if (useRemoteStore()) {
+    const admin = createServiceClient();
+    const {error} = await admin
+      .from('interview_sessions')
+      .delete()
+      .eq('id', id)
+      .eq('user_id', userId);
+    if (error) throw new Error(error.message);
+    return true;
+  }
+
+  const sessions = await readJson<InterviewSession[]>('sessions.json', []);
+  const questions = await readJson<InterviewQuestion[]>('questions.json', []);
+  const answers = await readJson<UserAnswer[]>('answers.json', []);
+  const questionIds = new Set(
+    questions.filter((q) => q.session_id === id).map((q) => q.id),
+  );
+
+  await writeJson(
+    'sessions.json',
+    sessions.filter((row) => row.id !== id),
+  );
+  await writeJson(
+    'questions.json',
+    questions.filter((q) => q.session_id !== id),
+  );
+  await writeJson(
+    'answers.json',
+    answers.filter((a) => !questionIds.has(a.question_id)),
+  );
+  await removeLocalSessionAudio(id);
+  return true;
+}
+
 export async function getSessionQuestions(
   sessionId: string,
 ): Promise<InterviewQuestion[]> {
