@@ -39,18 +39,26 @@ html {
 html,
 body {
   min-height: 100%;
+  min-height: 100dvh;
 }
 
 body {
-  background-color: var(--color-background-body);
+  background-color: #ffffff;
   background-image: none;
   color: var(--color-text-primary);
   font-family: var(--font-family-body);
+  /* Default Mac antialiasing thins Open Sans/Inter — keep native weight */
+  -webkit-font-smoothing: auto;
+  -moz-osx-font-smoothing: auto;
+  text-rendering: auto;
+  letter-spacing: normal;
+  font-synthesis: none;
 }
 
 /*
   Brand type — global.
   Headings: Inter medium (500). UI copy / buttons / links: Open Sans.
+  No tracking / fake bold — those made the type look weak and wrong.
 */
 .astryx-heading,
 .astryx-heading .astryx-text,
@@ -62,6 +70,9 @@ h5,
 h6 {
   font-family: var(--font-family-heading) !important;
   font-weight: 500 !important;
+  letter-spacing: normal !important;
+  -webkit-font-smoothing: auto;
+  -moz-osx-font-smoothing: auto;
 }
 
 .astryx-text,
@@ -82,6 +93,13 @@ label,
 p,
 li {
   font-family: var(--font-family-body);
+  letter-spacing: normal;
+  -webkit-font-smoothing: auto;
+  -moz-osx-font-smoothing: auto;
+}
+
+.astryx-button {
+  font-weight: 500 !important;
 }
 
 /* Logged-in app chrome: reliable gutters (StyleX contentPadding is easy to miss) */
@@ -97,12 +115,51 @@ li {
     var(--ease-standard, cubic-bezier(0.24, 1, 0.4, 1)) both;
 }
 
-/* Product canvas — white page; cards carry the grey tint (not the whole brand wash) */
+/* Product canvas — white everywhere (StyleX wash was painting main grey) */
 body:has(.aced-app-page),
+.astryx-app-shell,
+.astryx-app-shell[data-variant='wash'],
+.astryx-app-shell[data-variant='surface'],
 .astryx-app-shell:has(.aced-app-page),
-.astryx-app-shell:has(.aced-app-page) .astryx-app-shell-content {
+.astryx-app-shell:has(.aced-app-page) .astryx-app-shell-content,
+#astryx-app-shell-main,
+.astryx-layout-content {
   --aced-canvas: #ffffff;
   background: #ffffff !important;
+  background-color: #ffffff !important;
+}
+
+/* Fill the viewport; pin footer to the bottom on short pages */
+.astryx-app-shell:has(.aced-app-page) {
+  min-height: 100dvh !important;
+  display: flex !important;
+  flex-direction: column !important;
+}
+
+.astryx-app-shell:has(.aced-app-page) > *,
+.astryx-app-shell:has(.aced-app-page) .astryx-layout {
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+#astryx-app-shell-main {
+  flex: 1 1 auto !important;
+  display: flex !important;
+  flex-direction: column !important;
+  min-height: 0 !important;
+}
+
+.aced-app-page {
+  flex: 1 0 auto;
+}
+
+.aced-app-footer {
+  margin-top: auto;
+  width: 100%;
+  max-width: none;
+  background: #ffffff;
 }
 
 .astryx-app-shell-header .astryx-top-nav,
@@ -166,7 +223,7 @@ body:has(.aced-app-page),
   color: var(--aced-mute);
   font-family: var(--font-family-body);
   font-weight: 500;
-  letter-spacing: -0.01em;
+  letter-spacing: normal;
   background: transparent !important;
   transition:
     color 180ms cubic-bezier(0.24, 1, 0.4, 1),
@@ -499,8 +556,8 @@ body:has(.aced-app-page),
 */
 .astryx-button {
   box-sizing: border-box !important;
-  height: auto !important;
-  min-height: 2.5rem !important; /* 40px */
+  height: 2.5rem !important; /* 40px — equal affordance */
+  min-height: 2.5rem !important;
   max-height: 48px !important;
   padding: 0.5rem 1rem !important;
   border-width: 1px !important;
@@ -546,10 +603,11 @@ body:has(.aced-app-page),
 }
 
 .astryx-button[data-variant='primary'] {
-  letter-spacing: 0.04em;
+  letter-spacing: normal;
   text-transform: uppercase;
   font-size: 0.78rem !important;
   font-family: var(--font-family-body);
+  font-weight: 600 !important;
   color: #ffffff !important;
   background-color: var(--aced-ink) !important;
   border-color: var(--aced-ink) !important;
@@ -3563,8 +3621,11 @@ dialog.aced-feedback-dialog::backdrop {
 /* Product canvas: white shell (was grey wash — cards own the #a1a1a1 tint) */
 .astryx-app-shell,
 .astryx-app-shell[data-variant='wash'],
-.astryx-app-shell-content {
+.astryx-app-shell[data-variant='surface'],
+.astryx-app-shell-content,
+#astryx-app-shell-main {
   background: #ffffff !important;
+  background-color: #ffffff !important;
 }
 
 .aced-panel--soft {

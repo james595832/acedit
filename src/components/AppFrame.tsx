@@ -115,7 +115,7 @@ export function AppFrame({
     <AuthSessionProvider email={userEmail}>
     <AppShell
       height="auto"
-      variant="wash"
+      variant="surface"
       contentPadding={0}
       mobileNav={
         isSignedIn

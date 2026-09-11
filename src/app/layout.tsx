@@ -11,6 +11,7 @@ const inter = Inter({
   variable: '--font-inter',
   display: 'swap',
   weight: ['400', '500', '600', '700'],
+  adjustFontFallback: false,
 });
 
 const openSans = Open_Sans({
@@ -18,6 +19,7 @@ const openSans = Open_Sans({
   variable: '--font-open-sans',
   display: 'swap',
   weight: ['400', '500', '600', '700'],
+  adjustFontFallback: false,
 });
 
 const jetbrains = JetBrains_Mono({
