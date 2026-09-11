@@ -247,6 +247,7 @@ export function CVUploadForm() {
               isLabelHidden
               description="We’ll ask questions at this craft and level. Skip this if you add a job description below."
               placeholder="Choose a role"
+              placement="below"
               options={TRACK_OPTIONS}
               value={targetTrackId || undefined}
               onChange={setTargetTrackId}

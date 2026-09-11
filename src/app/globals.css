@@ -333,6 +333,37 @@ body:has(.aced-app-page),
   backdrop-filter: none;
 }
 
+/*
+  Product surface padding — GLOBAL ONLY (no inline style={{}} for spacing).
+  StyleX Card/Section padding is flaky under Next; pin with Stone spacing tokens
+  so every product screen gets the same inset.
+*/
+.aced-app-page .astryx-card {
+  box-sizing: border-box;
+  --astryx-card-padding: var(--spacing-5);
+  --astryx-card-padding-inline: var(--spacing-5);
+  --astryx-card-padding-block-start: var(--spacing-5);
+  --astryx-card-padding-block-end: var(--spacing-5);
+  padding: var(--spacing-5) !important;
+}
+
+.aced-app-page .astryx-section {
+  box-sizing: border-box;
+  --astryx-section-padding: var(--spacing-4);
+}
+
+/* Dropdown menus: option rows need their own inset (not the trigger rules) */
+.astryx-popover [role='listbox'] {
+  box-sizing: border-box;
+  padding-block: var(--spacing-2);
+}
+
+.astryx-popover [role='option'],
+.astryx-selector-option {
+  box-sizing: border-box;
+  padding: var(--spacing-3) var(--spacing-4) !important;
+}
+
 /* Form fields: clear affordance on white cards.
    Explicit border + padding: Astryx reset zeroes input padding, and StyleX
    wrapper padding is easy to lose in the cascade — force both globally. */

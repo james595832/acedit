@@ -87,7 +87,8 @@ export function WhoAreYouForm() {
           <Selector
             label={copy.roleLabel}
             description={copy.rolePlaceholder}
-            placeholder={copy.rolePlaceholder}
+            placeholder="Select a role"
+            placement="below"
             options={TRACK_OPTIONS}
             value={targetTrackId || undefined}
             onChange={(next) => {
