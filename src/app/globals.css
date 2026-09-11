@@ -19,6 +19,8 @@
   --aced-terra: var(--color-accent);
   --aced-blue: var(--color-accent);
   --aced-canvas: var(--color-background-body);
+  /* Product card outline / wash (designer-specified) */
+  --aced-card-tint: #a1a1a1;
 }
 
 [data-astryx-theme='stone'] {
@@ -58,10 +60,11 @@ body {
     var(--ease-standard, cubic-bezier(0.24, 1, 0.4, 1)) both;
 }
 
-/* Stone canvas — white surfaces sit on the body wash */
+/* Product canvas — white page; cards carry the grey tint (not the whole brand wash) */
 body:has(.aced-app-page),
 .astryx-app-shell:has(.aced-app-page) {
-  background: var(--aced-canvas);
+  --aced-canvas: #ffffff;
+  background: #ffffff;
 }
 
 .astryx-app-shell-header .astryx-top-nav,
@@ -345,6 +348,11 @@ body:has(.aced-app-page),
   --astryx-card-padding-block-start: var(--spacing-5);
   --astryx-card-padding-block-end: var(--spacing-5);
   padding: var(--spacing-5) !important;
+  /* Soft grey wash + #a1a1a1 edge so cards read on white canvas */
+  background: color-mix(in srgb, var(--aced-card-tint) 9%, #ffffff) !important;
+  border-color: var(--aced-card-tint) !important;
+  border-width: 1px !important;
+  border-style: solid !important;
 }
 
 .aced-app-page .astryx-section {
