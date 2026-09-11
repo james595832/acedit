@@ -1,21 +1,21 @@
 import type {Metadata} from 'next';
-import {Figtree, JetBrains_Mono, Montserrat} from 'next/font/google';
+import {Inter, JetBrains_Mono, Open_Sans} from 'next/font/google';
 import {Providers} from '@/components/providers';
 import {AppShellServer} from '@/components/AppShellServer';
 import '@astryxdesign/core/reset.css';
 import '@astryxdesign/core/astryx.css';
 import './globals.css';
 
-const figtree = Figtree({
+const inter = Inter({
   subsets: ['latin'],
-  variable: '--font-figtree',
+  variable: '--font-inter',
   display: 'swap',
   weight: ['400', '500', '600', '700'],
 });
 
-const montserrat = Montserrat({
+const openSans = Open_Sans({
   subsets: ['latin'],
-  variable: '--font-montserrat',
+  variable: '--font-open-sans',
   display: 'swap',
   weight: ['400', '500', '600', '700'],
 });
@@ -58,9 +58,9 @@ export default function RootLayout({
       lang="en"
       data-theme="light"
       data-astryx-theme="stone"
-      className={`${figtree.variable} ${montserrat.variable} ${jetbrains.variable}`}
+      className={`${inter.variable} ${openSans.variable} ${jetbrains.variable}`}
     >
-      <body className={figtree.className}>
+      <body className={openSans.className}>
         <Providers>
           <AppShellServer>{children}</AppShellServer>
         </Providers>
