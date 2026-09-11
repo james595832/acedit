@@ -163,8 +163,8 @@ body:has(.aced-app-page),
   padding: 0.45rem 0.85rem !important;
   border-radius: 999px;
   color: var(--aced-mute);
-  font-family: var(--font-family-heading);
-  font-weight: 600;
+  font-family: var(--font-family-body);
+  font-weight: 500;
   letter-spacing: -0.01em;
   background: transparent !important;
   transition:
@@ -199,8 +199,8 @@ body:has(.aced-app-page),
   box-sizing: border-box;
   padding: 0.85rem 1rem !important;
   border-radius: 0.55rem;
-  font-family: var(--font-family-heading);
-  font-weight: 600;
+  font-family: var(--font-family-body);
+  font-weight: 500;
   font-size: 1.05rem;
   color: var(--aced-ink);
   text-decoration: none;
