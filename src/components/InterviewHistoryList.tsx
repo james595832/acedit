@@ -123,7 +123,7 @@ export function InterviewHistoryList({
                       {copy.dateTaken(formatDateTaken(session.created_at))}
                     </Text>
                   </VStack>
-                  <HStack gap={2} wrap="wrap">
+                  <HStack gap={2} wrap="wrap" align="center">
                     <Button
                       label={copy.readAnswers}
                       variant="secondary"
@@ -142,8 +142,7 @@ export function InterviewHistoryList({
                     />
                     <Button
                       label="Delete"
-                      variant="ghost"
-                      size="sm"
+                      variant="secondary"
                       clickAction={() => {
                         setError(null);
                         setPendingId(session.id);
