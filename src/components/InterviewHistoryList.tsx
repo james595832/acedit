@@ -1,12 +1,15 @@
 'use client';
 
-import {useEffect, useState, type CSSProperties} from 'react';
-import Link from 'next/link';
+import {useEffect, useState} from 'react';
 import {useRouter} from 'next/navigation';
 import {AlertDialog} from '@astryxdesign/core/AlertDialog';
 import {Banner} from '@astryxdesign/core/Banner';
 import {Button} from '@astryxdesign/core/Button';
+import {Card} from '@astryxdesign/core/Card';
+import {HStack, VStack} from '@astryxdesign/core/Layout';
+import {ProgressBar} from '@astryxdesign/core/ProgressBar';
 import {Text} from '@astryxdesign/core/Text';
+import {FIGMA_COPY} from '@/lib/interview/figma-copy';
 
 export type InterviewHistoryRow = {
   id: string;
@@ -25,22 +28,24 @@ function formatDateTaken(iso: string): string {
   return `${day}/${month}/${year}`;
 }
 
-function scoreTone(score: number | null): 'strong' | 'okay' | 'weak' | 'empty' {
-  if (score === null) return 'empty';
-  if (score >= 75) return 'strong';
-  if (score >= 55) return 'okay';
-  return 'weak';
+function scoreProgressVariant(
+  score: number | null,
+): 'success' | 'warning' | 'error' | 'neutral' {
+  if (score === null) return 'neutral';
+  if (score >= 75) return 'success';
+  if (score >= 55) return 'warning';
+  return 'error';
 }
 
 export function InterviewHistoryList({
   sessions,
 }: {
   sessions: InterviewHistoryRow[];
-  /** @deprecated kept for call-site compatibility */
   heading?: string;
   headingId?: string;
 }) {
   const router = useRouter();
+  const copy = FIGMA_COPY.interviews;
   const [rows, setRows] = useState(sessions);
   const [pendingId, setPendingId] = useState<string | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
@@ -75,7 +80,7 @@ export function InterviewHistoryList({
   if (rows.length === 0) return null;
 
   return (
-    <>
+    <VStack gap={3}>
       {error ? (
         <Banner
           status="error"
@@ -84,82 +89,88 @@ export function InterviewHistoryList({
         />
       ) : null}
 
-      <ul className="aced-history">
-        {rows.map((session) => {
-          const score =
-            session.overall_score === null ||
-            session.overall_score === undefined
-              ? null
-              : Math.round(Number(session.overall_score));
-          const tone = scoreTone(score);
-          const role = session.role_title?.trim() || 'design role';
-          const company = session.company_name?.trim();
-          const resultsHref = `/interview/results?session_id=${session.id}`;
-          const retakeHref = '/interview';
+      {rows.map((session) => {
+        const score =
+          session.overall_score === null ||
+          session.overall_score === undefined
+            ? null
+            : Math.round(Number(session.overall_score));
+        const role = session.role_title?.trim() || 'design role';
+        const company = session.company_name?.trim();
 
-          return (
-            <li key={session.id} className="aced-history__card">
-              <div className="aced-history__main">
-                <Text as="p" className="aced-history__title">
-                  Interviewing for{' '}
-                  <span className="aced-history__accent">{role}</span>
-                  {company ? (
-                    <>
-                      {' '}
-                      at <span className="aced-history__accent">{company}</span>
-                    </>
-                  ) : null}
-                </Text>
-                <Text as="p" color="secondary">
-                  Date taken: {formatDateTaken(session.created_at)}
-                </Text>
-                <div className="aced-history__actions">
-                  <Link className="aced-history__ghost" href={resultsHref}>
-                    Read answers
-                  </Link>
-                  <Link className="aced-history__ghost" href={retakeHref}>
-                    Retake interview
-                  </Link>
-                  <Button
-                    label="Delete"
-                    variant="ghost"
-                    size="sm"
-                    clickAction={() => {
-                      setError(null);
-                      setPendingId(session.id);
-                    }}
-                  />
-                </div>
-              </div>
+        return (
+          <Card key={session.id} padding={4}>
+            <VStack gap={3}>
+              <HStack gap={4} align="start" justify="between" wrap="wrap">
+                <VStack gap={2}>
+                  <Text as="p" type="large" weight="bold">
+                    Interviewing for{' '}
+                    <Text color="accent" weight="bold">
+                      {role}
+                    </Text>
+                    {company ? (
+                      <>
+                        {' '}
+                        at{' '}
+                        <Text color="accent" weight="bold">
+                          {company}
+                        </Text>
+                      </>
+                    ) : null}
+                  </Text>
+                  <Text as="p" color="secondary">
+                    {copy.dateTaken(formatDateTaken(session.created_at))}
+                  </Text>
+                  <HStack gap={2} wrap="wrap">
+                    <Button
+                      label={copy.readAnswers}
+                      variant="secondary"
+                      clickAction={() => {
+                        router.push(
+                          `/interview/results?session_id=${session.id}`,
+                        );
+                      }}
+                    />
+                    <Button
+                      label={copy.retake}
+                      variant="secondary"
+                      clickAction={() => {
+                        router.push('/interview');
+                      }}
+                    />
+                    <Button
+                      label="Delete"
+                      variant="ghost"
+                      size="sm"
+                      clickAction={() => {
+                        setError(null);
+                        setPendingId(session.id);
+                      }}
+                    />
+                  </HStack>
+                </VStack>
 
-              <div
-                className={`aced-history__score aced-history__score--${tone}`}
-                aria-label={
-                  score === null
-                    ? 'Assessment score pending'
-                    : `Assessment score ${score} percent`
-                }
-              >
-                <div
-                  className="aced-history__ring"
-                  style={
-                    score === null
-                      ? undefined
-                      : ({['--score-pct']: score} as CSSProperties)
-                  }
-                >
-                  <span className="aced-history__pct">
+                <VStack gap={2} align="center">
+                  <Text as="p" type="display-3" weight="bold" hasTabularNumbers>
                     {score === null ? '—' : `${score}%`}
-                  </span>
-                </div>
-                <Text as="p" type="label" className="aced-history__score-label">
-                  Assessment score
-                </Text>
-              </div>
-            </li>
-          );
-        })}
-      </ul>
+                  </Text>
+                  <Text as="p" type="label" weight="bold">
+                    {copy.assessmentScore}
+                  </Text>
+                  <ProgressBar
+                    label={copy.assessmentScore}
+                    isLabelHidden
+                    value={score ?? 0}
+                    max={100}
+                    variant={scoreProgressVariant(score)}
+                    isDisabled={score === null}
+                  />
+                </VStack>
+              </HStack>
+            </VStack>
+          </Card>
+        );
+      })}
 
       <AlertDialog
         isOpen={Boolean(pendingId)}
@@ -175,6 +186,6 @@ export function InterviewHistoryList({
           void confirmDelete();
         }}
       />
-    </>
+    </VStack>
   );
 }

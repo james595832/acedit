@@ -1,0 +1,28 @@
+---
+description: No AI design freelancing — Astryx Stone + Figma only
+alwaysApply: true
+---
+
+# UI authority
+
+Design direction comes from the product designer (Figma) and Astryx Stone — not from agent “taste,” generic frontend aesthetic skills, or model design defaults.
+
+## Do
+
+- Product UI: Astryx components + Stone theme only (`stoneTheme`, `data-astryx-theme="stone"`)
+- Before new UI: `npx astryx build` / `template` / `component` — follow those patterns
+- Layout: AppShell, Section, VStack/HStack/Grid, FormLayout — no raw `<div>` layout
+- Dense lists: List / ListItem; Card only when the item is independently removaable/reorderable
+- Copy and flow: match Figma when a file/node is provided
+- Style via component props and token-backed utilities only
+
+## Don’t
+
+- Invent visual systems, gradients, “editorial” skins, terracotta overrides, or custom `aced-*` chrome for product screens
+- Apply AI frontend design skills / aesthetic checklists (Grok, Claude, Cursor design taste rules, purple/cream/newspaper biases, etc.)
+- Hand-roll buttons, cards, score rings, or nav in `globals.css` when an Astryx component exists
+- Use raw hex, arbitrary spacing, `style={{…}}`, or `!important` overrides against Astryx
+
+## Exception
+
+Marketing landing (`/`, `/start`) may keep bespoke brand chrome until redesign. Signed-in product surfaces stay Astryx Stone.

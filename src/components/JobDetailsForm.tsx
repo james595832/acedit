@@ -10,12 +10,14 @@ import {VStack} from '@astryxdesign/core/Layout';
 import {Text} from '@astryxdesign/core/Text';
 import {Heading} from '@astryxdesign/core/Heading';
 import {Banner} from '@astryxdesign/core/Banner';
+import {FormLayout} from '@astryxdesign/core/FormLayout';
+import {Section} from '@astryxdesign/core/Section';
 import {
   clearCreateDraft,
   readCreateDraft,
   type CreateInterviewDraft,
 } from '@/lib/interview/create-draft';
-import {INTERVIEW_TRACKS} from '@/lib/interview/tracks';
+import {FIGMA_COPY} from '@/lib/interview/figma-copy';
 
 const JD_ACCEPT =
   'application/pdf,.pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document,.docx,image/png,image/jpeg,image/webp,.png,.jpg,.jpeg,.webp';
@@ -42,6 +44,7 @@ function companyHintFromUrl(raw: string): string | undefined {
 
 export function JobDetailsForm() {
   const router = useRouter();
+  const copy = FIGMA_COPY.job;
   const [draft, setDraft] = useState<CreateInterviewDraft | null>(null);
   const [jdFile, setJdFile] = useState<File | null>(null);
   const [jdText, setJdText] = useState('');
@@ -93,7 +96,6 @@ export function JobDetailsForm() {
         throw new Error('Add a job description, or go back and choose a role.');
       }
 
-      // Role-only path needs a track; CV + JD needs neither track.
       if (!jobDescriptionId && !draft.target_track_id) {
         throw new Error(
           'Add a job description, or go back and choose a role to simulate.',
@@ -127,131 +129,95 @@ export function JobDetailsForm() {
     }
   }
 
-  const trackLabel = draft?.target_track_id
-    ? INTERVIEW_TRACKS.find((t) => t.id === draft.target_track_id)?.label
-    : null;
-
   if (!draft) {
     return (
-      <Text as="p" color="secondary">
-        Loading…
-      </Text>
+      <Section variant="transparent" padding={0}>
+        <Text as="p" color="secondary">
+          Loading…
+        </Text>
+      </Section>
     );
   }
 
   return (
-    <VStack gap={6} className="aced-flow">
-      {error ? (
-        <Banner status="error" title="Couldn’t continue" description={error} />
-      ) : null}
-
-      <header className="aced-flow__intro">
-        <Heading level={1}>Tell us about the Job?</Heading>
-        <Text as="p" type="large">
-          Provide us with information about the role as this will make the
-          interview much more realistic in terms of the questions you’ll be
-          asked and ranked.
-        </Text>
-        {trackLabel || draft.cv_file_name ? (
-          <Text as="p" color="secondary" type="supporting">
-            {draft.cv_file_name ? `CV: ${draft.cv_file_name}` : null}
-            {draft.cv_file_name && trackLabel ? ' · ' : null}
-            {trackLabel ? `Role: ${trackLabel}` : null}
-            {' · '}
-            Optional on this step — skip if you’re simulating from the role
-            alone.
-          </Text>
+    <Section variant="transparent" padding={0}>
+      <VStack gap={5}>
+        {error ? (
+          <Banner status="error" title="Couldn’t continue" description={error} />
         ) : null}
-      </header>
 
-      <section className="aced-flow__block" aria-labelledby="aced-job-upload">
-        <Heading level={2} id="aced-job-upload">
-          Upload a job description
-        </Heading>
-        <FileInput
-          label="Upload a job description"
-          isLabelHidden
-          description="Upload a job description in either PDF or word format"
-          accept={JD_ACCEPT}
-          maxSize={10 * 1024 * 1024}
-          mode={jdFile ? 'input' : 'dropzone'}
-          value={jdFile}
-          onChange={(next) => {
-            setJdFile(fileFromValue(next));
-            setJdId(null);
-            setJdRole(null);
-          }}
-          isOptional
-          isLoading={isJdLoading}
-          placeholder="Upload a job description in either PDF or word format"
-        />
-      </section>
+        <VStack gap={2}>
+          <Heading level={1}>{copy.title}</Heading>
+          <Text as="p" type="large" color="secondary">
+            {copy.lead}
+          </Text>
+        </VStack>
 
-      <Text as="p" className="aced-flow__or">
-        Or
-      </Text>
+        <FormLayout direction="vertical">
+          <FileInput
+            label={copy.uploadLabel}
+            description={copy.uploadDropzone}
+            accept={JD_ACCEPT}
+            maxSize={10 * 1024 * 1024}
+            mode={jdFile ? 'input' : 'dropzone'}
+            value={jdFile}
+            onChange={(next) => {
+              setJdFile(fileFromValue(next));
+              setJdId(null);
+              setJdRole(null);
+            }}
+            isOptional
+            isLoading={isJdLoading}
+            placeholder={copy.uploadDropzone}
+          />
+        </FormLayout>
 
-      <section className="aced-flow__block" aria-labelledby="aced-job-paste">
-        <Heading level={2} id="aced-job-paste" className="aced-sr-only">
-          Paste job description
-        </Heading>
-        <TextArea
-          label="Paste a job description"
-          isLabelHidden
-          value={jdText}
-          onChange={(next) => {
-            setJdText(next);
-            setJdId(null);
-            setJdRole(null);
-          }}
-          isOptional
-          rows={5}
-          placeholder="Paste a job description here..."
-        />
-      </section>
+        <Heading level={2}>{copy.or}</Heading>
 
-      <section className="aced-flow__block" aria-labelledby="aced-job-url">
-        <Heading level={2} id="aced-job-url">
-          Finally add a company URL
-        </Heading>
-        <Text as="p">
-          We use this to pull information on the company to again help us
-          simulate a more realistic interview
-        </Text>
-        <TextInput
-          label="Company URL"
-          isLabelHidden
-          value={companyUrl}
-          onChange={setCompanyUrl}
-          isOptional
-          placeholder="Enter a URL for the company you are applying to"
-        />
-      </section>
+        <FormLayout direction="vertical">
+          <TextArea
+            label={copy.pastePlaceholder}
+            isLabelHidden
+            value={jdText}
+            onChange={(next) => {
+              setJdText(next);
+              setJdId(null);
+              setJdRole(null);
+            }}
+            isOptional
+            rows={5}
+            placeholder={copy.pastePlaceholder}
+          />
+        </FormLayout>
 
-      {jdRole ? (
-        <Banner
-          status="success"
-          title={`Target role: ${jdRole}`}
-          description="Questions will lean toward this role."
-        />
-      ) : null}
+        <FormLayout direction="vertical">
+          <TextInput
+            label={copy.companyLabel}
+            description={copy.companyLead}
+            value={companyUrl}
+            onChange={setCompanyUrl}
+            isOptional
+            placeholder={copy.companyPlaceholder}
+          />
+        </FormLayout>
 
-      <div className="aced-flow__actions">
+        {jdRole ? (
+          <Banner
+            status="success"
+            title={`Target role: ${jdRole}`}
+            description="Questions will lean toward this role."
+          />
+        ) : null}
+
         <Button
-          label="Continue"
+          label={copy.continue}
           variant="primary"
           isLoading={isLoading || isJdLoading}
           clickAction={() => {
             void handleContinue();
           }}
         />
-        <Button
-          label="Back"
-          variant="ghost"
-          isDisabled={isLoading}
-          clickAction={() => router.push('/interview')}
-        />
-      </div>
-    </VStack>
+      </VStack>
+    </Section>
   );
 }

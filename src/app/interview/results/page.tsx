@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import {VStack} from '@astryxdesign/core/Layout';
+import {VStack, HStack} from '@astryxdesign/core/Layout';
 import {Heading} from '@astryxdesign/core/Heading';
 import {Text} from '@astryxdesign/core/Text';
 import {Section} from '@astryxdesign/core/Section';
@@ -12,6 +12,7 @@ import {
   listSessions,
 } from '@/lib/store';
 import {InterviewHistoryList} from '@/components/InterviewHistoryList';
+import {CreateInterviewButton} from '@/components/CreateInterviewButton';
 import {ResultsDebrief} from './ResultsDebrief';
 
 type ResultsPageProps = {
@@ -70,42 +71,34 @@ export default async function ResultsPage({searchParams}: ResultsPageProps) {
   );
 
   return (
-    <div className="aced-debrief">
-      <nav className="aced-crumb" aria-label="Breadcrumb">
-        <Link href="/studio">← Interviews</Link>
-      </nav>
+    <Section variant="transparent" padding={0}>
+      <VStack gap={5}>
+        <Text as="p" color="secondary">
+          <Link href="/studio">← Interviews</Link>
+        </Text>
 
-      <Section variant="transparent" padding={0}>
-        <VStack gap={5} className="aced-interviews">
-          <header className="aced-interviews__head">
-            <div className="aced-interviews__title">
-              <Heading level={1}>Interviews</Heading>
-              <Text as="p" type="large">
-                We will keep a list of your interviews here for you to review or
-                retake
-              </Text>
-            </div>
-            <Link className="aced-flow__btn" href="/interview">
-              Create an interview
-            </Link>
-          </header>
+        <HStack gap={4} align="start" justify="between" wrap="wrap">
+          <VStack gap={2}>
+            <Heading level={1}>Interviews</Heading>
+            <Text as="p" type="large" color="secondary">
+              We will keep a list of your interviews here for you to review or
+              retake
+            </Text>
+          </VStack>
+          <CreateInterviewButton />
+        </HStack>
 
-          {historyRows.length === 0 ? (
-            <EmptyState
-              headingLevel={2}
-              title="No interviews yet"
-              description="Create your first interview — pick a role or upload a CV, then add a job description if you have one."
-              actions={
-                <Link className="aced-flow__btn" href="/interview">
-                  Create an interview
-                </Link>
-              }
-            />
-          ) : (
-            <InterviewHistoryList sessions={historyRows} />
-          )}
-        </VStack>
-      </Section>
-    </div>
+        {historyRows.length === 0 ? (
+          <EmptyState
+            headingLevel={2}
+            title="No interviews yet"
+            description="Create your first interview — pick a role or upload a CV, then add a job description if you have one."
+            actions={<CreateInterviewButton />}
+          />
+        ) : (
+          <InterviewHistoryList sessions={historyRows} />
+        )}
+      </VStack>
+    </Section>
   );
 }

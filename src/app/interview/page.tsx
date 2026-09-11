@@ -1,10 +1,5 @@
-import {Section} from '@astryxdesign/core/Section';
 import {WhoAreYouForm} from '@/components/WhoAreYouForm';
 
 export default function InterviewPage() {
-  return (
-    <Section variant="transparent" padding={0}>
-      <WhoAreYouForm />
-    </Section>
-  );
+  return <WhoAreYouForm />;
 }

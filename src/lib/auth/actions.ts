@@ -80,7 +80,7 @@ export async function signUp(
   const origin = process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000';
   const afterConfirm = wantsCheckout
     ? checkoutPath(trial || '5', plan || 'pro')
-    : '/onboarding';
+    : '/studio';
 
   const {data, error} = await supabase.auth.signUp({
     email,
@@ -115,7 +115,7 @@ export async function signUp(
     if (wantsCheckout && !isStripeConfigured()) {
       redirect('/settings?billing=stripe_missing');
     }
-    redirect('/onboarding');
+    redirect('/studio');
   }
 
   const login = new URL('/login', origin);

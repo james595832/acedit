@@ -1,10 +1,3 @@
-import Link from 'next/link';
-import {Heading} from '@astryxdesign/core/Heading';
-import {Text} from '@astryxdesign/core/Text';
-import {VStack} from '@astryxdesign/core/Layout';
-import {Section} from '@astryxdesign/core/Section';
-import {Banner} from '@astryxdesign/core/Banner';
-import {EmptyState} from '@astryxdesign/core/EmptyState';
 import {createClient} from '@/lib/supabase/server';
 import {isSupabaseConfigured} from '@/lib/supabase/config';
 import {isStripeConfigured} from '@/lib/stripe';
@@ -14,7 +7,8 @@ import {
   getJobDescription,
   listSessions,
 } from '@/lib/store';
-import {InterviewHistoryList} from '@/components/InterviewHistoryList';
+import {resolveGreetingName} from '@/lib/greeting';
+import {StudioDashboard} from '@/components/StudioDashboard';
 
 type StudioPageProps = {
   searchParams: Promise<{billing?: string; session_id?: string}>;
@@ -23,6 +17,7 @@ type StudioPageProps = {
 export default async function StudioPage({searchParams}: StudioPageProps) {
   let billingBanner: string | null = null;
   let userId: string | null = null;
+  let firstName = 'there';
 
   if (isSupabaseConfigured()) {
     try {
@@ -31,6 +26,23 @@ export default async function StudioPage({searchParams}: StudioPageProps) {
         data: {user},
       } = await supabase.auth.getUser();
       userId = user?.id ?? null;
+
+      let profileName: string | null = null;
+      if (user) {
+        const {data: profile} = await supabase
+          .from('profiles')
+          .select('full_name')
+          .eq('id', user.id)
+          .maybeSingle();
+        profileName = (profile?.full_name as string | null) ?? null;
+      }
+
+      firstName = resolveGreetingName({
+        profileName,
+        metaName: (user?.user_metadata?.full_name as string | undefined) ?? null,
+        givenName: (user?.user_metadata?.given_name as string | undefined) ?? null,
+        email: user?.email ?? null,
+      });
 
       const params = await searchParams;
       if (
@@ -92,40 +104,10 @@ export default async function StudioPage({searchParams}: StudioPageProps) {
   );
 
   return (
-    <Section variant="transparent" padding={0}>
-      <VStack gap={5} className="aced-interviews">
-        <header className="aced-interviews__head">
-          <div className="aced-interviews__title">
-            <Heading level={1}>Interviews</Heading>
-            <Text as="p" type="large">
-              We will keep a list of your interviews here for you to review or
-              retake
-            </Text>
-          </div>
-          <Link className="aced-flow__btn" href="/interview">
-            Create an interview
-          </Link>
-        </header>
-
-        {billingBanner ? (
-          <Banner status="success" title={billingBanner} />
-        ) : null}
-
-        {historyRows.length === 0 ? (
-          <EmptyState
-            headingLevel={2}
-            title="No interviews yet"
-            description="Create your first interview — pick a role or upload a CV, then add a job description if you have one."
-            actions={
-              <Link className="aced-flow__btn" href="/interview">
-                Create an interview
-              </Link>
-            }
-          />
-        ) : (
-          <InterviewHistoryList sessions={historyRows} />
-        )}
-      </VStack>
-    </Section>
+    <StudioDashboard
+      firstName={firstName}
+      billingBanner={billingBanner}
+      sessions={historyRows}
+    />
   );
 }
