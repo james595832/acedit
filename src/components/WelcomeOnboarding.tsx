@@ -14,7 +14,7 @@ export function WelcomeOnboarding({firstName}: {firstName: string}) {
   const copy = FIGMA_COPY.welcome;
 
   return (
-    <Section variant="transparent" padding={0}>
+    <Section variant="transparent" padding={4}>
       <VStack gap={5}>
         <VStack gap={3}>
           <Heading level={1}>{copy.title(firstName)}</Heading>

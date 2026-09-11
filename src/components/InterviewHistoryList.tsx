@@ -80,7 +80,7 @@ export function InterviewHistoryList({
   if (rows.length === 0) return null;
 
   return (
-    <VStack gap={3}>
+    <VStack gap={4}>
       {error ? (
         <Banner
           status="error"
@@ -99,28 +99,30 @@ export function InterviewHistoryList({
         const company = session.company_name?.trim();
 
         return (
-          <Card key={session.id} padding={4}>
-            <VStack gap={3}>
-              <HStack gap={4} align="start" justify="between" wrap="wrap">
-                <VStack gap={2}>
-                  <Text as="p" type="large" weight="bold">
-                    Interviewing for{' '}
-                    <Text color="accent" weight="bold">
-                      {role}
+          <Card key={session.id} padding={5}>
+            <VStack gap={4}>
+              <HStack gap={5} align="start" justify="between" wrap="wrap">
+                <VStack gap={3}>
+                  <VStack gap={2}>
+                    <Text as="p" type="large" weight="bold">
+                      Interviewing for{' '}
+                      <Text color="accent" weight="bold">
+                        {role}
+                      </Text>
+                      {company ? (
+                        <>
+                          {' '}
+                          at{' '}
+                          <Text color="accent" weight="bold">
+                            {company}
+                          </Text>
+                        </>
+                      ) : null}
                     </Text>
-                    {company ? (
-                      <>
-                        {' '}
-                        at{' '}
-                        <Text color="accent" weight="bold">
-                          {company}
-                        </Text>
-                      </>
-                    ) : null}
-                  </Text>
-                  <Text as="p" color="secondary">
-                    {copy.dateTaken(formatDateTaken(session.created_at))}
-                  </Text>
+                    <Text as="p" color="secondary">
+                      {copy.dateTaken(formatDateTaken(session.created_at))}
+                    </Text>
+                  </VStack>
                   <HStack gap={2} wrap="wrap">
                     <Button
                       label={copy.readAnswers}
@@ -150,7 +152,7 @@ export function InterviewHistoryList({
                   </HStack>
                 </VStack>
 
-                <VStack gap={2} align="center">
+                <VStack gap={2} align="center" padding={1}>
                   <Text as="p" type="display-3" weight="bold" hasTabularNumbers>
                     {score === null ? '—' : `${score}%`}
                   </Text>

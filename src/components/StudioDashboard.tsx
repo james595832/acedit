@@ -36,7 +36,7 @@ export function StudioDashboard({
 
   if (!ready) {
     return (
-      <Section variant="transparent" padding={0}>
+      <Section variant="transparent" padding={4}>
         <Text as="p" color="secondary">
           Loading…
         </Text>
@@ -49,8 +49,8 @@ export function StudioDashboard({
   }
 
   return (
-    <Section variant="transparent" padding={0}>
-      <VStack gap={5}>
+    <Section variant="transparent" padding={4}>
+      <VStack gap={6}>
         <HStack gap={4} align="start" justify="between" wrap="wrap">
           <VStack gap={2}>
             <Heading level={1}>{copy.title}</Heading>

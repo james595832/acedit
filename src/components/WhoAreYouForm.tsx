@@ -70,7 +70,7 @@ export function WhoAreYouForm() {
   }
 
   return (
-    <Section variant="transparent" padding={0}>
+    <Section variant="transparent" padding={4}>
       <VStack gap={5}>
         {error ? (
           <Banner status="error" title="Couldn’t continue" description={error} />

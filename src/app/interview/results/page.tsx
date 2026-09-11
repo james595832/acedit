@@ -71,7 +71,7 @@ export default async function ResultsPage({searchParams}: ResultsPageProps) {
   );
 
   return (
-    <Section variant="transparent" padding={0}>
+    <Section variant="transparent" padding={4}>
       <VStack gap={5}>
         <Text as="p" color="secondary">
           <Link href="/studio">← Interviews</Link>
