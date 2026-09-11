@@ -99,9 +99,10 @@ li {
 
 /* Product canvas — white page; cards carry the grey tint (not the whole brand wash) */
 body:has(.aced-app-page),
-.astryx-app-shell:has(.aced-app-page) {
+.astryx-app-shell:has(.aced-app-page),
+.astryx-app-shell:has(.aced-app-page) .astryx-app-shell-content {
   --aced-canvas: #ffffff;
-  background: #ffffff;
+  background: #ffffff !important;
 }
 
 .astryx-app-shell-header .astryx-top-nav,
@@ -3559,11 +3560,11 @@ dialog.aced-feedback-dialog::backdrop {
   line-height: 1.12;
 }
 
-/* Warm paper canvas on the app shell so white cards read as surfaces */
+/* Product canvas: white shell (was grey wash — cards own the #a1a1a1 tint) */
 .astryx-app-shell,
 .astryx-app-shell[data-variant='wash'],
 .astryx-app-shell-content {
-  background: var(--color-background-body) !important;
+  background: #ffffff !important;
 }
 
 .aced-panel--soft {
