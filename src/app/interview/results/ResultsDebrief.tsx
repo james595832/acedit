@@ -1,7 +1,7 @@
 'use client';
 
 import {useEffect, useMemo, useState} from 'react';
-import Link from 'next/link';
+import {Link} from '@astryxdesign/core/Link';
 import {VStack, HStack} from '@astryxdesign/core/Layout';
 import {Heading} from '@astryxdesign/core/Heading';
 import {Text} from '@astryxdesign/core/Text';
@@ -50,7 +50,7 @@ function outcomeCopy(
       lead: 'Strong answers. Take the win — then one more round to lock it in.',
       badge: 'Strong interview',
       cta: 'Interview again',
-      ctaHint: 'Keep the momentum while it’s fresh',
+      ctaHint: 'We’ll keep what landed and press the weaker answers next time',
     };
   }
   if (tone === 'okay') {
@@ -59,7 +59,7 @@ function outcomeCopy(
       lead: 'You’re building the muscle. Another round will sharpen the weak spots.',
       badge: overall !== null ? `${Math.round(overall)} / 100` : 'In progress',
       cta: 'Start another interview',
-      ctaHint: 'Focus on the lower-scoring answers below',
+      ctaHint: 'Next interview will reuse this debrief and press those weak spots',
     };
   }
   if (tone === 'weak') {
@@ -68,7 +68,7 @@ function outcomeCopy(
       lead: 'First interviews are messy. That’s the point. Try again and watch the score move.',
       badge: 'Keep going',
       cta: 'Interview again',
-      ctaHint: 'You’ve done the hard part — starting',
+      ctaHint: 'We’ll keep this debrief and ask you to go deeper next time',
     };
   }
   if (questionCount > 0 && gradedCount === 0) {

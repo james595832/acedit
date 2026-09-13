@@ -8,6 +8,7 @@ import {
   getSession,
   getSessionQuestions,
 } from '@/lib/store';
+import {loadPracticeMemory} from '@/lib/interview/practice-memory';
 
 type Params = {params: Promise<{sessionId: string}>};
 
@@ -34,6 +35,9 @@ export async function GET(_request: Request, {params}: Params) {
       roleTitle: jd?.role_title,
       companyName: jd?.company_name,
     });
+    const memory = await loadPracticeMemory(auth.userId, {
+      excludeSessionId: session.id,
+    });
 
     return NextResponse.json({
       session,
@@ -43,6 +47,8 @@ export async function GET(_request: Request, {params}: Params) {
         firstName,
         position,
         tailored_to_jd: Boolean(jd),
+        practice_focus: memory?.focus ?? [],
+        last_score: memory?.overall ?? null,
       },
     });
   } catch (error) {

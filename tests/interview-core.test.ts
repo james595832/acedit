@@ -266,6 +266,58 @@ Figma - Prototyping
       true,
     );
   });
+
+  it('asks prototype-first product questions when that process is chosen', async () => {
+    const {analyzeCvLocally, buildQuestionsFromCv} = await import(
+      '@/lib/cv-parse'
+    );
+    const {getTrack} = await import('@/lib/interview/tracks');
+    const analysis = analyzeCvLocally(`
+Jane Okonkwo
+Product Designer - Northloop Health
+PROJECTS
+Student Housing Finder
+SKILLS
+Figma - Prototyping
+`);
+    const questions = buildQuestionsFromCv(
+      analysis,
+      null,
+      getTrack('product_designer'),
+      'prototype_first',
+    );
+    const blob = questions.map((q) => q.text).join('\n');
+    expect(questions[1]?.text).toMatch(/working prototype/i);
+    expect(blob).toMatch(/working prototype instead of finishing research/i);
+    expect(blob).toMatch(/last-mile|scrappy version|learn in the product/i);
+    expect(blob).not.toMatch(/PM pushing to ship an AI feature/i);
+  });
+
+  it('asks startup-pace questions when there is no job description', async () => {
+    const {analyzeCvLocally, buildQuestionsFromCv} = await import(
+      '@/lib/cv-parse'
+    );
+    const {getTrack} = await import('@/lib/interview/tracks');
+    const analysis = analyzeCvLocally(`
+Jane Okonkwo
+Product Designer - Northloop Health
+PROJECTS
+Student Housing Finder
+SKILLS
+Figma - Prototyping
+`);
+    const questions = buildQuestionsFromCv(
+      analysis,
+      null,
+      getTrack('product_designer'),
+      'classic',
+      'startup',
+    );
+    const blob = questions.map((q) => q.text).join('\n');
+    expect(questions[1]?.text).toMatch(/startup/i);
+    expect(blob).toMatch(/week one|first weeks|no handbook|little onboarding/i);
+    expect(blob).toMatch(/founder|shipped this week/i);
+  });
 });
 
 describe('JD whiteboard routing', () => {

@@ -13,8 +13,25 @@ export const FIGMA_COPY = {
     lead: 'You can choose a generic role and simulate an interview or you can upload a CV and get questions related to the actual job you are going for.',
     roleLabel: 'Choose a role',
     rolePlaceholder: 'Pick a role that is closest to the job you are going for',
+    processLabel: 'How you work',
+    processDescription:
+      'Some teams still hire for the classic loop. Others now interview for going straight to a working prototype. Practise the stance you will have to defend.',
+    classicLabel: 'Classic process',
+    classicDescription:
+      'Research, diverge, converge, then mocks. Evidence before you build.',
+    prototypeLabel: 'Prototype first',
+    prototypeDescription:
+      'Ship a working version, then polish in the product. Short-horizon vision instead of a long discovery cycle.',
     or: 'Or',
     cvDropzone: 'Upload a CV in either PDF or word format',
+    cvOnFileLabel: 'Your CV',
+    cvOnFileDescription:
+      'Use the CV we already have, or upload a new one for this interview.',
+    cvUseSaved: (name: string) => `Use ${name}`,
+    cvUseSavedHint: 'Questions will come from this file. You do not need to upload again.',
+    cvUploadNew: 'Upload a new CV',
+    cvUploadNewHint: 'Use a different file for this interview.',
+    memoryTitle: 'Carrying last interview forward',
     continue: 'Continue',
   },
   job: {
@@ -28,6 +45,15 @@ export const FIGMA_COPY = {
     companyLead:
       'We use this to pull information on the company to again help us simulate a more realistic interview',
     companyPlaceholder: 'Enter a URL for the company you are applying to',
+    paceLabel: 'Kind of team',
+    paceDescription:
+      'Without a job description we need the pace. A startup expects you useful in week one. An established company usually trains you first.',
+    startupLabel: 'Startup',
+    startupDescription:
+      'Small team, high speed. Little onboarding. You are useful from the first week.',
+    establishedLabel: 'Established company',
+    establishedDescription:
+      'Training, onboarding, and a runway before you own the work.',
     continue: 'Continue',
   },
   interviews: {
@@ -41,5 +67,7 @@ export const FIGMA_COPY = {
     emptyTitle: 'No interviews yet',
     emptyDescription:
       'Create your first interview — pick a role or upload a CV, then add a job description if you have one.',
+    recent: 'Recent',
+    longerAgo: 'Longer ago',
   },
 } as const;

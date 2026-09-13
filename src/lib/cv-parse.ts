@@ -11,9 +11,17 @@ import {
 import {
   draftQuestionsForTrack,
   getTrack,
+  parseDesignProcessStance,
+  parseOrgPace,
   resolveInterviewTrack,
+  type DesignProcessStance,
   type InterviewTrack,
+  type OrgPace,
 } from '@/lib/interview/tracks';
+import {
+  applyPracticeMemoryToQuestions,
+  type PracticeMemory,
+} from '@/lib/interview/practice-memory';
 
 export type CvAnalysis = {
   parsed_text: string;
@@ -547,6 +555,9 @@ export function buildQuestionsFromCv(
   analysis: CvAnalysis,
   jd: JobDescriptionAnalysis | null = null,
   track: InterviewTrack | null = null,
+  process: DesignProcessStance = 'classic',
+  orgPace: OrgPace = 'established',
+  memory: PracticeMemory | null = null,
 ): GeneratedQuestion[] {
   const resolved =
     track ??
@@ -582,9 +593,11 @@ export function buildQuestionsFromCv(
     hasJd: Boolean(jd),
     jdWantsAi,
     cvUsesAi: cvUsesAi(analysis),
+    process: parseDesignProcessStance(process),
+    orgPace: parseOrgPace(orgPace),
   });
 
-  return draft.slice(0, INTERVIEW_QUESTION_COUNT).map((q) => ({
+  const mapped = draft.slice(0, INTERVIEW_QUESTION_COUNT).map((q) => ({
     text: q.text,
     category: q.category,
     is_personal: q.is_personal,
@@ -597,6 +610,7 @@ export function buildQuestionsFromCv(
       kind: q.kind,
     }),
   }));
+  return applyPracticeMemoryToQuestions(mapped, memory);
 }
 
 export function looksLikeClassicOpener(text: string): boolean {
@@ -610,8 +624,18 @@ export function assembleInterviewSet(
   jd: JobDescriptionAnalysis | null,
   llmQuestions?: GeneratedQuestion[] | null,
   track: InterviewTrack | null = null,
+  process: DesignProcessStance = 'classic',
+  orgPace: OrgPace = 'established',
+  memory: PracticeMemory | null = null,
 ): GeneratedQuestion[] {
-  const local = buildQuestionsFromCv(analysis, jd, track);
+  const local = buildQuestionsFromCv(
+    analysis,
+    jd,
+    track,
+    process,
+    orgPace,
+    memory,
+  );
   const classic = local.slice(0, CLASSIC_OPENER_COUNT);
   if (!llmQuestions?.length) return local;
 
@@ -634,7 +658,15 @@ export function assembleInterviewSet(
     .slice(0, INTERVIEW_QUESTION_COUNT - CLASSIC_OPENER_COUNT);
   const cv =
     cvFromLlm.length >= 4
-      ? ensureAiQuestion(cvFromLlm, analysis, jd, track)
+      ? ensureAiQuestion(
+          cvFromLlm,
+          analysis,
+          jd,
+          track,
+          process,
+          orgPace,
+          memory,
+        )
       : local.slice(CLASSIC_OPENER_COUNT);
 
   return [...classic, ...cv].slice(0, INTERVIEW_QUESTION_COUNT);
@@ -645,12 +677,22 @@ export function ensureAiQuestion(
   analysis: CvAnalysis,
   jd: JobDescriptionAnalysis | null,
   track: InterviewTrack | null = null,
+  process: DesignProcessStance = 'classic',
+  orgPace: OrgPace = 'established',
+  memory: PracticeMemory | null = null,
 ): GeneratedQuestion[] {
   const limit = INTERVIEW_QUESTION_COUNT - CLASSIC_OPENER_COUNT;
   const trimmed = questions.slice(0, limit);
   if (trimmed.some((q) => /\bai\b/i.test(q.text))) return trimmed;
-  const ai = buildQuestionsFromCv(analysis, jd, track).find((q) =>
-    /\bai\b/i.test(q.text),
+  const ai = buildQuestionsFromCv(
+    analysis,
+    jd,
+    track,
+    process,
+    orgPace,
+    memory,
+  ).find(
+    (q) => /\bai\b/i.test(q.text),
   );
   if (!ai) return trimmed;
   return [trimmed[0], ai, ...trimmed.slice(1)].filter(Boolean).slice(0, limit);

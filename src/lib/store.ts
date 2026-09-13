@@ -194,6 +194,36 @@ export async function saveCv(
   return cv;
 }
 
+function isReusableCv(cv: CV): boolean {
+  if (cv.file_url.startsWith('role-practice://')) return false;
+  if (cv.file_name.startsWith('Role practice:')) return false;
+  return Boolean(cv.parsed_text?.trim());
+}
+
+/** Real uploaded CVs for this user, newest first. Skips role-only stubs. */
+export async function listCvsForUser(userId: string): Promise<CV[]> {
+  if (useRemoteStore()) {
+    const admin = createServiceClient();
+    const {data, error} = await admin
+      .from('cvs')
+      .select('*')
+      .eq('user_id', userId)
+      .order('created_at', {ascending: false});
+    if (error) throw new Error(error.message);
+    return ((data ?? []) as Record<string, unknown>[])
+      .map(mapCv)
+      .filter(isReusableCv);
+  }
+
+  const cvs = await readJson<CV[]>('cvs.json', []);
+  return cvs
+    .filter((cv) => cv.user_id === userId && isReusableCv(cv))
+    .sort(
+      (a, b) =>
+        new Date(b.created_at).getTime() - new Date(a.created_at).getTime(),
+    );
+}
+
 export async function getCv(id: string, userId?: string): Promise<CV | null> {
   if (useRemoteStore()) {
     const admin = createServiceClient();

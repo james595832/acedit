@@ -1,11 +1,14 @@
 /** Client-side draft between “who you are” and “job” create steps. */
 
+import type {DesignProcessStance} from '@/lib/interview/tracks';
+
 export const CREATE_INTERVIEW_DRAFT_KEY = 'aced-create-interview-draft';
 
 export type CreateInterviewDraft = {
   cv_id?: string;
   target_track_id?: string;
   cv_file_name?: string;
+  process_stance?: DesignProcessStance;
 };
 
 export function readCreateDraft(): CreateInterviewDraft | null {

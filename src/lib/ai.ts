@@ -14,8 +14,16 @@ import {
 import {evaluateCvEvidence} from '@/lib/cv-evidence';
 import {
   llmTrackGuidance,
+  parseDesignProcessStance,
+  parseOrgPace,
   resolveInterviewTrack,
+  type DesignProcessStance,
+  type OrgPace,
 } from '@/lib/interview/tracks';
+import {
+  llmPracticeMemoryGuidance,
+  type PracticeMemory,
+} from '@/lib/interview/practice-memory';
 
 export async function analyzeCvBuffer(
   fileName: string,
@@ -160,6 +168,9 @@ export async function generateQuestions(input: {
   analysis?: CvAnalysis | null;
   jd?: JobDescriptionAnalysis | null;
   trackId?: string | null;
+  processStance?: DesignProcessStance | null;
+  orgPace?: OrgPace | null;
+  practiceMemory?: PracticeMemory | null;
 }): Promise<GeneratedQuestion[]> {
   const analysis = input.analysis ?? analyzeCvLocally(input.cvText ?? '');
   const jd =
@@ -178,6 +189,9 @@ export async function generateQuestions(input: {
     trackId: input.trackId,
     roleTitle: jd?.role_title ?? input.role,
   });
+  const process = parseDesignProcessStance(input.processStance);
+  const orgPace = parseOrgPace(input.orgPace);
+  const memory = input.practiceMemory ?? null;
 
   if (useStubs()) {
     return assembleInterviewSet(
@@ -191,6 +205,9 @@ export async function generateQuestions(input: {
       jd,
       null,
       track,
+      process,
+      orgPace,
+      memory,
     );
   }
 
@@ -217,7 +234,8 @@ The first 5 must be classic openers (personalised with CV/company names):
 5. Where do you see yourself in five years
 Then 5 CV-grounded craft questions for THIS target role. Include exactly one about using AI in that craft (tools, judgement of output, what stays human). If the CV mentions AI, ground that question in their work. If not, use a realistic template tied to a project on the CV.
 If a job description is provided, tailor the “why here”, JD-fit, and 90-days questions to it.
-${llmTrackGuidance(track)}
+${llmTrackGuidance(track, process, orgPace)}
+${llmPracticeMemoryGuidance(memory)}
 
 Skills: ${analysis.skills_extracted.join(', ')}
 Projects: ${analysis.projects.join(' | ')}
@@ -238,7 +256,15 @@ Return ONLY JSON:
   });
 
   if (!response.ok) {
-    return assembleInterviewSet(analysis, jd, null, track);
+    return assembleInterviewSet(
+      analysis,
+      jd,
+      null,
+      track,
+      process,
+      orgPace,
+      memory,
+    );
   }
 
   const data = (await response.json()) as {
@@ -260,12 +286,28 @@ Return ONLY JSON:
             jd,
           }),
       }));
-      return assembleInterviewSet(analysis, jd, mapped, track);
+      return assembleInterviewSet(
+        analysis,
+        jd,
+        mapped,
+        track,
+        process,
+        orgPace,
+        memory,
+      );
     }
   } catch {
     // fall through
   }
-  return assembleInterviewSet(analysis, jd, null, track);
+  return assembleInterviewSet(
+    analysis,
+    jd,
+    null,
+    track,
+    process,
+    orgPace,
+    memory,
+  );
 }
 
 export async function gradeAnswer(input: {

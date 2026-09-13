@@ -7,8 +7,11 @@ import {recommendWhiteboardFromJd} from '@/lib/interview/format';
 import {
   getTrack,
   isInterviewTrackId,
+  parseDesignProcessStance,
+  parseOrgPace,
   resolveInterviewTrack,
 } from '@/lib/interview/tracks';
+import {loadPracticeMemory} from '@/lib/interview/practice-memory';
 import {
   createSession,
   getCv,
@@ -46,6 +49,8 @@ export async function POST(request: Request) {
       company?: string;
       company_url?: string;
       role?: string;
+      process_stance?: string;
+      org_pace?: string;
     };
 
     if (!body.job_description_id && !body.target_track_id) {
@@ -170,6 +175,7 @@ export async function POST(request: Request) {
     });
 
     const whiteboard = recommendWhiteboardFromJd(jd);
+    const practiceMemory = await loadPracticeMemory(auth.userId);
 
     let questions = await generateQuestions({
       cvText: cv.parsed_text,
@@ -181,6 +187,11 @@ export async function POST(request: Request) {
         undefined,
       role: body.role ?? track?.label ?? jdRow?.role_title ?? undefined,
       trackId: track?.id,
+      processStance: parseDesignProcessStance(body.process_stance),
+      orgPace: body.job_description_id
+        ? 'established'
+        : parseOrgPace(body.org_pace),
+      practiceMemory,
       jd: jd
         ? {
             ...jd,

@@ -15,6 +15,7 @@ import {
   createSession,
   getCv,
   getSessionQuestions,
+  listCvsForUser,
   saveCv,
 } from '@/lib/store';
 
@@ -155,5 +156,34 @@ Must be comfortable using AI and LLMs in the design workflow.
     const ai = questions.find((q) => /\bai\b/i.test(q.text));
     expect(ai?.text).toMatch(/this role/i);
     expect(ai?.text).toMatch(/expects AI/i);
+  });
+
+  it('lists a real CV for reuse and skips role-practice stubs', async () => {
+    const user = '22222222-2222-4222-8222-222222222222';
+    const real = await saveCv(
+      {
+        file_name: 'jane.pdf',
+        file_url: 'cv://test/jane.pdf',
+        parsed_text: 'Jane Okonkwo Product Designer',
+        skills_extracted: ['Figma'],
+        experience_years: 2,
+      },
+      user,
+    );
+    await saveCv(
+      {
+        file_name: 'Role practice: Product designer',
+        file_url: 'role-practice://synthetic',
+        parsed_text: 'stub',
+        skills_extracted: [],
+        experience_years: 0,
+      },
+      user,
+    );
+    const listed = await listCvsForUser(user);
+    expect(listed.some((cv) => cv.id === real.id)).toBe(true);
+    expect(
+      listed.every((cv) => !cv.file_url.startsWith('role-practice://')),
+    ).toBe(true);
   });
 });

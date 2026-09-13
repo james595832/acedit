@@ -1,7 +1,7 @@
 'use client';
 
 import {useEffect, useMemo, useState, Suspense} from 'react';
-import Link from 'next/link';
+import {Link} from '@astryxdesign/core/Link';
 import {useRouter, useSearchParams} from 'next/navigation';
 import {VStack, HStack} from '@astryxdesign/core/Layout';
 import {Text} from '@astryxdesign/core/Text';
@@ -28,6 +28,8 @@ type QuestionRow = {
 type Briefing = {
   firstName: string;
   position: string;
+  practiceFocus: string[];
+  lastScore: number | null;
 };
 
 function InterviewStartInner() {
@@ -78,6 +80,11 @@ function InterviewStartInner() {
         setBriefing({
           firstName: data.briefing.firstName ?? 'there',
           position: data.briefing.position ?? 'a product design role',
+          practiceFocus: data.briefing.practice_focus ?? [],
+          lastScore:
+            typeof data.briefing.last_score === 'number'
+              ? data.briefing.last_score
+              : null,
         });
       }
       if (!questionId) {
@@ -161,6 +168,8 @@ function InterviewStartInner() {
             firstName={briefing.firstName}
             position={briefing.position}
             questionCount={questions.length}
+            practiceFocus={briefing.practiceFocus}
+            lastScore={briefing.lastScore}
             onReady={() => {
               const first = questions[0];
               if (first) goToQuestion(first.id);
@@ -301,28 +310,20 @@ function InterviewStartInner() {
                     <Button
                       label="Next question"
                       variant="primary"
-                      onClick={() => goToQuestion(nextQuestion.id)}
+                      href={`/interview/start?session_id=${sessionId}&question_id=${nextQuestion.id}`}
                     />
                   ) : (
                     <Button
                       label="See session results"
                       variant="primary"
-                      onClick={() =>
-                        router.push(
-                          `/interview/results?session_id=${sessionId}`,
-                        )
-                      }
+                      href={`/interview/results?session_id=${sessionId}`}
                     />
                   )}
                   {nextQuestion && sessionId ? (
                     <Button
                       label="End session"
                       variant="secondary"
-                      onClick={() =>
-                        router.push(
-                          `/interview/results?session_id=${sessionId}`,
-                        )
-                      }
+                      href={`/interview/results?session_id=${sessionId}`}
                     />
                   ) : null}
                 </HStack>

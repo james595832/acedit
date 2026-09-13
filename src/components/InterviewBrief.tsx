@@ -1,10 +1,11 @@
 'use client';
 
-import Link from 'next/link';
+import {Link} from '@astryxdesign/core/Link';
 import {VStack, HStack} from '@astryxdesign/core/Layout';
 import {Heading} from '@astryxdesign/core/Heading';
 import {Text} from '@astryxdesign/core/Text';
 import {Button} from '@astryxdesign/core/Button';
+import {Banner} from '@astryxdesign/core/Banner';
 import {Avatar, AvatarStatusDot} from '@astryxdesign/core/Avatar';
 import {
   INTERVIEWER_NAME,
@@ -17,6 +18,8 @@ type InterviewBriefProps = {
   position: string;
   questionCount: number;
   onReady: () => void;
+  practiceFocus?: string[];
+  lastScore?: number | null;
 };
 
 export function InterviewBrief({
@@ -24,6 +27,8 @@ export function InterviewBrief({
   position,
   questionCount,
   onReady,
+  practiceFocus = [],
+  lastScore = null,
 }: InterviewBriefProps) {
   const named = firstName !== 'there';
 
@@ -67,6 +72,17 @@ export function InterviewBrief({
           series of questions and find out your suitability for{' '}
           <strong>{position}</strong>.
         </Text>
+        {practiceFocus.length > 0 ? (
+          <Banner
+            status="info"
+            title="I’ll press last time’s weak spots"
+            description={
+              lastScore !== null
+                ? `Last interview scored ${lastScore}/100. ${practiceFocus.slice(0, 2).join(' ')}`
+                : practiceFocus.slice(0, 2).join(' ')
+            }
+          />
+        ) : null}
       </VStack>
 
       <HStack gap={3} align="center" wrap="wrap" className="aced-brief__actions">

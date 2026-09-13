@@ -6,18 +6,20 @@ import {FileInput} from '@astryxdesign/core/FileInput';
 import {TextArea} from '@astryxdesign/core/TextArea';
 import {TextInput} from '@astryxdesign/core/TextInput';
 import {Button} from '@astryxdesign/core/Button';
-import {VStack} from '@astryxdesign/core/Layout';
+import {HStack, VStack} from '@astryxdesign/core/Layout';
 import {Text} from '@astryxdesign/core/Text';
 import {Heading} from '@astryxdesign/core/Heading';
 import {Banner} from '@astryxdesign/core/Banner';
 import {FormLayout} from '@astryxdesign/core/FormLayout';
 import {Section} from '@astryxdesign/core/Section';
+import {RadioList, RadioListItem} from '@astryxdesign/core/RadioList';
 import {
   clearCreateDraft,
   readCreateDraft,
   type CreateInterviewDraft,
 } from '@/lib/interview/create-draft';
 import {FIGMA_COPY} from '@/lib/interview/figma-copy';
+import type {OrgPace} from '@/lib/interview/tracks';
 
 const JD_ACCEPT =
   'application/pdf,.pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document,.docx,image/png,image/jpeg,image/webp,.png,.jpg,.jpeg,.webp';
@@ -54,6 +56,7 @@ export function JobDetailsForm() {
   const [isJdLoading, setIsJdLoading] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [orgPace, setOrgPace] = useState<OrgPace>('established');
 
   useEffect(() => {
     const next = readCreateDraft();
@@ -114,6 +117,8 @@ export function JobDetailsForm() {
           interview_type: 'practice',
           company_url: companyUrl.trim() || undefined,
           company: companyHintFromUrl(companyUrl),
+          process_stance: draft.process_stance ?? 'classic',
+          org_pace: jobDescriptionId ? undefined : orgPace,
         }),
       });
       const startData = await startRes.json();
@@ -209,14 +214,38 @@ export function JobDetailsForm() {
           />
         ) : null}
 
-        <Button
-          label={copy.continue}
-          variant="primary"
-          isLoading={isLoading || isJdLoading}
-          clickAction={() => {
-            void handleContinue();
-          }}
-        />
+        {!jdFile && !jdText.trim() && !jdId ? (
+          <FormLayout direction="vertical">
+            <RadioList
+              label={copy.paceLabel}
+              description={copy.paceDescription}
+              value={orgPace}
+              onChange={(next) => setOrgPace(next as OrgPace)}
+            >
+              <RadioListItem
+                value="startup"
+                label={copy.startupLabel}
+                description={copy.startupDescription}
+              />
+              <RadioListItem
+                value="established"
+                label={copy.establishedLabel}
+                description={copy.establishedDescription}
+              />
+            </RadioList>
+          </FormLayout>
+        ) : null}
+
+        <HStack>
+          <Button
+            label={copy.continue}
+            variant="primary"
+            isLoading={isLoading || isJdLoading}
+            clickAction={() => {
+              void handleContinue();
+            }}
+          />
+        </HStack>
       </VStack>
     </Section>
   );
