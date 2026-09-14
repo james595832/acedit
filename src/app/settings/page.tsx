@@ -2,6 +2,7 @@ import {Section} from '@astryxdesign/core/Section';
 import {BillingSettings} from '@/components/BillingSettings';
 import {createClient} from '@/lib/supabase/server';
 import {isSupabaseConfigured} from '@/lib/supabase/config';
+import {getAuthUser} from '@/lib/supabase/user';
 import {isStripeConfigured} from '@/lib/stripe';
 import {syncBillingForUser} from '@/lib/billing/sync';
 import {listBillingInvoices} from '@/lib/billing/invoices';
@@ -31,15 +32,13 @@ export default async function SettingsPage({searchParams}: SettingsPageProps) {
     redirect('/login');
   }
 
-  const supabase = await createClient();
-  const {
-    data: {user},
-  } = await supabase.auth.getUser();
+  const user = await getAuthUser();
 
   if (!user) {
     redirect('/login?next=/settings');
   }
 
+  const supabase = await createClient();
   const params = await searchParams;
   let syncError: string | null = null;
 

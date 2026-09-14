@@ -1,5 +1,5 @@
 import type {Metadata} from 'next';
-import Link from 'next/link';
+import {Link} from '@astryxdesign/core/Link';
 import {SUPPORT_EMAIL} from '@/components/SiteFooter';
 import {LegalBackLink} from '@/components/LegalBackLink';
 

@@ -1,7 +1,7 @@
 'use client';
 
 import {useEffect, useMemo, useRef, useState} from 'react';
-import Link from 'next/link';
+import {Link} from '@astryxdesign/core/Link';
 import {Button} from '@astryxdesign/core/Button';
 import {Banner} from '@astryxdesign/core/Banner';
 import {TextArea} from '@astryxdesign/core/TextArea';

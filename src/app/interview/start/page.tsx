@@ -1,7 +1,6 @@
 'use client';
 
 import {useEffect, useMemo, useState, Suspense} from 'react';
-import {Link} from '@astryxdesign/core/Link';
 import {useRouter, useSearchParams} from 'next/navigation';
 import {VStack, HStack} from '@astryxdesign/core/Layout';
 import {Text} from '@astryxdesign/core/Text';
@@ -13,14 +12,21 @@ import {VoiceRecorder} from '@/components/VoiceRecorder';
 import {GradeFeedback} from '@/components/GradeFeedback';
 import {SessionProgress} from '@/components/SessionProgress';
 import {InterviewBrief} from '@/components/InterviewBrief';
-import type {GradeResult} from '@/lib/types';
+import {BackLink} from '@/components/BackLink';
+import type {GradeResult, InterviewPersona} from '@/lib/types';
 import type {AnswerCriteria} from '@/lib/criteria';
+import {
+  parseInterviewPersona,
+  personaLine,
+  type PersonaVoice,
+} from '@/lib/interview/personas';
 
 type QuestionRow = {
   id: string;
   question_text: string;
   question_category: string;
   is_personal: boolean;
+  persona?: InterviewPersona | null;
   criteria_json: string | null;
   question_order: number;
 };
@@ -28,8 +34,15 @@ type QuestionRow = {
 type Briefing = {
   firstName: string;
   position: string;
+  roleTitle: string | null;
+  companyName: string | null;
+  tailoredToJd: boolean;
   practiceFocus: string[];
   lastScore: number | null;
+  stageNumber: number;
+  durationLabel: string;
+  voices: PersonaVoice[];
+  roundTitle: string;
 };
 
 function InterviewStartInner() {
@@ -80,11 +93,18 @@ function InterviewStartInner() {
         setBriefing({
           firstName: data.briefing.firstName ?? 'there',
           position: data.briefing.position ?? 'a product design role',
+          roleTitle: data.briefing.role_title ?? null,
+          companyName: data.briefing.company_name ?? null,
+          tailoredToJd: Boolean(data.briefing.tailored_to_jd),
           practiceFocus: data.briefing.practice_focus ?? [],
           lastScore:
             typeof data.briefing.last_score === 'number'
               ? data.briefing.last_score
               : null,
+          stageNumber: Number(data.briefing.stage_number ?? 1),
+          durationLabel: data.briefing.duration_label ?? 'about an hour',
+          voices: data.briefing.voices ?? [],
+          roundTitle: data.briefing.round_title ?? 'Hiring screen',
         });
       }
       if (!questionId) {
@@ -151,11 +171,25 @@ function InterviewStartInner() {
         ? 'Answer saved'
         : 'Your turn';
 
+  const currentPersona = useMemo((): InterviewPersona | null => {
+    const current = questions[questionIndex];
+    if (!current) return null;
+    const fromRow = parseInterviewPersona(current.persona);
+    if (fromRow) return fromRow;
+    if (!current.criteria_json) return null;
+    try {
+      const parsed = JSON.parse(current.criteria_json) as {persona?: string};
+      return parseInterviewPersona(parsed.persona);
+    } catch {
+      return null;
+    }
+  }, [questions, questionIndex]);
+
   if (showBrief) {
     return (
       <section className="aced-room aced-room--brief">
         <nav className="aced-crumb" aria-label="Breadcrumb">
-          <Link href="/studio">← Home</Link>
+          <BackLink href="/studio">Home</BackLink>
         </nav>
         {error ? (
           <Banner
@@ -167,9 +201,16 @@ function InterviewStartInner() {
           <InterviewBrief
             firstName={briefing.firstName}
             position={briefing.position}
+            roleTitle={briefing.roleTitle}
+            companyName={briefing.companyName}
+            tailoredToJd={briefing.tailoredToJd}
             questionCount={questions.length}
             practiceFocus={briefing.practiceFocus}
             lastScore={briefing.lastScore}
+            stageNumber={briefing.stageNumber}
+            durationLabel={briefing.durationLabel}
+            voices={briefing.voices}
+            roundHeading={briefing.roundTitle}
             onReady={() => {
               const first = questions[0];
               if (first) goToQuestion(first.id);
@@ -187,12 +228,13 @@ function InterviewStartInner() {
   return (
     <div className="aced-room">
       <nav className="aced-crumb" aria-label="Breadcrumb">
-        <Link href="/studio">← Home</Link>
+        <BackLink href="/studio">Home</BackLink>
       </nav>
 
       <header className="aced-room__head">
         <Text type="label" color="secondary" as="p">
-          Interview · Room · step 2 of 3
+          {briefing?.roundTitle ?? 'Interview'} · Room · question{' '}
+          {questionIndex + 1} of {questions.length || '—'}
         </Text>
         {questions.length > 0 ? (
           <SessionProgress
@@ -201,6 +243,11 @@ function InterviewStartInner() {
             total={questions.length}
             status={phaseStatus}
           />
+        ) : null}
+        {currentPersona ? (
+          <Text type="label" as="p">
+            {personaLine(currentPersona)}
+          </Text>
         ) : null}
         <h1>{questionText ?? 'Loading question…'}</h1>
         <p className="aced-room__lead">

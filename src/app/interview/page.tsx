@@ -1,5 +1,5 @@
-import {createClient} from '@/lib/supabase/server';
 import {isSupabaseConfigured} from '@/lib/supabase/config';
+import {getAuthUser} from '@/lib/supabase/user';
 import {demoUserId, listCvsForUser} from '@/lib/store';
 import {loadPracticeMemory} from '@/lib/interview/practice-memory';
 import {WhoAreYouForm} from '@/components/WhoAreYouForm';
@@ -10,27 +10,22 @@ export default async function InterviewPage() {
   let practiceMemory: {overall: number; focus: string[]} | null = null;
 
   try {
-    let userId: string | null = null;
-    if (isSupabaseConfigured()) {
-      const supabase = await createClient();
-      const {
-        data: {user},
-      } = await supabase.auth.getUser();
-      userId = user?.id ?? null;
-    } else {
-      userId = demoUserId();
-    }
+    const userId = isSupabaseConfigured()
+      ? (await getAuthUser())?.id ?? null
+      : demoUserId();
 
     if (userId) {
-      const latest = (await listCvsForUser(userId))[0];
-      if (latest) {
+      const [latestCv, memory] = await Promise.all([
+        listCvsForUser(userId).then((rows) => rows[0] ?? null),
+        loadPracticeMemory(userId),
+      ]);
+      if (latestCv) {
         savedCv = {
-          id: latest.id,
-          file_name: latest.file_name,
-          created_at: latest.created_at,
+          id: latestCv.id,
+          file_name: latestCv.file_name,
+          created_at: latestCv.created_at,
         };
       }
-      const memory = await loadPracticeMemory(userId);
       if (memory) {
         practiceMemory = {
           overall: memory.overall,

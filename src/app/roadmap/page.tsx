@@ -1,5 +1,5 @@
 import type {Metadata} from 'next';
-import Link from 'next/link';
+import {Link} from '@astryxdesign/core/Link';
 
 export const metadata: Metadata = {
   title: 'Roadmap | ACED-IT',

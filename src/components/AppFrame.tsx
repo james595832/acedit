@@ -1,8 +1,8 @@
 'use client';
 
-import {type ReactNode, useLayoutEffect, useRef, useState} from 'react';
+import {type ReactNode, useEffect, useLayoutEffect, useRef, useState} from 'react';
 import Image from 'next/image';
-import {usePathname} from 'next/navigation';
+import {usePathname, useRouter} from 'next/navigation';
 import {AppShell} from '@astryxdesign/core/AppShell';
 import {HStack} from '@astryxdesign/core/Layout';
 import {MobileNav, MobileNavToggle} from '@astryxdesign/core/MobileNav';
@@ -12,6 +12,7 @@ import {AuthNav} from '@/components/AuthNav';
 import {SiteFooter} from '@/components/SiteFooter';
 import {FeedbackWidget} from '@/components/FeedbackWidget';
 import {AuthSessionProvider} from '@/components/AuthSession';
+import {SkipToContent} from '@/components/SkipToContent';
 
 type AppFrameProps = {
   children: ReactNode;
@@ -31,6 +32,7 @@ export function AppFrame({
   supabaseConfigured,
 }: AppFrameProps) {
   const pathname = usePathname();
+  const router = useRouter();
   const linksRef = useRef<HTMLDivElement>(null);
   const [indicator, setIndicator] = useState<NavIndicator>({
     x: 0,
@@ -49,6 +51,14 @@ export function AppFrame({
   const isStudio = pathname === '/studio';
   const isResults = pathname.startsWith('/interview/results');
   const isRoadmap = pathname.startsWith('/roadmap');
+
+  useEffect(() => {
+    if (!showAppChrome) return;
+    router.prefetch('/studio');
+    router.prefetch('/interview');
+    router.prefetch('/interview/results');
+    router.prefetch('/roadmap');
+  }, [router, showAppChrome]);
 
   useLayoutEffect(() => {
     if (!showAppChrome) return;
@@ -113,6 +123,7 @@ export function AppFrame({
 
   return (
     <AuthSessionProvider email={userEmail}>
+    <SkipToContent />
     <AppShell
       height="auto"
       variant="surface"

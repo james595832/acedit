@@ -1,16 +1,13 @@
-import Link from 'next/link';
+import {BackLink} from '@/components/BackLink';
 import {VStack, HStack} from '@astryxdesign/core/Layout';
 import {Heading} from '@astryxdesign/core/Heading';
 import {Text} from '@astryxdesign/core/Text';
 import {Section} from '@astryxdesign/core/Section';
 import {EmptyState} from '@astryxdesign/core/EmptyState';
-import {createClient} from '@/lib/supabase/server';
 import {isSupabaseConfigured} from '@/lib/supabase/config';
-import {
-  demoUserId,
-  getJobDescription,
-  listSessions,
-} from '@/lib/store';
+import {getAuthUser} from '@/lib/supabase/user';
+import {demoUserId, listSessions} from '@/lib/store';
+import {historyTilesForSessions} from '@/lib/interview/history-tiles';
 import {InterviewHistoryList} from '@/components/InterviewHistoryList';
 import {CreateInterviewButton} from '@/components/CreateInterviewButton';
 import {ResultsDebrief} from './ResultsDebrief';
@@ -31,11 +28,7 @@ export default async function ResultsPage({searchParams}: ResultsPageProps) {
   let userId: string | null = null;
   try {
     if (isSupabaseConfigured()) {
-      const supabase = await createClient();
-      const {
-        data: {user},
-      } = await supabase.auth.getUser();
-      userId = user?.id ?? null;
+      userId = (await getAuthUser())?.id ?? null;
     } else {
       userId = demoUserId();
     }
@@ -44,37 +37,13 @@ export default async function ResultsPage({searchParams}: ResultsPageProps) {
     sessions = [];
   }
 
-  const historyRows = await Promise.all(
-    sessions.map(async (session) => {
-      let role_title: string | null = null;
-      let company_name: string | null = null;
-      if (session.job_description_id && userId) {
-        try {
-          const jd = await getJobDescription(
-            session.job_description_id,
-            userId,
-          );
-          role_title = jd?.role_title ?? null;
-          company_name = jd?.company_name ?? null;
-        } catch {
-          // decorative
-        }
-      }
-      return {
-        id: session.id,
-        overall_score: session.overall_score,
-        created_at: session.created_at,
-        role_title,
-        company_name,
-      };
-    }),
-  );
+  const historyRows = await historyTilesForSessions(sessions, userId);
 
   return (
     <Section variant="transparent" padding={4}>
       <VStack gap={5}>
         <Text as="p" color="secondary">
-          <Link href="/studio">← Interviews</Link>
+          <BackLink href="/studio">Interviews</BackLink>
         </Text>
 
         <HStack gap={4} align="start" justify="between" wrap="wrap">

@@ -1,7 +1,7 @@
 'use client';
 
 import {useState} from 'react';
-import Link from 'next/link';
+import {Link} from '@astryxdesign/core/Link';
 import {TextInput} from '@astryxdesign/core/TextInput';
 import {TextArea} from '@astryxdesign/core/TextArea';
 import {Button} from '@astryxdesign/core/Button';

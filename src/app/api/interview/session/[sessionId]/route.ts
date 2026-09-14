@@ -5,10 +5,23 @@ import {interviewPositionLine} from '@/lib/interview/host';
 import {
   deleteSession,
   getJobDescription,
+  getSeries,
   getSession,
   getSessionQuestions,
 } from '@/lib/store';
 import {loadPracticeMemory} from '@/lib/interview/practice-memory';
+import {
+  durationLabelForRound,
+  parseInterviewRound,
+  pickExecPersona,
+  roundTitle,
+  voicesForRound,
+} from '@/lib/interview/rounds';
+import {
+  parseDesignProcessStance,
+  parseOrgPace,
+  resolveInterviewTrack,
+} from '@/lib/interview/tracks';
 
 type Params = {params: Promise<{sessionId: string}>};
 
@@ -38,6 +51,20 @@ export async function GET(_request: Request, {params}: Params) {
     const memory = await loadPracticeMemory(auth.userId, {
       excludeSessionId: session.id,
     });
+    const series = session.series_id
+      ? await getSeries(session.series_id, auth.userId)
+      : null;
+    const round = parseInterviewRound(session.stage_number);
+    const track = resolveInterviewTrack({
+      trackId: series?.target_track_id,
+      roleTitle: jd?.role_title,
+    });
+    const exec = pickExecPersona({
+      orgPace: parseOrgPace(series?.org_pace),
+      processStance: parseDesignProcessStance(series?.process_stance),
+      trackFamily: track?.family,
+      jdText: jd?.raw_text,
+    });
 
     return NextResponse.json({
       session,
@@ -46,9 +73,16 @@ export async function GET(_request: Request, {params}: Params) {
       briefing: {
         firstName,
         position,
-        tailored_to_jd: Boolean(jd),
+        role_title: jd?.role_title ?? null,
+        company_name: jd?.company_name ?? null,
+        tailored_to_jd: Boolean(jd?.raw_text?.trim() && !jd.file_name?.startsWith('Target role:')),
         practice_focus: memory?.focus ?? [],
         last_score: memory?.overall ?? null,
+        stage_number: round,
+        round_title: roundTitle(round),
+        duration_label: durationLabelForRound(round),
+        voices: voicesForRound(round, exec),
+        exec_persona: exec,
       },
     });
   } catch (error) {

@@ -1,10 +1,11 @@
 'use client';
 
 import {useEffect, useState} from 'react';
-import Link from 'next/link';
+import {Link} from '@astryxdesign/core/Link';
 import {useParams} from 'next/navigation';
 import {Banner} from '@astryxdesign/core/Banner';
 import {Section} from '@astryxdesign/core/Section';
+import {BackLink} from '@/components/BackLink';
 import {FeaturePaused} from '@/components/FeaturePaused';
 import {WhiteboardDebriefView} from '@/components/WhiteboardDebrief';
 import {isFeatureEnabled} from '@/lib/feature-flags';
@@ -70,7 +71,7 @@ export default function WhiteboardReviewPage() {
     return (
       <>
         <nav className="aced-crumb" aria-label="Breadcrumb">
-          <Link href="/studio">← Home</Link>
+          <BackLink href="/studio">Home</BackLink>
         </nav>
         <FeaturePaused
           title="Whiteboard challenges"
@@ -94,7 +95,7 @@ export default function WhiteboardReviewPage() {
 
       <Section variant="transparent" padding={0}>
         <p className="aced-wb__back">
-          <Link href="/whiteboard">← All challenges</Link>
+          <BackLink href="/whiteboard">All challenges</BackLink>
         </p>
 
         {error ? (

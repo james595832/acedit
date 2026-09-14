@@ -1,4 +1,4 @@
-import Link from 'next/link';
+import {Link} from '@astryxdesign/core/Link';
 
 type FeaturePausedProps = {
   title: string;

@@ -21,9 +21,21 @@ import {
   type OrgPace,
 } from '@/lib/interview/tracks';
 import {
+  applyPracticeMemoryToQuestions,
   llmPracticeMemoryGuidance,
   type PracticeMemory,
 } from '@/lib/interview/practice-memory';
+import {
+  attachPersonas,
+  draftExecRoundQuestions,
+  draftTeamRoundQuestions,
+  llmRoundGuidance,
+  parseInterviewRound,
+  pickExecPersona,
+  questionCountForRound,
+  type ExecPersona,
+  type InterviewRound,
+} from '@/lib/interview/rounds';
 
 export async function analyzeCvBuffer(
   fileName: string,
@@ -161,6 +173,112 @@ Return plain text only. No markdown, no commentary.`,
   }
 }
 
+function trackQuestionContext(
+  analysis: CvAnalysis,
+  jd: JobDescriptionAnalysis | null,
+  role: string | undefined,
+  process: DesignProcessStance,
+  orgPace: OrgPace,
+) {
+  return {
+    skill: analysis.skills_extracted[0] ?? 'your core design craft',
+    project: analysis.projects[0] ?? 'a recent project from your CV',
+    company:
+      jd?.company_name ?? analysis.companies[0] ?? 'your most recent company',
+    role: jd?.role_title ?? role ?? analysis.roles[0] ?? 'your current role',
+    years: analysis.experience_years
+      ? `${analysis.experience_years} years`
+      : 'your experience level',
+    jdFocus: String(
+      jd?.requirements[0] ??
+        jd?.keywords[0] ??
+        'the priorities in the job description',
+    ),
+    hasCompany: Boolean(jd?.company_name),
+    hasJd: Boolean(jd?.raw_text?.trim()),
+    jdWantsAi: Boolean(
+      jd &&
+        /\b(ai|llm|machine learning|copilot|chatgpt)\b/i.test(
+          `${jd.raw_text} ${jd.requirements.join(' ')} ${jd.keywords.join(' ')}`,
+        ),
+    ),
+    cvUsesAi: /\bai\b/i.test(analysis.parsed_text),
+    process,
+    orgPace,
+    companyBrief: jd?.company_brief ?? null,
+    skillGaps: jd?.skill_gaps ?? [],
+  };
+}
+
+function questionsForRound(input: {
+  round: InterviewRound;
+  exec: ExecPersona;
+  analysis: CvAnalysis;
+  jd: JobDescriptionAnalysis | null;
+  role?: string;
+  process: DesignProcessStance;
+  orgPace: OrgPace;
+  memory: PracticeMemory | null;
+  llmQuestions?: GeneratedQuestion[] | null;
+  track: ReturnType<typeof resolveInterviewTrack>;
+}): GeneratedQuestion[] {
+  const ctx = trackQuestionContext(
+    input.analysis,
+    input.jd,
+    input.role,
+    input.process,
+    input.orgPace,
+  );
+  if (input.round === 2) {
+    const drafted = draftTeamRoundQuestions(ctx, input.analysis, input.jd);
+    const llm = input.llmQuestions?.filter(
+      (question) => !/tell me about yourself/i.test(question.text),
+    );
+    const chosen =
+      llm && llm.length >= 4 ? llm.slice(0, TEAM_OR_EXEC_LIMIT(2)) : drafted;
+    return attachPersonas(
+      applyPracticeMemoryToQuestions(chosen, input.memory),
+      2,
+      input.exec,
+    );
+  }
+  if (input.round === 3) {
+    const drafted = draftExecRoundQuestions(
+      input.exec,
+      ctx,
+      input.analysis,
+      input.jd,
+    );
+    const llm = input.llmQuestions?.filter(
+      (question) => !/tell me about yourself/i.test(question.text),
+    );
+    const chosen =
+      llm && llm.length >= 3 ? llm.slice(0, TEAM_OR_EXEC_LIMIT(3)) : drafted;
+    return attachPersonas(
+      applyPracticeMemoryToQuestions(chosen, input.memory),
+      3,
+      input.exec,
+    );
+  }
+  return attachPersonas(
+    assembleInterviewSet(
+      input.analysis,
+      input.jd,
+      input.llmQuestions,
+      input.track,
+      input.process,
+      input.orgPace,
+      input.memory,
+    ),
+    1,
+    input.exec,
+  );
+}
+
+function TEAM_OR_EXEC_LIMIT(round: InterviewRound): number {
+  return questionCountForRound(round);
+}
+
 export async function generateQuestions(input: {
   cvText?: string | null;
   company?: string;
@@ -171,6 +289,7 @@ export async function generateQuestions(input: {
   processStance?: DesignProcessStance | null;
   orgPace?: OrgPace | null;
   practiceMemory?: PracticeMemory | null;
+  round?: InterviewRound | number | null;
 }): Promise<GeneratedQuestion[]> {
   const analysis = input.analysis ?? analyzeCvLocally(input.cvText ?? '');
   const jd =
@@ -189,26 +308,36 @@ export async function generateQuestions(input: {
     trackId: input.trackId,
     roleTitle: jd?.role_title ?? input.role,
   });
-  const process = parseDesignProcessStance(input.processStance);
+  const stance = parseDesignProcessStance(input.processStance);
   const orgPace = parseOrgPace(input.orgPace);
   const memory = input.practiceMemory ?? null;
+  const round = parseInterviewRound(input.round);
+  const exec = pickExecPersona({
+    orgPace,
+    processStance: stance,
+    trackFamily: track?.family,
+    jdText: jd?.raw_text,
+  });
+  const enrichedAnalysis = {
+    ...analysis,
+    companies: input.company
+      ? [input.company, ...analysis.companies]
+      : analysis.companies,
+    roles: input.role ? [input.role, ...analysis.roles] : analysis.roles,
+  };
 
   if (useStubs()) {
-    return assembleInterviewSet(
-      {
-        ...analysis,
-        companies: input.company
-          ? [input.company, ...analysis.companies]
-          : analysis.companies,
-        roles: input.role ? [input.role, ...analysis.roles] : analysis.roles,
-      },
+    return questionsForRound({
+      round,
+      exec,
+      analysis: enrichedAnalysis,
       jd,
-      null,
-      track,
-      process,
+      role: input.role,
+      process: stance,
       orgPace,
       memory,
-    );
+      track,
+    });
   }
 
   const apiKey = process.env.ANTHROPIC_API_KEY!;
@@ -225,16 +354,22 @@ export async function generateQuestions(input: {
       messages: [
         {
           role: 'user',
-          content: `You are a design interview coach writing a realistic 10-question spoken interview.
+          content: `You are a design interview coach writing a realistic spoken interview.
+${
+  round === 1
+    ? `Write a realistic 10-question spoken interview.
 The first 5 must be classic openers (personalised with CV/company names):
 1. Tell me about yourself
-2. Why this company/role (or why this kind of role if no JD)
+2. If a real company/JD is present: Why are you applying for THIS role at THIS company. If not: why this kind of role.
 3. Strengths and a genuine weakness
 4. A conflict you’ve dealt with
-5. Where do you see yourself in five years
+5. If a real company is present: What do you know about us? Ground it in the company brief. If not: where do you see yourself in five years.
 Then 5 CV-grounded craft questions for THIS target role. Include exactly one about using AI in that craft (tools, judgement of output, what stays human). If the CV mentions AI, ground that question in their work. If not, use a realistic template tied to a project on the CV.
-If a job description is provided, tailor the “why here”, JD-fit, and 90-days questions to it.
-${llmTrackGuidance(track, process, orgPace)}
+If a job description is provided, tailor JD-fit and 90-days questions to it. If skill gaps are listed, one question MUST be a real interviewer challenge: the CV is lighter on that requirement than the spec — how do they still make the case.
+Return persona "hirer" on every question.`
+    : llmRoundGuidance(round, exec)
+}
+${llmTrackGuidance(track, stance, orgPace)}
 ${llmPracticeMemoryGuidance(memory)}
 
 Skills: ${analysis.skills_extracted.join(', ')}
@@ -246,25 +381,32 @@ JD role: ${jd?.role_title ?? input.role ?? 'n/a'}
 JD company: ${jd?.company_name ?? input.company ?? 'n/a'}
 JD requirements: ${(jd?.requirements ?? []).join(' | ')}
 JD keywords: ${(jd?.keywords ?? []).join(', ')}
+Company brief: ${(jd?.company_brief ?? '').slice(0, 800) || 'n/a'}
+CV vs JD gaps: ${(jd?.skill_gaps ?? []).join(' | ') || 'none obvious'}
 CV excerpt: ${(input.cvText ?? analysis.parsed_text).slice(0, 1500)}
 
 Return ONLY JSON:
-{"questions":[{"text":"...","category":"ux_process","is_personal":true}]}`,
+{"questions":[{"text":"...","category":"ux_process","is_personal":true,"persona":"hirer"}]}`,
         },
       ],
     }),
   });
 
-  if (!response.ok) {
-    return assembleInterviewSet(
-      analysis,
+  const fallback = () =>
+    questionsForRound({
+      round,
+      exec,
+      analysis: enrichedAnalysis,
       jd,
-      null,
-      track,
-      process,
+      role: input.role,
+      process: stance,
       orgPace,
       memory,
-    );
+      track,
+    });
+
+  if (!response.ok) {
+    return fallback();
   }
 
   const data = (await response.json()) as {
@@ -286,28 +428,23 @@ Return ONLY JSON:
             jd,
           }),
       }));
-      return assembleInterviewSet(
-        analysis,
+      return questionsForRound({
+        round,
+        exec,
+        analysis: enrichedAnalysis,
         jd,
-        mapped,
-        track,
-        process,
+        role: input.role,
+        process: stance,
         orgPace,
         memory,
-      );
+        llmQuestions: mapped,
+        track,
+      });
     }
   } catch {
     // fall through
   }
-  return assembleInterviewSet(
-    analysis,
-    jd,
-    null,
-    track,
-    process,
-    orgPace,
-    memory,
-  );
+  return fallback();
 }
 
 export async function gradeAnswer(input: {

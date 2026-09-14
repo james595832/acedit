@@ -19,6 +19,7 @@ import {
   type CreateInterviewDraft,
 } from '@/lib/interview/create-draft';
 import {FIGMA_COPY} from '@/lib/interview/figma-copy';
+import {companyNameFromUrl} from '@/lib/interview/company-from-url';
 import type {OrgPace} from '@/lib/interview/tracks';
 
 const JD_ACCEPT =
@@ -26,22 +27,6 @@ const JD_ACCEPT =
 
 function fileFromValue(next: File | File[] | null): File | null {
   return next instanceof File ? next : null;
-}
-
-function companyHintFromUrl(raw: string): string | undefined {
-  const trimmed = raw.trim();
-  if (!trimmed) return undefined;
-  try {
-    const withProtocol = /^https?:\/\//i.test(trimmed)
-      ? trimmed
-      : `https://${trimmed}`;
-    const host = new URL(withProtocol).hostname.replace(/^www\./i, '');
-    const label = host.split('.')[0];
-    if (!label) return undefined;
-    return label.charAt(0).toUpperCase() + label.slice(1);
-  } catch {
-    return undefined;
-  }
 }
 
 export function JobDetailsForm() {
@@ -116,7 +101,7 @@ export function JobDetailsForm() {
             : draft.target_track_id,
           interview_type: 'practice',
           company_url: companyUrl.trim() || undefined,
-          company: companyHintFromUrl(companyUrl),
+          company: companyNameFromUrl(companyUrl),
           process_stance: draft.process_stance ?? 'classic',
           org_pace: jobDescriptionId ? undefined : orgPace,
         }),

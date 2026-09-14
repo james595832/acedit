@@ -7,6 +7,12 @@ import {
   listAnswersForQuestions,
 } from '@/lib/store';
 import type {GradeResult} from '@/lib/types';
+import {
+  isRoundPassed,
+  nextRoundCta,
+  nextUnlockedStage,
+  parseInterviewRound,
+} from '@/lib/interview/rounds';
 
 type Params = {params: Promise<{sessionId: string}>};
 
@@ -72,9 +78,23 @@ export async function GET(_request: Request, {params}: Params) {
           ? Number(session.overall_score)
           : null;
 
+    const attempt = {
+      overall,
+      gradedCount: scored.length,
+      questionCount: questionRows.length,
+    };
+    const stage = parseInterviewRound(session.stage_number);
+    const passed = isRoundPassed(attempt);
+    const nextStage = nextUnlockedStage({currentStage: stage, attempt});
+
     return NextResponse.json({
       session_id: session.id,
+      series_id: session.series_id,
+      stage_number: stage,
       overall_score: overall,
+      passed,
+      next_stage: nextStage,
+      next_cta: nextRoundCta(nextStage),
       summary: summarizeInterview({
         overall,
         answers: questionRows.map((row) => ({

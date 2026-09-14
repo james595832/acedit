@@ -12,6 +12,26 @@ export async function updateSession(request: NextRequest) {
     return supabaseResponse;
   }
 
+  const path = request.nextUrl.pathname;
+  const isProtected =
+    path.startsWith('/interview') ||
+    path.startsWith('/portfolio') ||
+    path.startsWith('/studio') ||
+    path.startsWith('/onboarding') ||
+    path.startsWith('/whiteboard') ||
+    path.startsWith('/api/whiteboard') ||
+    path.startsWith('/api/interview') ||
+    path.startsWith('/api/portfolio') ||
+    path.startsWith('/api/cv') ||
+    path.startsWith('/api/jd') ||
+    path.startsWith('/settings');
+  const isAuthRoute =
+    path === '/login' || path === '/signup' || path === '/start';
+
+  if (!isProtected && !isAuthRoute) {
+    return supabaseResponse;
+  }
+
   const supabase = createServerClient(url, anonKey, {
     cookies: {
       getAll() {
@@ -32,22 +52,6 @@ export async function updateSession(request: NextRequest) {
   const {
     data: {user},
   } = await supabase.auth.getUser();
-
-  const path = request.nextUrl.pathname;
-  const isProtected =
-    path.startsWith('/interview') ||
-    path.startsWith('/portfolio') ||
-    path.startsWith('/studio') ||
-    path.startsWith('/onboarding') ||
-    path.startsWith('/whiteboard') ||
-    path.startsWith('/api/whiteboard') ||
-    path.startsWith('/api/interview') ||
-    path.startsWith('/api/portfolio') ||
-    path.startsWith('/api/cv') ||
-    path.startsWith('/api/jd') ||
-    path.startsWith('/settings');
-  const isAuthRoute =
-    path === '/login' || path === '/signup' || path === '/start';
 
   if (!user && isProtected) {
     // APIs get JSON 401; pages redirect to login.

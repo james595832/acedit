@@ -1,6 +1,6 @@
 import type {Metadata} from 'next';
 import Image from 'next/image';
-import Link from 'next/link';
+import {Link} from '@astryxdesign/core/Link';
 import {SignUpForm} from '@/components/SignUpForm';
 import {isSupabaseConfigured} from '@/lib/supabase/config';
 
@@ -40,7 +40,7 @@ export default function StartPage() {
   return (
     <div className="aced-start">
       <header className="aced-start__nav">
-        <Link href="/" className="aced-start__logo" aria-label="ACED-IT home">
+        <Link href="/" className="aced-start__logo">
           <Image
             src="/ACED-IT.svg"
             alt="ACED-IT"

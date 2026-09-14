@@ -1,4 +1,4 @@
-import Link from 'next/link';
+import {BackLink} from '@/components/BackLink';
 import {FeaturePaused} from '@/components/FeaturePaused';
 import {isFeatureEnabled} from '@/lib/feature-flags';
 import {Section} from '@astryxdesign/core/Section';
@@ -9,7 +9,7 @@ export default function PortfolioPage() {
     return (
       <>
         <nav className="aced-crumb" aria-label="Breadcrumb">
-          <Link href="/studio">← Home</Link>
+          <BackLink href="/studio">Home</BackLink>
         </nav>
         <FeaturePaused
           title="Portfolio review"
@@ -23,7 +23,7 @@ export default function PortfolioPage() {
   return (
     <>
       <nav className="aced-crumb" aria-label="Breadcrumb">
-        <Link href="/studio">← Home</Link>
+        <BackLink href="/studio">Home</BackLink>
       </nav>
       <header className="aced-masthead">
         <div className="aced-masthead__copy">

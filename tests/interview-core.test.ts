@@ -92,6 +92,31 @@ describe('local grading', () => {
   });
 });
 
+describe('CV vs JD gaps', () => {
+  it('flags spec asks the CV does not show', async () => {
+    const {findCvJdGaps} = await import('@/lib/interview/cv-jd-gap');
+    const gaps = findCvJdGaps({
+      cvText: 'Jane Okonkwo Product Designer Figma prototyping',
+      skills: ['Figma', 'Prototyping'],
+      requirements: ['Figma', 'Accessibility audits', 'SQL'],
+      keywords: [],
+    });
+    expect(gaps.join(' ')).toMatch(/accessibility|sql/i);
+    expect(gaps.some((gap) => /figma/i.test(gap))).toBe(false);
+  });
+});
+
+describe('company name from URL', () => {
+  it('reads the company from a careers host and skips filler labels', async () => {
+    const {companyNameFromUrl} = await import(
+      '@/lib/interview/company-from-url'
+    );
+    expect(companyNameFromUrl('https://www.anthropic.com')).toBe('Anthropic');
+    expect(companyNameFromUrl('https://careers.figma.com/jobs')).toBe('Figma');
+    expect(companyNameFromUrl('jobs.lever.co')).toBe('Lever');
+  });
+});
+
 describe('interview host', () => {
   it('names the JD role when present, else a stock design role', async () => {
     const {interviewPositionLine} = await import('@/lib/interview/host');
@@ -291,6 +316,42 @@ Figma - Prototyping
     expect(blob).toMatch(/working prototype instead of finishing research/i);
     expect(blob).toMatch(/last-mile|scrappy version|learn in the product/i);
     expect(blob).not.toMatch(/PM pushing to ship an AI feature/i);
+  });
+
+  it('asks why you are applying, what you know about us, and a CV gap', async () => {
+    const {analyzeCvLocally, buildQuestionsFromCv} = await import(
+      '@/lib/cv-parse'
+    );
+    const {getTrack} = await import('@/lib/interview/tracks');
+    const analysis = analyzeCvLocally(`
+Jane Okonkwo
+Product Designer - Northloop Health
+PROJECTS
+Student Housing Finder
+SKILLS
+Figma - Prototyping
+`);
+    const questions = buildQuestionsFromCv(
+      analysis,
+      {
+        raw_text:
+          'Job title: Product designer\nCompany: Anthropic\nRequirements:\n- Design systems\n- Accessibility audits\n- Figma',
+        role_title: 'Product designer',
+        company_name: 'Anthropic',
+        requirements: ['Design systems', 'Accessibility audits', 'Figma'],
+        responsibilities: [],
+        keywords: ['accessibility', 'design systems'],
+        company_brief:
+          'Anthropic builds reliable, steerable AI systems. Claude is our consumer product.',
+        skill_gaps: ['Accessibility audits'],
+      },
+      getTrack('product_designer'),
+    );
+    const blob = questions.map((q) => q.text).join('\n');
+    expect(questions[1]?.text).toMatch(/why are you applying/i);
+    expect(blob).toMatch(/what do you know about Anthropic/i);
+    expect(blob).toMatch(/lighter on Accessibility audits/i);
+    expect(blob).not.toMatch(/five years/i);
   });
 
   it('asks startup-pace questions when there is no job description', async () => {

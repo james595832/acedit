@@ -1,26 +1,17 @@
 import type {ReactNode} from 'react';
 import {AppFrame} from '@/components/AppFrame';
 import {isSupabaseConfigured} from '@/lib/supabase/config';
-import {createClient} from '@/lib/supabase/server';
+import {getAuthUser} from '@/lib/supabase/user';
 
 export async function AppShellServer({children}: {children: ReactNode}) {
   const configured = isSupabaseConfigured();
-  let userEmail: string | null = null;
-
-  if (configured) {
-    try {
-      const supabase = await createClient();
-      const {
-        data: {user},
-      } = await supabase.auth.getUser();
-      userEmail = user?.email ?? null;
-    } catch {
-      userEmail = null;
-    }
-  }
+  const user = configured ? await getAuthUser() : null;
 
   return (
-    <AppFrame userEmail={userEmail} supabaseConfigured={configured}>
+    <AppFrame
+      userEmail={user?.email ?? null}
+      supabaseConfigured={configured}
+    >
       {children}
     </AppFrame>
   );

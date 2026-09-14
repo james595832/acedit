@@ -1,7 +1,7 @@
 'use client';
 
 import {useEffect, useState} from 'react';
-import Link from 'next/link';
+import {Link} from '@astryxdesign/core/Link';
 import type {WhiteboardChallenge} from '@/lib/whiteboard/challenges';
 
 type SessionLite = {

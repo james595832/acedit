@@ -1,4 +1,4 @@
-import Link from 'next/link';
+import {BackLink} from '@/components/BackLink';
 import {FeaturePaused} from '@/components/FeaturePaused';
 import {isFeatureEnabled} from '@/lib/feature-flags';
 import {WhiteboardHub} from '@/components/WhiteboardHub';
@@ -9,7 +9,7 @@ export default function WhiteboardIndexPage() {
     return (
       <>
         <nav className="aced-crumb" aria-label="Breadcrumb">
-          <Link href="/studio">← Home</Link>
+          <BackLink href="/studio">Home</BackLink>
         </nav>
         <FeaturePaused
           title="Whiteboard challenges"

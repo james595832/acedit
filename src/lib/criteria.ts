@@ -1,4 +1,8 @@
-import type {InterviewQuestionKind, QuestionCategory} from '@/lib/types';
+import type {
+  InterviewPersona,
+  InterviewQuestionKind,
+  QuestionCategory,
+} from '@/lib/types';
 import type {CvAnalysis} from '@/lib/cv-parse';
 
 export type JobDescriptionAnalysis = {
@@ -8,10 +12,13 @@ export type JobDescriptionAnalysis = {
   requirements: string[];
   responsibilities: string[];
   keywords: string[];
+  company_brief?: string | null;
+  skill_gaps?: string[];
 };
 
 export type AnswerCriteria = {
   kind?: InterviewQuestionKind;
+  persona?: InterviewPersona;
   /** Topics a strong answer should cover for THIS question + role */
   mustCover: string[];
   /** Phrases/behaviors that signal a strong answer */
@@ -177,12 +184,13 @@ export function inferQuestionKind(questionText: string): InterviewQuestionKind {
   const text = questionText.toLowerCase();
   if (/tell me about yourself/.test(text)) return 'intro';
   if (
-    /why (do you want|this role|this company|this kind of|this intern|would this be)/.test(
+    /why (do you want|are you applying|this role|this company|this kind of|this intern|would this be)/.test(
       text,
     )
   ) {
     return 'motivation';
   }
+  if (/what do you know about/.test(text)) return 'company_knowledge';
   if (/strengths? and (a |your )?weakness/.test(text)) return 'self_awareness';
   if (/conflict/.test(text) && !/stakeholder/.test(text)) return 'conflict';
   if (/five years|5 years/.test(text)) return 'ambition';
@@ -195,7 +203,25 @@ export function inferQuestionKind(questionText: string): InterviewQuestionKind {
   }
   if (/stakeholder|pm pushing/.test(text)) return 'stakeholder';
   if (/\bai\b/.test(text) || /\bllm\b/.test(text)) return 'ai';
-  if (/asks for|demonstrated that|job description/.test(text)) return 'jd_fit';
+  if (
+    /asks for|demonstrated that|job description|lighter on|don.?t fully match|we.?ve read your cv/.test(
+      text,
+    )
+  ) {
+    return 'jd_fit';
+  }
+  if (/priya|engineering:|last mile|hand off|handoff/.test(text)) {
+    return 'team_ship';
+  }
+  if (/marcus|product:|what would you cut|tradeoff/.test(text)) {
+    return 'team_scope';
+  }
+  if (/elena|senior design:|would you reject|craft bar/.test(text)) {
+    return 'team_taste';
+  }
+  if (/ceo:|cio:|why us, why now|no ted talk|one decision/.test(text)) {
+    return 'exec_outcome';
+  }
   return 'cv_project';
 }
 
@@ -297,6 +323,25 @@ function criteriaForKind(
           ? `They want to hear that you researched ${ctx.company} and can say why ${ctx.role} is the right next step. Vague flattery fails.`
           : 'This still has to sound like a real interview: why this direction, why now, with proof from your CV.',
       };
+    case 'company_knowledge':
+      return {
+        mustCover: [
+          `Something specific about ${ctx.company} — product, users, or how they work`,
+          'What you looked at before this interview',
+          'One honest gap in what you still don’t know',
+        ],
+        strongSignals: [
+          'A fact a stranger could not guess from the logo',
+          'You connect their work to why you applied',
+          'You do not recite the about page',
+        ],
+        weakSignals: [
+          '“Great culture / mission” with no proof',
+          'Confusing them with a competitor',
+          'Nothing beyond the job title',
+        ],
+        summary: `This is “what do you know about us?” They expect homework on ${ctx.company}, not generic praise.`,
+      };
     case 'self_awareness':
       return {
         mustCover: [
@@ -383,10 +428,10 @@ function criteriaForKind(
       return {
         mustCover: [
           ctx.jdReq
-            ? `Show the requirement: ${truncate(ctx.jdReq, 70)}`
+            ? `Address the gap or requirement: ${truncate(ctx.jdReq, 70)}`
             : `Show fit for ${ctx.role} at ${ctx.company}`,
-          `Use a CV example (e.g. ${truncate(ctx.project, 40)})`,
-          'Name the problem, what you did, and what changed',
+          `Use a CV example (e.g. ${truncate(ctx.project, 40)}) — or say honestly you have not done it yet`,
+          'How you would close the gap without overselling',
         ],
         strongSignals: [
           'Language that matches the JD without parroting it',
@@ -502,6 +547,86 @@ function criteriaForKind(
         ],
         summary:
           'They want a grown-up 90-day picture: learn, make, measure. Weak answers are a revolution with no diagnosis.',
+      };
+    case 'team_ship':
+      return {
+        mustCover: [
+          'What was actually hard to build, not the Figma file',
+          'What you changed after engineering pushed back',
+          'Empty, error, or last-mile states you owned — or admitted you missed',
+        ],
+        strongSignals: [
+          'You can say what shipped vs what stayed a mock',
+          'Handoff a developer could finish without you',
+          'No blame-the-engineers story',
+        ],
+        weakSignals: [
+          '“I just handed over the file”',
+          'No mention of constraints or the last mile',
+          'A TED talk about collaboration',
+        ],
+        summary:
+          'Engineering wants to know if this can ship. Strong answers name feasibility, handoff, and what you changed. Weak answers stay in the mock.',
+      };
+    case 'team_scope':
+      return {
+        mustCover: [
+          'What you would cut first, and why that is the right cut',
+          'What you would refuse to drop',
+          'A real tradeoff with a shipped outcome',
+        ],
+        strongSignals: [
+          'Scope named in user or business terms, not “we’ll try our best”',
+          'You can kill your own idea',
+          'A timeline or constraint that forced the call',
+        ],
+        weakSignals: [
+          'Everything is a priority',
+          'No cut, only a longer wishlist',
+          'No outcome — only a process',
+        ],
+        summary:
+          'The PM is testing what you would cut. Strong answers pick a loser and still protect the user. Weak answers keep the whole roadmap.',
+      };
+    case 'team_taste':
+      return {
+        mustCover: [
+          'Something you would reject — a real craft failure, not a preference',
+          'The bar in concrete terms (type, hierarchy, interaction, evidence)',
+          'Where you would still fight the brief',
+        ],
+        strongSignals: [
+          'You can describe why it fails without dunking on a person',
+          'A replacement, not only a no',
+          'Taste tied to the product, not a moodboard',
+        ],
+        weakSignals: [
+          '“I like clean design”',
+          'Rejecting work with no reason',
+          'No example',
+        ],
+        summary:
+          'Senior design wants a craft bar. Strong answers reject something specific and say what good looks like. Weak answers are vibes.',
+      };
+    case 'exec_outcome':
+      return {
+        mustCover: [
+          'One decision, said plainly',
+          'One risk, and how someone would see it early',
+          'An outcome you would own — not a process deck',
+        ],
+        strongSignals: [
+          'Short. No TED talk.',
+          'Stakes in business or user terms',
+          'You would push back with a real example, not a slogan',
+        ],
+        weakSignals: [
+          'A five-minute vision speech',
+          'No decision, only “it depends”',
+          'Figma hygiene or file structure as the answer',
+        ],
+        summary:
+          'The exec wants a decision and a risk, not a case-study. Strong answers are short and owned. Weak answers waffle.',
       };
     default:
       return {

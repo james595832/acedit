@@ -62,9 +62,9 @@ export function AuthNav({email, configured}: AuthNavProps) {
                 variant="ghost"
                 size="sm"
                 className="aced-account-menu__item"
+                href="/studio"
                 onClick={() => {
                   setIsOpen(false);
-                  window.location.assign('/studio');
                 }}
               />
               <Button
@@ -72,9 +72,9 @@ export function AuthNav({email, configured}: AuthNavProps) {
                 variant="ghost"
                 size="sm"
                 className="aced-account-menu__item"
+                href="/settings"
                 onClick={() => {
                   setIsOpen(false);
-                  window.location.assign('/settings');
                 }}
               />
               <Button

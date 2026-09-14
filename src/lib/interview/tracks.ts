@@ -271,6 +271,8 @@ export type TrackQuestionContext = {
   cvUsesAi: boolean;
   process?: DesignProcessStance;
   orgPace?: OrgPace;
+  companyBrief?: string | null;
+  skillGaps?: string[];
 };
 
 function isPrototypeFirst(ctx: TrackQuestionContext): boolean {
@@ -297,6 +299,7 @@ export type TrackDraftQuestion = {
     | 'self_awareness'
     | 'conflict'
     | 'ambition'
+    | 'company_knowledge'
     | 'cv_project'
     | 'ai'
     | 'jd_fit'
@@ -311,10 +314,7 @@ function truncate(value: string, max: number): string {
 
 function motivationText(track: InterviewTrack, ctx: TrackQuestionContext): string {
   if (ctx.hasJd && ctx.hasCompany) {
-    if (isPrototypeFirst(ctx)) {
-      return `Why do you want to work at ${ctx.company} as ${ctx.role}? What did you learn about how they actually ship — not only the product story?`;
-    }
-    return `Why do you want to work at ${ctx.company} as ${ctx.role}? What did you learn about the product, the users, or how they work?`;
+    return `Why are you applying for ${ctx.role} at ${ctx.company}? What is your reason for this role — not a generic “I like the mission”?`;
   }
   if (track.family === 'intern_visual') {
     if (isStartupPace(ctx)) {
@@ -368,6 +368,16 @@ function motivationText(track: InterviewTrack, ctx: TrackQuestionContext): strin
     return `Why this kind of product-design role at a startup next? What would make a go-go-go team a good fit given your work at ${ctx.company}?`;
   }
   return `Why this kind of product-design role next? What would make a team a good fit given your work at ${ctx.company}?`;
+}
+
+function companyKnowledgeText(ctx: TrackQuestionContext): string {
+  const snippet = ctx.companyBrief
+    ? truncate(ctx.companyBrief.replace(/\s+/g, ' '), 90)
+    : null;
+  if (snippet) {
+    return `What do you know about ${ctx.company}? From what we can see they talk about “${snippet}”. What did you learn before this interview, and what is still unclear?`;
+  }
+  return `What do you know about ${ctx.company}? What have you looked at — the product, the users, or how they work — and why does that make you want ${ctx.role}?`;
 }
 
 function ambitionText(track: InterviewTrack, ctx: TrackQuestionContext): string {
@@ -451,6 +461,13 @@ function aiQuestion(track: InterviewTrack, ctx: TrackQuestionContext): string {
 }
 
 function craftDecision(track: InterviewTrack, ctx: TrackQuestionContext): string {
+  const gap = ctx.skillGaps?.[0];
+  if (ctx.hasJd && gap) {
+    if (track.family === 'intern_visual') {
+      return `This internship${ctx.hasCompany ? ` at ${ctx.company}` : ''} asks for ${truncate(gap, 70)}. Your CV is lighter on that. How would you get up to speed without pretending you’ve already done it?`;
+    }
+    return `We’ve read your CV against this ${ctx.role} spec${ctx.hasCompany ? ` at ${ctx.company}` : ''}. You’re lighter on ${truncate(gap, 70)} than what we’re looking for. How do you still make the case — and where would you close that gap?`;
+  }
   if (ctx.hasJd) {
     const who = ctx.hasCompany ? `This role at ${ctx.company}` : `This ${ctx.role} role`;
     return `${who} asks for ${truncate(ctx.jdFocus, 70)}. Using a CV example, how have you demonstrated that?`;
@@ -634,12 +651,19 @@ export function draftQuestionsForTrack(
       category: 'communication',
       is_personal: true,
     },
-    {
-      kind: 'ambition',
-      text: ambitionText(track, ctx),
-      category: 'communication',
-      is_personal: ctx.hasJd,
-    },
+    ctx.hasJd && ctx.hasCompany
+      ? {
+          kind: 'company_knowledge' as const,
+          text: companyKnowledgeText(ctx),
+          category: 'communication' as const,
+          is_personal: true,
+        }
+      : {
+          kind: 'ambition' as const,
+          text: ambitionText(track, ctx),
+          category: 'communication' as const,
+          is_personal: ctx.hasJd,
+        },
     {
       kind: 'cv_project',
       text: projectWalkthrough(track, ctx),

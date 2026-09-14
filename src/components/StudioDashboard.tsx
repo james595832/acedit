@@ -26,23 +26,11 @@ export function StudioDashboard({
   sessions: InterviewHistoryRow[];
 }) {
   const copy = FIGMA_COPY.interviews;
-  const [ready, setReady] = useState(false);
   const [showWelcome, setShowWelcome] = useState(false);
 
   useEffect(() => {
     setShowWelcome(sessions.length === 0 && !hasSeenWelcome());
-    setReady(true);
   }, [sessions.length]);
-
-  if (!ready) {
-    return (
-      <Section variant="transparent" padding={4}>
-        <Text as="p" color="secondary">
-          Loading…
-        </Text>
-      </Section>
-    );
-  }
 
   if (showWelcome) {
     return <WelcomeOnboarding firstName={firstName} />;

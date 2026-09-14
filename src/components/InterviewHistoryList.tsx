@@ -3,13 +3,19 @@
 import {useEffect, useState} from 'react';
 import {useRouter} from 'next/navigation';
 import {AlertDialog} from '@astryxdesign/core/AlertDialog';
+import {Avatar} from '@astryxdesign/core/Avatar';
 import {Banner} from '@astryxdesign/core/Banner';
 import {Button} from '@astryxdesign/core/Button';
 import {Card} from '@astryxdesign/core/Card';
+import {Grid} from '@astryxdesign/core/Grid';
+import {Heading} from '@astryxdesign/core/Heading';
+import {Icon} from '@astryxdesign/core/Icon';
 import {HStack, VStack} from '@astryxdesign/core/Layout';
-import {ProgressBar} from '@astryxdesign/core/ProgressBar';
 import {Text} from '@astryxdesign/core/Text';
+import {Timestamp} from '@astryxdesign/core/Timestamp';
 import {FIGMA_COPY} from '@/lib/interview/figma-copy';
+import {inferTrackFromRole} from '@/lib/interview/tracks';
+import {ContinueSeriesButton} from '@/components/ContinueSeriesButton';
 
 export type InterviewHistoryRow = {
   id: string;
@@ -17,24 +23,130 @@ export type InterviewHistoryRow = {
   created_at: string;
   role_title?: string | null;
   company_name?: string | null;
+  series_id?: string | null;
+  stage_number?: number;
+  series_progress?: string;
+  next_stage?: number | null;
+  next_label?: string;
 };
 
-function formatDateTaken(iso: string): string {
-  const d = new Date(iso);
-  if (Number.isNaN(d.getTime())) return '—';
-  const day = String(d.getDate()).padStart(2, '0');
-  const month = String(d.getMonth() + 1).padStart(2, '0');
-  const year = d.getFullYear();
-  return `${day}/${month}/${year}`;
+type InterviewCardVariant =
+  | 'muted'
+  | 'blue'
+  | 'cyan'
+  | 'green'
+  | 'orange'
+  | 'purple'
+  | 'teal';
+
+function cardVariantForRole(role: string): InterviewCardVariant {
+  switch (inferTrackFromRole(role)?.family) {
+    case 'visual':
+      return 'orange';
+    case 'research':
+      return 'teal';
+    case 'ux':
+      return 'blue';
+    case 'product':
+      return 'cyan';
+    case 'ai_product':
+      return 'purple';
+    case 'direction':
+      return 'purple';
+    case 'intern_visual':
+      return 'green';
+    default:
+      return 'muted';
+  }
 }
 
-function scoreProgressVariant(
-  score: number | null,
-): 'success' | 'warning' | 'error' | 'neutral' {
-  if (score === null) return 'neutral';
-  if (score >= 75) return 'success';
-  if (score >= 55) return 'warning';
-  return 'error';
+const RECENT_MS = 21 * 24 * 60 * 60 * 1000;
+
+function isRecent(iso: string, now: number): boolean {
+  const taken = new Date(iso).getTime();
+  if (Number.isNaN(taken)) return false;
+  return now - taken <= RECENT_MS;
+}
+
+function splitByRecency(rows: InterviewHistoryRow[]): {
+  recent: InterviewHistoryRow[];
+  older: InterviewHistoryRow[];
+} {
+  const now = Date.now();
+  const recent: InterviewHistoryRow[] = [];
+  const older: InterviewHistoryRow[] = [];
+  for (const row of rows) {
+    if (isRecent(row.created_at, now)) recent.push(row);
+    else older.push(row);
+  }
+  return {recent, older};
+}
+
+function InterviewTile({
+  session,
+  copy,
+  onDelete,
+}: {
+  session: InterviewHistoryRow;
+  copy: (typeof FIGMA_COPY)['interviews'];
+  onDelete: () => void;
+}) {
+  const role = session.role_title?.trim() || 'design role';
+  const company = session.company_name?.trim();
+  const continueStage =
+    session.next_stage ?? session.stage_number ?? 1;
+  const continueLabel = session.next_label ?? copy.retake;
+  const showContinue =
+    continueLabel !== 'Read answers' &&
+    Boolean(session.next_stage || continueLabel === 'Retake this round');
+
+  return (
+    <Card padding={5} variant={cardVariantForRole(role)}>
+      <VStack gap={5}>
+        <HStack gap={4} align="start" justify="between">
+          <VStack gap={2}>
+            <Text as="p" type="supporting" color="secondary">
+              {company ? company : 'Interview'}
+            </Text>
+            <Heading level={3}>{role}</Heading>
+            <Text as="p" type="supporting">
+              {session.series_progress ?? '1 of 3'}
+            </Text>
+            <HStack gap={1} align="center">
+              <Icon icon="calendar" size="sm" color="secondary" />
+              <Timestamp
+                value={session.created_at}
+                format="date"
+                type="supporting"
+                color="secondary"
+              />
+            </HStack>
+          </VStack>
+          <Avatar name={role} size="xl" alt="" />
+        </HStack>
+
+        <HStack gap={2} align="center" wrap="wrap">
+          <Button
+            label={copy.readAnswers}
+            variant="ghost"
+            href={`/interview/results?session_id=${session.id}`}
+          />
+          {showContinue ? (
+            <ContinueSeriesButton
+              seriesId={session.series_id}
+              fromSessionId={session.id}
+              stageNumber={continueStage}
+              label={continueLabel}
+              variant="ghost"
+            />
+          ) : (
+            <Button label={copy.retake} variant="ghost" href="/interview" />
+          )}
+          <Button label="Delete" variant="ghost" clickAction={onDelete} />
+        </HStack>
+      </VStack>
+    </Card>
+  );
 }
 
 export function InterviewHistoryList({
@@ -79,8 +191,14 @@ export function InterviewHistoryList({
 
   if (rows.length === 0) return null;
 
+  const {recent, older} = splitByRecency(rows);
+  const groups = [
+    {title: copy.recent, sessions: recent},
+    {title: copy.longerAgo, sessions: older},
+  ].filter((group) => group.sessions.length > 0);
+
   return (
-    <VStack gap={4}>
+    <VStack gap={6}>
       {error ? (
         <Banner
           status="error"
@@ -89,89 +207,24 @@ export function InterviewHistoryList({
         />
       ) : null}
 
-      {rows.map((session) => {
-        const score =
-          session.overall_score === null ||
-          session.overall_score === undefined
-            ? null
-            : Math.round(Number(session.overall_score));
-        const role = session.role_title?.trim() || 'design role';
-        const company = session.company_name?.trim();
-
-        return (
-          <Card key={session.id} padding={5}>
-            <VStack gap={4}>
-              <HStack gap={5} align="start" justify="between" wrap="wrap">
-                <VStack gap={3}>
-                  <VStack gap={2}>
-                    <Text as="p" type="large" weight="bold">
-                      Interviewing for{' '}
-                      <Text color="accent" weight="bold">
-                        {role}
-                      </Text>
-                      {company ? (
-                        <>
-                          {' '}
-                          at{' '}
-                          <Text color="accent" weight="bold">
-                            {company}
-                          </Text>
-                        </>
-                      ) : null}
-                    </Text>
-                    <Text as="p" color="secondary">
-                      {copy.dateTaken(formatDateTaken(session.created_at))}
-                    </Text>
-                  </VStack>
-                  <HStack gap={2} wrap="wrap" align="center">
-                    <Button
-                      label={copy.readAnswers}
-                      variant="secondary"
-                      clickAction={() => {
-                        router.push(
-                          `/interview/results?session_id=${session.id}`,
-                        );
-                      }}
-                    />
-                    <Button
-                      label={copy.retake}
-                      variant="secondary"
-                      clickAction={() => {
-                        router.push('/interview');
-                      }}
-                    />
-                    <Button
-                      label="Delete"
-                      variant="secondary"
-                      clickAction={() => {
-                        setError(null);
-                        setPendingId(session.id);
-                      }}
-                    />
-                  </HStack>
-                </VStack>
-
-                <VStack gap={2} align="center" padding={1}>
-                  <Text as="p" type="display-3" weight="bold" hasTabularNumbers>
-                    {score === null ? '—' : `${score}%`}
-                  </Text>
-                  <Text as="p" type="label" weight="bold">
-                    {copy.assessmentScore}
-                  </Text>
-                  <ProgressBar
-                    label={copy.assessmentScore}
-                    isLabelHidden
-                    value={score ?? 0}
-                    max={100}
-                    variant={scoreProgressVariant(score)}
-                    isDisabled={score === null}
-                  />
-                </VStack>
-              </HStack>
-            </VStack>
-          </Card>
-        );
-      })}
+      {groups.map((group) => (
+        <VStack key={group.title} gap={4}>
+          <Heading level={2}>{group.title}</Heading>
+          <Grid columns={{minWidth: 300, max: 3}} gap={4}>
+            {group.sessions.map((session) => (
+              <InterviewTile
+                key={session.id}
+                session={session}
+                copy={copy}
+                onDelete={() => {
+                  setError(null);
+                  setPendingId(session.id);
+                }}
+              />
+            ))}
+          </Grid>
+        </VStack>
+      ))}
 
       <AlertDialog
         isOpen={Boolean(pendingId)}

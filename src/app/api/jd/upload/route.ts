@@ -6,6 +6,7 @@ import {extractCvDocument, extractPdfText} from '@/lib/cv-parse';
 import {requireInterviewUser} from '@/lib/interview/auth';
 import {recommendWhiteboardFromJd} from '@/lib/interview/format';
 import {ocrImageToText} from '@/lib/ocr';
+import {companyNameFromUrl} from '@/lib/interview/company-from-url';
 import {saveJobDescription} from '@/lib/store';
 
 export const runtime = 'nodejs';
@@ -21,21 +22,7 @@ export async function POST(request: Request) {
     const pasted = String(form.get('text') ?? '').trim();
     const companyUrl = String(form.get('company_url') ?? '').trim();
 
-    let companyFromUrl: string | null = null;
-    if (companyUrl) {
-      try {
-        const withProtocol = /^https?:\/\//i.test(companyUrl)
-          ? companyUrl
-          : `https://${companyUrl}`;
-        const host = new URL(withProtocol).hostname.replace(/^www\./i, '');
-        const label = host.split('.')[0];
-        if (label) {
-          companyFromUrl = label.charAt(0).toUpperCase() + label.slice(1);
-        }
-      } catch {
-        companyFromUrl = null;
-      }
-    }
+    const companyFromUrl = companyNameFromUrl(companyUrl) ?? null;
 
     let rawText = pasted;
     let sourceType: 'image' | 'pdf' | 'text' = 'text';

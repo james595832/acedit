@@ -43,7 +43,7 @@ export const FIGMA_COPY = {
     pastePlaceholder: 'Paste a job description here...',
     companyLabel: 'Finally add a company URL',
     companyLead:
-      'We use this to pull information on the company to again help us simulate a more realistic interview',
+      'We read the public page at this URL so we can ask what you know about the company, and why you are applying',
     companyPlaceholder: 'Enter a URL for the company you are applying to',
     paceLabel: 'Kind of team',
     paceDescription:

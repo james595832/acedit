@@ -1,14 +1,12 @@
 import {createClient} from '@/lib/supabase/server';
 import {isSupabaseConfigured} from '@/lib/supabase/config';
+import {getAuthUser} from '@/lib/supabase/user';
 import {isStripeConfigured} from '@/lib/stripe';
 import {syncBillingFromCheckoutSession} from '@/lib/billing/sync';
-import {
-  demoUserId,
-  getJobDescription,
-  listSessions,
-} from '@/lib/store';
+import {demoUserId, listSessions} from '@/lib/store';
 import {resolveGreetingName} from '@/lib/greeting';
 import {StudioDashboard} from '@/components/StudioDashboard';
+import {historyTilesForSessions} from '@/lib/interview/history-tiles';
 
 type StudioPageProps = {
   searchParams: Promise<{billing?: string; session_id?: string}>;
@@ -21,14 +19,12 @@ export default async function StudioPage({searchParams}: StudioPageProps) {
 
   if (isSupabaseConfigured()) {
     try {
-      const supabase = await createClient();
-      const {
-        data: {user},
-      } = await supabase.auth.getUser();
+      const user = await getAuthUser();
       userId = user?.id ?? null;
 
       let profileName: string | null = null;
       if (user) {
+        const supabase = await createClient();
         const {data: profile} = await supabase
           .from('profiles')
           .select('full_name')
@@ -77,31 +73,7 @@ export default async function StudioPage({searchParams}: StudioPageProps) {
   }
 
   const ownerId = userId ?? (isSupabaseConfigured() ? null : demoUserId());
-  const historyRows = await Promise.all(
-    sessions.map(async (session) => {
-      let role_title: string | null = null;
-      let company_name: string | null = null;
-      if (session.job_description_id && ownerId) {
-        try {
-          const jd = await getJobDescription(
-            session.job_description_id,
-            ownerId,
-          );
-          role_title = jd?.role_title ?? null;
-          company_name = jd?.company_name ?? null;
-        } catch {
-          // decorative metadata
-        }
-      }
-      return {
-        id: session.id,
-        overall_score: session.overall_score,
-        created_at: session.created_at,
-        role_title,
-        company_name,
-      };
-    }),
-  );
+  const historyRows = await historyTilesForSessions(sessions, ownerId);
 
   return (
     <StudioDashboard

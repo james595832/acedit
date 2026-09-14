@@ -168,36 +168,33 @@ export async function loadPracticeMemory(
     .filter((session) => session.id !== options?.excludeSessionId)
     .slice(0, 8);
 
-  const packed: Array<{
-    sessionId: string;
-    answers: PracticeMemoryInputAnswer[];
-  }> = [];
-
-  for (const session of sessions) {
-    if (packed.length >= MAX_PRIOR_SESSIONS) break;
-    const questions = await getSessionQuestions(session.id);
-    if (!questions.length) continue;
-    const answers = await listAnswersForQuestions(
-      questions.map((question) => question.id),
-      userId,
-    );
-    const byQuestion = new Map(
-      answers.map((answer) => [answer.question_id, answer]),
-    );
-    const rows: PracticeMemoryInputAnswer[] = questions.map((question) => {
-      const answer = byQuestion.get(question.id);
-      const grade = parseStoredGrade(answer?.feedback ?? null);
-      return {
-        score: grade?.score ?? answer?.score ?? null,
-        feedback: answer?.feedback ?? null,
-        questionText: question.question_text,
-        category: question.question_category,
-      };
-    });
-    if (rows.some((row) => typeof row.score === 'number')) {
-      packed.push({sessionId: session.id, answers: rows});
-    }
-  }
+  const packed = (
+    await Promise.all(
+      sessions.slice(0, MAX_PRIOR_SESSIONS).map(async (session) => {
+        const questions = await getSessionQuestions(session.id);
+        if (!questions.length) return null;
+        const answers = await listAnswersForQuestions(
+          questions.map((question) => question.id),
+          userId,
+        );
+        const byQuestion = new Map(
+          answers.map((answer) => [answer.question_id, answer]),
+        );
+        const rows: PracticeMemoryInputAnswer[] = questions.map((question) => {
+          const answer = byQuestion.get(question.id);
+          const grade = parseStoredGrade(answer?.feedback ?? null);
+          return {
+            score: grade?.score ?? answer?.score ?? null,
+            feedback: answer?.feedback ?? null,
+            questionText: question.question_text,
+            category: question.question_category,
+          };
+        });
+        if (!rows.some((row) => typeof row.score === 'number')) return null;
+        return {sessionId: session.id, answers: rows};
+      }),
+    )
+  ).filter((row): row is NonNullable<typeof row> => Boolean(row));
 
   return buildPracticeMemory(packed);
 }

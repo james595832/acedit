@@ -102,6 +102,25 @@ li {
   font-weight: 500 !important;
 }
 
+/* First focusable control — visible only when tabbed to */
+.aced-skip-link {
+  position: absolute;
+  inset-inline-start: var(--spacing-4);
+  inset-block-start: var(--spacing-4);
+  z-index: 20;
+  padding: var(--spacing-2) var(--spacing-3);
+  background: var(--color-background-surface);
+  color: var(--color-text-primary);
+  border: 1px solid var(--color-border-emphasized);
+  border-radius: var(--radius-md, 0.5rem);
+  transform: translateY(-160%);
+}
+
+.aced-skip-link:focus,
+.aced-skip-link:focus-visible {
+  transform: none;
+}
+
 /* Logged-in app chrome: reliable gutters (StyleX contentPadding is easy to miss) */
 .aced-app-page {
   --aced-app-gutter: clamp(1.5rem, 5vw, 3.25rem);
@@ -443,11 +462,15 @@ body:has(.aced-app-page),
   --astryx-card-padding-block-start: var(--spacing-5);
   --astryx-card-padding-block-end: var(--spacing-5);
   padding: var(--spacing-5) !important;
-  /* Soft grey wash + #a1a1a1 edge so cards read on white canvas */
-  background: color-mix(in srgb, var(--aced-card-tint) 9%, #ffffff) !important;
-  border-color: var(--aced-card-tint) !important;
   border-width: 1px !important;
   border-style: solid !important;
+}
+
+/* Default cards keep a light #a1a1a1 edge. Colour variants (role tiles) keep Stone tints. */
+.aced-app-page .astryx-card:not([data-variant]),
+.aced-app-page .astryx-card[data-variant='default'] {
+  background: color-mix(in srgb, var(--aced-card-tint) 8%, #ffffff) !important;
+  border-color: var(--aced-card-tint) !important;
 }
 
 .aced-app-page .astryx-section {
@@ -600,6 +623,13 @@ body:has(.aced-app-page),
   min-height: 2.75rem !important; /* 44px */
   max-height: 48px !important;
   padding: 0.625rem 1.15rem !important;
+}
+
+/* Tertiary: no chrome — our global button border was making ghost look like secondary */
+.astryx-button[data-variant='ghost'] {
+  border-color: transparent !important;
+  background: transparent !important;
+  box-shadow: none !important;
 }
 
 .astryx-button[data-variant='primary'] {
@@ -2020,13 +2050,13 @@ body:has(.aced-app-page),
 }
 
 .aced-legal__nav a {
-  color: var(--aced-mute);
+  color: var(--color-text-accent, #0064e0);
   text-decoration: none;
   font-weight: 500;
 }
 
 .aced-legal__nav a:hover {
-  color: var(--aced-ink);
+  color: var(--color-text-blue, #042f97);
   text-decoration: underline;
 }
 
@@ -4021,18 +4051,28 @@ dialog.aced-feedback-dialog::backdrop {
   gap: 0.5rem;
   margin-bottom: 1rem;
   font-size: 0.85rem;
-  color: var(--aced-mute);
 }
 
-.aced-crumb a {
-  color: var(--aced-mute);
+.aced-crumb a,
+.aced-back-link {
+  display: inline-flex;
+  align-items: center;
+  color: var(--color-text-accent, #0064e0);
   text-decoration: none;
   font-weight: 500;
   transition: color var(--duration-fast, 150ms) ease;
 }
 
-.aced-crumb a:hover {
-  color: var(--aced-ink);
+.aced-crumb a:hover,
+.aced-back-link:hover {
+  color: var(--color-text-blue, #042f97);
+}
+
+.aced-crumb a:focus-visible,
+.aced-back-link:focus-visible {
+  outline: 2px solid var(--color-accent, #0064e0);
+  outline-offset: 2px;
+  border-radius: var(--radius-element, 0.25rem);
 }
 
 .aced-check {
@@ -4418,13 +4458,13 @@ dialog.aced-feedback-dialog::backdrop {
 }
 
 .aced-wb__back a {
-  color: var(--aced-mute);
+  color: var(--color-text-accent, #0064e0);
   text-decoration: none;
   font-size: 0.9rem;
 }
 
 .aced-wb__back a:hover {
-  color: var(--aced-ink);
+  color: var(--color-text-blue, #042f97);
 }
 
 .aced-wb {
@@ -5772,13 +5812,13 @@ dialog.aced-feedback-dialog::backdrop {
 }
 
 .aced-brief__back {
-  color: var(--color-text-secondary, var(--aced-mute));
+  color: var(--color-text-accent, #0064e0);
   font-size: var(--text-supporting-size, 0.75rem);
   text-decoration: none;
 }
 
 .aced-brief__back:hover {
-  color: var(--color-text-primary, var(--aced-ink));
+  color: var(--color-text-blue, #042f97);
 }
 
 .aced-brief__meta {

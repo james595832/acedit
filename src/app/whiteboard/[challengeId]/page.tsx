@@ -1,4 +1,4 @@
-import Link from 'next/link';
+import {BackLink} from '@/components/BackLink';
 import {notFound} from 'next/navigation';
 import {Section} from '@astryxdesign/core/Section';
 import {FeaturePaused} from '@/components/FeaturePaused';
@@ -17,7 +17,7 @@ export default async function WhiteboardChallengePage({
     return (
       <>
         <nav className="aced-crumb" aria-label="Breadcrumb">
-          <Link href="/studio">← Home</Link>
+          <BackLink href="/studio">Home</BackLink>
         </nav>
         <FeaturePaused
           title="Whiteboard challenges"
@@ -35,7 +35,7 @@ export default async function WhiteboardChallengePage({
   return (
     <Section variant="transparent" padding={0}>
       <p className="aced-wb__back">
-        <Link href="/whiteboard">← All challenges</Link>
+        <BackLink href="/whiteboard">All challenges</BackLink>
       </p>
       <WhiteboardSession challenge={challenge} />
     </Section>

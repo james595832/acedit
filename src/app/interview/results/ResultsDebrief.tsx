@@ -2,6 +2,7 @@
 
 import {useEffect, useMemo, useState} from 'react';
 import {Link} from '@astryxdesign/core/Link';
+import {BackLink} from '@/components/BackLink';
 import {VStack, HStack} from '@astryxdesign/core/Layout';
 import {Heading} from '@astryxdesign/core/Heading';
 import {Text} from '@astryxdesign/core/Text';
@@ -11,6 +12,8 @@ import {Collapsible} from '@astryxdesign/core/Collapsible';
 import {StatusDot} from '@astryxdesign/core/StatusDot';
 import {SessionProgress} from '@/components/SessionProgress';
 import {DeleteInterviewButton} from '@/components/DeleteInterviewButton';
+import {ContinueSeriesButton} from '@/components/ContinueSeriesButton';
+import {roundTitle} from '@/lib/interview/personas';
 
 type ResultRow = {
   question_text: string;
@@ -43,31 +46,40 @@ function outcomeCopy(
   overall: number | null,
   gradedCount: number,
   questionCount: number,
+  passed: boolean,
 ) {
   if (tone === 'strong') {
     return {
       title: 'You aced this interview',
-      lead: 'Strong answers. Take the win — then one more round to lock it in.',
+      lead: passed
+        ? 'Strong answers. The next room is unlocked if there is one.'
+        : 'Strong answers. Take the win — then one more round to lock it in.',
       badge: 'Strong interview',
-      cta: 'Interview again',
-      ctaHint: 'We’ll keep what landed and press the weaker answers next time',
+      cta: 'Interview this round again',
+      ctaHint: passed
+        ? 'Or meet the next room while this debrief is fresh'
+        : 'We’ll keep what landed and press the weaker answers next time',
     };
   }
   if (tone === 'okay') {
     return {
-      title: 'Solid interview — keep going',
-      lead: 'You’re building the muscle. Another round will sharpen the weak spots.',
+      title: passed ? 'Solid interview — next room is open' : 'Solid — not enough to unlock the next room',
+      lead: passed
+        ? 'You’re through this level. The next people will ask different things.'
+        : 'Score 60 or more, with most answers graded, to unlock the next room. Retake this round.',
       badge: overall !== null ? `${Math.round(overall)} / 100` : 'In progress',
-      cta: 'Start another interview',
-      ctaHint: 'Next interview will reuse this debrief and press those weak spots',
+      cta: 'Interview this round again',
+      ctaHint: passed
+        ? 'Next interview will reuse this debrief and press those weak spots'
+        : 'Practice memory will carry the weak spots into the retake',
     };
   }
   if (tone === 'weak') {
     return {
-      title: 'Good that you showed up',
-      lead: 'First interviews are messy. That’s the point. Try again and watch the score move.',
+      title: 'This round stays locked',
+      lead: 'Below 60 you retake the same room. Completing the interview is not enough.',
       badge: 'Keep going',
-      cta: 'Interview again',
+      cta: 'Interview this round again',
       ctaHint: 'We’ll keep this debrief and ask you to go deeper next time',
     };
   }
@@ -95,6 +107,13 @@ export function ResultsDebrief({sessionId}: {sessionId: string}) {
   const [summary, setSummary] = useState<DebriefSummary | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const [seriesId, setSeriesId] = useState<string | null>(null);
+  const [stageNumber, setStageNumber] = useState(1);
+  const [passed, setPassed] = useState(false);
+  const [nextStage, setNextStage] = useState<number | null>(null);
+  const [nextCta, setNextCta] = useState<{label: string; hint: string} | null>(
+    null,
+  );
 
   useEffect(() => {
     void (async () => {
@@ -113,6 +132,13 @@ export function ResultsDebrief({sessionId}: {sessionId: string}) {
       );
       setRows(data.questions ?? []);
       setSummary(data.summary ?? null);
+      setSeriesId(typeof data.series_id === 'string' ? data.series_id : null);
+      setStageNumber(Number(data.stage_number ?? 1));
+      setPassed(Boolean(data.passed));
+      setNextStage(
+        typeof data.next_stage === 'number' ? data.next_stage : null,
+      );
+      setNextCta(data.next_cta ?? null);
       setLoading(false);
     })();
   }, [sessionId]);
@@ -123,7 +149,13 @@ export function ResultsDebrief({sessionId}: {sessionId: string}) {
       .map((row, index) => ({row, index}))
       .filter((x) => x.row.score !== null);
   }, [rows]);
-  const copy = outcomeCopy(tone, overall, scoredRows.length, rows.length);
+  const copy = outcomeCopy(
+    tone,
+    overall,
+    scoredRows.length,
+    rows.length,
+    passed,
+  );
   const title = summary?.headline ?? copy.title;
   const lead = summary?.body ?? copy.lead;
 
@@ -147,14 +179,14 @@ export function ResultsDebrief({sessionId}: {sessionId: string}) {
   return (
     <div className={`aced-debrief aced-debrief--${tone}`}>
       <nav className="aced-crumb" aria-label="Breadcrumb">
-        <Link href="/studio">← Home</Link>
+        <BackLink href="/studio">Home</BackLink>
       </nav>
 
       <Section variant="transparent" padding={0}>
         <VStack gap={6}>
           <SessionProgress
-            label="Interview"
-            current={3}
+            label={roundTitle(stageNumber === 2 ? 2 : stageNumber === 3 ? 3 : 1)}
+            current={stageNumber}
             total={3}
             status="Debrief"
           />
@@ -217,16 +249,44 @@ export function ResultsDebrief({sessionId}: {sessionId: string}) {
               ) : null}
 
               <div className="aced-debrief__cta">
+                {scoredRows.length > 0 &&
+                scoredRows.length * 2 <= rows.length ? (
+                  <Banner
+                    status="warning"
+                    title="Grade more answers to unlock the next room"
+                    description="Score 60 or more with most questions answered. Ending early keeps this round locked."
+                  />
+                ) : null}
                 <HStack gap={3} align="center" wrap="wrap">
-                  <Link className="aced-home__primary" href="/interview">
-                    {copy.cta}
-                  </Link>
+                  {passed && nextStage && nextCta ? (
+                    <ContinueSeriesButton
+                      seriesId={seriesId}
+                      fromSessionId={sessionId}
+                      stageNumber={nextStage}
+                      label={nextCta.label}
+                    />
+                  ) : null}
+                  {scoredRows.length > 0 ? (
+                    <ContinueSeriesButton
+                      seriesId={seriesId}
+                      fromSessionId={sessionId}
+                      stageNumber={stageNumber}
+                      label={copy.cta}
+                      variant={passed && nextStage ? 'secondary' : 'primary'}
+                    />
+                  ) : (
+                    <Link className="aced-home__primary" href={`/interview/start?session_id=${sessionId}`}>
+                      {copy.cta}
+                    </Link>
+                  )}
                   <Link className="aced-home__secondary" href="/studio">
                     Back to Home
                   </Link>
                   <DeleteInterviewButton sessionId={sessionId} />
                 </HStack>
-                <p className="aced-debrief__cta-hint">{copy.ctaHint}</p>
+                <p className="aced-debrief__cta-hint">
+                  {passed && nextCta ? nextCta.hint : copy.ctaHint}
+                </p>
               </div>
 
               {showScore && summary ? (

@@ -590,11 +590,13 @@ export function buildQuestionsFromCv(
     years,
     jdFocus: String(jdFocus),
     hasCompany: Boolean(jd?.company_name),
-    hasJd: Boolean(jd),
+    hasJd: Boolean(jd?.raw_text?.trim()),
     jdWantsAi,
     cvUsesAi: cvUsesAi(analysis),
     process: parseDesignProcessStance(process),
     orgPace: parseOrgPace(orgPace),
+    companyBrief: jd?.company_brief ?? null,
+    skillGaps: jd?.skill_gaps ?? [],
   });
 
   const mapped = draft.slice(0, INTERVIEW_QUESTION_COUNT).map((q) => ({
@@ -614,7 +616,7 @@ export function buildQuestionsFromCv(
 }
 
 export function looksLikeClassicOpener(text: string): boolean {
-  return /tell me about yourself|why (do you want|this kind of|this intern)|strengths as a |dealt with a conflict|five years/i.test(
+  return /tell me about yourself|why (do you want|are you applying|this kind of|this intern)|what do you know about|strengths as a |dealt with a conflict|five years/i.test(
     text,
   );
 }

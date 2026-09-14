@@ -7,6 +7,7 @@ import {
   getAnswerForUser,
   getCv,
   getQuestionForUserSession,
+  refreshSessionOverall,
   updateAnswerGrade,
 } from '@/lib/store';
 
@@ -74,6 +75,7 @@ export async function POST(request: Request) {
     });
 
     await updateAnswerGrade(answer.id, grade);
+    await refreshSessionOverall(session.id, auth.userId);
 
     return NextResponse.json(grade);
   } catch (error) {

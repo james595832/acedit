@@ -46,11 +46,37 @@ export type InterviewQuestionKind =
   | 'self_awareness'
   | 'conflict'
   | 'ambition'
+  | 'company_knowledge'
   | 'cv_project'
   | 'ai'
   | 'jd_fit'
   | 'stakeholder'
-  | 'horizon';
+  | 'horizon'
+  | 'team_ship'
+  | 'team_scope'
+  | 'team_taste'
+  | 'exec_outcome';
+
+export type InterviewPersona =
+  | 'hirer'
+  | 'engineer'
+  | 'pm'
+  | 'senior_designer'
+  | 'ceo'
+  | 'cio';
+
+export type InterviewSeries = {
+  id: string;
+  user_id: string;
+  cv_id: string | null;
+  job_description_id: string | null;
+  current_stage: number;
+  process_stance: string | null;
+  org_pace: string | null;
+  company_url: string | null;
+  target_track_id: string | null;
+  created_at: string;
+};
 
 export type CV = {
   id: string;
@@ -81,6 +107,7 @@ export type InterviewSession = {
   user_id: string;
   cv_id: string | null;
   job_description_id: string | null;
+  series_id: string | null;
   interview_type: InterviewType;
   stage_number: number;
   status: InterviewStatus;
@@ -98,6 +125,7 @@ export type InterviewQuestion = {
   question_order: number;
   question_category: QuestionCategory;
   is_personal: boolean;
+  persona: InterviewPersona | null;
   criteria_json: string | null;
   created_at: string;
 };
@@ -128,8 +156,10 @@ export type GeneratedQuestion = {
   text: string;
   category: QuestionCategory;
   is_personal: boolean;
+  persona?: InterviewPersona;
   criteria?: {
     kind?: InterviewQuestionKind;
+    persona?: InterviewPersona;
     mustCover: string[];
     strongSignals: string[];
     weakSignals: string[];

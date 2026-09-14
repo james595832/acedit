@@ -7,12 +7,15 @@ import type {
   CV,
   GradeResult,
   GeneratedQuestion,
+  InterviewPersona,
   InterviewQuestion,
+  InterviewSeries,
   InterviewSession,
   JobDescription,
   QuestionCategory,
   UserAnswer,
 } from '@/lib/types';
+import {parseInterviewPersona} from '@/lib/interview/personas';
 
 const DATA_DIR = path.join(process.cwd(), '.data');
 
@@ -94,12 +97,40 @@ function mapJd(row: Record<string, unknown>): JobDescription {
   };
 }
 
+function personaFromCriteriaJson(
+  raw: string | null | undefined,
+): InterviewPersona | null {
+  if (!raw) return null;
+  try {
+    const parsed = JSON.parse(raw) as {persona?: string};
+    return parseInterviewPersona(parsed.persona);
+  } catch {
+    return null;
+  }
+}
+
+function mapSeries(row: Record<string, unknown>): InterviewSeries {
+  return {
+    id: String(row.id),
+    user_id: String(row.user_id),
+    cv_id: (row.cv_id as string | null) ?? null,
+    job_description_id: (row.job_description_id as string | null) ?? null,
+    current_stage: Number(row.current_stage ?? 1),
+    process_stance: (row.process_stance as string | null) ?? null,
+    org_pace: (row.org_pace as string | null) ?? null,
+    company_url: (row.company_url as string | null) ?? null,
+    target_track_id: (row.target_track_id as string | null) ?? null,
+    created_at: String(row.created_at),
+  };
+}
+
 function mapSession(row: Record<string, unknown>): InterviewSession {
   return {
     id: String(row.id),
     user_id: String(row.user_id),
     cv_id: (row.cv_id as string | null) ?? null,
     job_description_id: (row.job_description_id as string | null) ?? null,
+    series_id: (row.series_id as string | null) ?? null,
     interview_type: row.interview_type as InterviewSession['interview_type'],
     stage_number: Number(row.stage_number ?? 1),
     status: row.status as InterviewSession['status'],
@@ -115,6 +146,7 @@ function mapSession(row: Record<string, unknown>): InterviewSession {
 }
 
 function mapQuestion(row: Record<string, unknown>): InterviewQuestion {
+  const criteria_json = (row.criteria_json as string | null) ?? null;
   return {
     id: String(row.id),
     session_id: String(row.session_id),
@@ -122,7 +154,10 @@ function mapQuestion(row: Record<string, unknown>): InterviewQuestion {
     question_order: Number(row.question_order ?? 0),
     question_category: row.question_category as QuestionCategory,
     is_personal: Boolean(row.is_personal),
-    criteria_json: (row.criteria_json as string | null) ?? null,
+    persona:
+      parseInterviewPersona(row.persona as string | null) ??
+      personaFromCriteriaJson(criteria_json),
+    criteria_json,
     created_at: String(row.created_at),
   };
 }
@@ -292,6 +327,36 @@ export async function saveJobDescription(
   return jd;
 }
 
+export async function updateJobDescription(
+  id: string,
+  userId: string,
+  patch: Partial<
+    Pick<JobDescription, 'company_name' | 'role_title' | 'raw_text'>
+  >,
+): Promise<JobDescription | null> {
+  if (useRemoteStore()) {
+    const admin = createServiceClient();
+    const {data, error} = await admin
+      .from('job_descriptions')
+      .update(patch)
+      .eq('id', id)
+      .eq('user_id', userId)
+      .select('*')
+      .maybeSingle();
+    if (error) throw new Error(error.message);
+    return data ? mapJd(data as Record<string, unknown>) : null;
+  }
+
+  const rows = await readJson<JobDescription[]>('job_descriptions.json', []);
+  const index = rows.findIndex(
+    (row) => row.id === id && row.user_id === userId,
+  );
+  if (index < 0) return null;
+  rows[index] = {...rows[index], ...patch};
+  await writeJson('job_descriptions.json', rows);
+  return rows[index];
+}
+
 export async function getJobDescription(
   id: string,
   userId?: string,
@@ -310,22 +375,195 @@ export async function getJobDescription(
   return userId ? owned(jd, userId) : jd;
 }
 
+export async function createSeries(
+  input: {
+    cv_id?: string | null;
+    job_description_id?: string | null;
+    process_stance?: string | null;
+    org_pace?: string | null;
+    company_url?: string | null;
+    target_track_id?: string | null;
+    current_stage?: number;
+  },
+  userId: string,
+): Promise<InterviewSeries> {
+  const row: InterviewSeries = {
+    id: randomUUID(),
+    user_id: userId,
+    cv_id: input.cv_id ?? null,
+    job_description_id: input.job_description_id ?? null,
+    current_stage: input.current_stage ?? 1,
+    process_stance: input.process_stance ?? null,
+    org_pace: input.org_pace ?? null,
+    company_url: input.company_url ?? null,
+    target_track_id: input.target_track_id ?? null,
+    created_at: new Date().toISOString(),
+  };
+
+  if (useRemoteStore()) {
+    const admin = createServiceClient();
+    const {data, error} = await admin
+      .from('interview_series')
+      .insert({
+        user_id: userId,
+        cv_id: row.cv_id,
+        job_description_id: row.job_description_id,
+        current_stage: row.current_stage,
+        process_stance: row.process_stance,
+        org_pace: row.org_pace,
+        company_url: row.company_url,
+        target_track_id: row.target_track_id,
+      })
+      .select('*')
+      .single();
+    if (error || !data) {
+      throw new Error(error?.message ?? 'Could not create interview series');
+    }
+    return mapSeries(data as Record<string, unknown>);
+  }
+
+  const rows = await readJson<InterviewSeries[]>('series.json', []);
+  rows.push(row);
+  await writeJson('series.json', rows);
+  return row;
+}
+
+export async function getSeries(
+  id: string,
+  userId?: string,
+): Promise<InterviewSeries | null> {
+  if (useRemoteStore()) {
+    const admin = createServiceClient();
+    let query = admin.from('interview_series').select('*').eq('id', id);
+    if (userId) query = query.eq('user_id', userId);
+    const {data, error} = await query.maybeSingle();
+    if (error) {
+      if (error.message?.includes('interview_series')) return null;
+      throw new Error(error.message);
+    }
+    return data ? mapSeries(data as Record<string, unknown>) : null;
+  }
+
+  const rows = await readJson<InterviewSeries[]>('series.json', []);
+  const series = rows.find((row) => row.id === id) ?? null;
+  return userId ? owned(series, userId) : series;
+}
+
+export async function updateSeries(
+  id: string,
+  userId: string,
+  patch: Partial<
+    Pick<
+      InterviewSeries,
+      | 'current_stage'
+      | 'cv_id'
+      | 'job_description_id'
+      | 'process_stance'
+      | 'org_pace'
+      | 'company_url'
+      | 'target_track_id'
+    >
+  >,
+): Promise<InterviewSeries | null> {
+  if (useRemoteStore()) {
+    const admin = createServiceClient();
+    const {data, error} = await admin
+      .from('interview_series')
+      .update(patch)
+      .eq('id', id)
+      .eq('user_id', userId)
+      .select('*')
+      .maybeSingle();
+    if (error) throw new Error(error.message);
+    return data ? mapSeries(data as Record<string, unknown>) : null;
+  }
+
+  const rows = await readJson<InterviewSeries[]>('series.json', []);
+  const index = rows.findIndex((row) => row.id === id && row.user_id === userId);
+  if (index < 0) return null;
+  rows[index] = {...rows[index], ...patch};
+  await writeJson('series.json', rows);
+  return rows[index];
+}
+
+export async function updateSessionFields(
+  id: string,
+  userId: string,
+  patch: Partial<
+    Pick<InterviewSession, 'series_id' | 'overall_score' | 'status' | 'completed_at'>
+  >,
+): Promise<InterviewSession | null> {
+  if (useRemoteStore()) {
+    const admin = createServiceClient();
+    const {data, error} = await admin
+      .from('interview_sessions')
+      .update(patch)
+      .eq('id', id)
+      .eq('user_id', userId)
+      .select('*')
+      .maybeSingle();
+    if (error) throw new Error(error.message);
+    return data ? mapSession(data as Record<string, unknown>) : null;
+  }
+
+  const rows = await readJson<InterviewSession[]>('sessions.json', []);
+  const index = rows.findIndex((row) => row.id === id && row.user_id === userId);
+  if (index < 0) return null;
+  rows[index] = {...rows[index], ...patch};
+  await writeJson('sessions.json', rows);
+  return rows[index];
+}
+
+export async function listSessionsBySeries(
+  seriesId: string,
+  userId: string,
+): Promise<InterviewSession[]> {
+  if (useRemoteStore()) {
+    const admin = createServiceClient();
+    const {data, error} = await admin
+      .from('interview_sessions')
+      .select('*')
+      .eq('user_id', userId)
+      .eq('series_id', seriesId)
+      .order('created_at', {ascending: false});
+    if (error) {
+      if (error.message?.includes('series_id')) return [];
+      throw new Error(error.message);
+    }
+    return ((data ?? []) as Record<string, unknown>[]).map(mapSession);
+  }
+
+  const sessions = await readJson<InterviewSession[]>('sessions.json', []);
+  return sessions
+    .filter((session) => session.user_id === userId && session.series_id === seriesId)
+    .sort(
+      (a, b) =>
+        new Date(b.created_at).getTime() - new Date(a.created_at).getTime(),
+    );
+}
+
 export async function createSession(
   input: {
     cv_id: string;
     job_description_id?: string | null;
+    series_id?: string | null;
+    stage_number?: number;
     interview_type: InterviewSession['interview_type'];
     questions: GeneratedQuestion[];
   },
   userId: string,
 ): Promise<{session: InterviewSession; questions: InterviewQuestion[]}> {
+  const stage_number = input.stage_number && input.stage_number > 0
+    ? Math.min(input.stage_number, 3)
+    : 1;
+
   if (useRemoteStore()) {
     const admin = createServiceClient();
     const baseSession = {
       user_id: userId,
       cv_id: input.cv_id,
       interview_type: input.interview_type,
-      stage_number: 1,
+      stage_number,
       status: 'in_progress',
       started_at: new Date().toISOString(),
     };
@@ -339,13 +577,23 @@ export async function createSession(
         .insert({
           ...baseSession,
           job_description_id: input.job_description_id ?? null,
+          series_id: input.series_id ?? null,
         })
         .select('*')
         .single();
-      if (first.error?.message?.includes('job_description_id')) {
+      const missingColumn =
+        first.error?.message?.includes('job_description_id') ||
+        first.error?.message?.includes('series_id');
+      if (missingColumn) {
+        const slim = {
+          ...baseSession,
+          ...(first.error?.message?.includes('job_description_id')
+            ? {}
+            : {job_description_id: input.job_description_id ?? null}),
+        };
         const retry = await admin
           .from('interview_sessions')
-          .insert(baseSession)
+          .insert(slim)
           .select('*')
           .single();
         sessionRow = (retry.data as Record<string, unknown> | null) ?? null;
@@ -363,14 +611,23 @@ export async function createSession(
     }
 
     const session = mapSession(sessionRow);
-    const withCriteria = input.questions.map((q, index) => ({
-      session_id: session.id,
-      question_text: q.text,
-      question_order: index + 1,
-      question_category: q.category,
-      is_personal: q.is_personal,
-      criteria_json: q.criteria ? JSON.stringify(q.criteria) : null,
-    }));
+    const withCriteria = input.questions.map((q, index) => {
+      const persona = parseInterviewPersona(q.persona ?? q.criteria?.persona);
+      const criteria = q.criteria
+        ? {...q.criteria, persona: persona ?? q.criteria.persona}
+        : persona
+          ? {persona}
+          : null;
+      return {
+        session_id: session.id,
+        question_text: q.text,
+        question_order: index + 1,
+        question_category: q.category,
+        is_personal: q.is_personal,
+        persona,
+        criteria_json: criteria ? JSON.stringify(criteria) : null,
+      };
+    });
 
     let storedQuestions: Record<string, unknown>[] | null = null;
     let questionError: {message: string} | null = null;
@@ -380,13 +637,18 @@ export async function createSession(
         .from('interview_questions')
         .insert(withCriteria)
         .select('*');
-      if (first.error?.message?.includes('criteria_json')) {
-        const withoutCriteria = withCriteria.map(
-          ({criteria_json: _ignored, ...rest}) => rest,
-        );
+      const missingCriteria = first.error?.message?.includes('criteria_json');
+      const missingPersona = first.error?.message?.includes('persona');
+      if (missingCriteria || missingPersona) {
+        const slim = withCriteria.map((row) => {
+          const next = {...row};
+          if (missingCriteria) delete (next as {criteria_json?: string | null}).criteria_json;
+          if (missingPersona) delete (next as {persona?: InterviewPersona | null}).persona;
+          return next;
+        });
         const retry = await admin
           .from('interview_questions')
-          .insert(withoutCriteria)
+          .insert(slim)
           .select('*');
         storedQuestions =
           (retry.data as Record<string, unknown>[] | null) ?? null;
@@ -419,8 +681,9 @@ export async function createSession(
     user_id: userId,
     cv_id: input.cv_id,
     job_description_id: input.job_description_id ?? null,
+    series_id: input.series_id ?? null,
     interview_type: input.interview_type,
-    stage_number: 1,
+    stage_number,
     status: 'in_progress',
     started_at: new Date().toISOString(),
     completed_at: null,
@@ -429,16 +692,25 @@ export async function createSession(
     created_at: new Date().toISOString(),
   };
 
-  const questions: InterviewQuestion[] = input.questions.map((q, index) => ({
-    id: randomUUID(),
-    session_id: session.id,
-    question_text: q.text,
-    question_order: index + 1,
-    question_category: q.category,
-    is_personal: q.is_personal,
-    criteria_json: q.criteria ? JSON.stringify(q.criteria) : null,
-    created_at: new Date().toISOString(),
-  }));
+  const questions: InterviewQuestion[] = input.questions.map((q, index) => {
+    const persona = parseInterviewPersona(q.persona ?? q.criteria?.persona);
+    const criteria = q.criteria
+      ? {...q.criteria, persona: persona ?? q.criteria.persona}
+      : persona
+        ? {persona}
+        : null;
+    return {
+      id: randomUUID(),
+      session_id: session.id,
+      question_text: q.text,
+      question_order: index + 1,
+      question_category: q.category,
+      is_personal: q.is_personal,
+      persona,
+      criteria_json: criteria ? JSON.stringify(criteria) : null,
+      created_at: new Date().toISOString(),
+    };
+  });
 
   sessions.push(session);
   await writeJson('sessions.json', sessions);
@@ -693,6 +965,73 @@ export async function listAnswersForQuestions(
   return questionIds
     .map((id) => latestByQuestion.get(id))
     .filter((a): a is UserAnswer => Boolean(a));
+}
+
+export async function scoreSessionAttempt(
+  sessionId: string,
+  userId: string,
+): Promise<{
+  questionCount: number;
+  gradedCount: number;
+  overall: number | null;
+}> {
+  const questions = await getSessionQuestions(sessionId);
+  const answers = await listAnswersForQuestions(
+    questions.map((question) => question.id),
+    userId,
+  );
+  const scores = answers
+    .map((answer) => {
+      if (typeof answer.score === 'number') return answer.score;
+      if (!answer.feedback) return null;
+      try {
+        const parsed = JSON.parse(answer.feedback) as {score?: number};
+        return typeof parsed.score === 'number' ? parsed.score : null;
+      } catch {
+        return null;
+      }
+    })
+    .filter((score): score is number => typeof score === 'number');
+  const overall =
+    scores.length > 0
+      ? scores.reduce((sum, score) => sum + score, 0) / scores.length
+      : null;
+  return {
+    questionCount: questions.length,
+    gradedCount: scores.length,
+    overall,
+  };
+}
+
+export async function getLatestStageAttempt(
+  seriesId: string,
+  stageNumber: number,
+  userId: string,
+): Promise<{
+  session: InterviewSession;
+  questionCount: number;
+  gradedCount: number;
+  overall: number | null;
+} | null> {
+  const sessions = (await listSessionsBySeries(seriesId, userId)).filter(
+    (session) => session.stage_number === stageNumber,
+  );
+  const latest = sessions[0];
+  if (!latest) return null;
+  const scored = await scoreSessionAttempt(latest.id, userId);
+  return {session: latest, ...scored};
+}
+
+export async function refreshSessionOverall(
+  sessionId: string,
+  userId: string,
+): Promise<number | null> {
+  const scored = await scoreSessionAttempt(sessionId, userId);
+  if (scored.overall === null) return null;
+  await updateSessionFields(sessionId, userId, {
+    overall_score: Math.round(scored.overall),
+  });
+  return scored.overall;
 }
 
 export async function updateAnswerGrade(

@@ -1,5 +1,5 @@
 import Image from 'next/image';
-import Link from 'next/link';
+import {Link} from '@astryxdesign/core/Link';
 
 const SUPPORT_EMAIL = 'support@acedit.app';
 

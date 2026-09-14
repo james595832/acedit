@@ -1,6 +1,5 @@
 'use client';
 
-import {useRouter} from 'next/navigation';
 import {Button} from '@astryxdesign/core/Button';
 import {Heading} from '@astryxdesign/core/Heading';
 import {Text} from '@astryxdesign/core/Text';
@@ -10,7 +9,6 @@ import {markWelcomeDone} from '@/lib/interview/create-draft';
 import {FIGMA_COPY} from '@/lib/interview/figma-copy';
 
 export function WelcomeOnboarding({firstName}: {firstName: string}) {
-  const router = useRouter();
   const copy = FIGMA_COPY.welcome;
 
   return (
@@ -32,9 +30,9 @@ export function WelcomeOnboarding({firstName}: {firstName: string}) {
         <Button
           label={copy.cta}
           variant="primary"
-          clickAction={() => {
+          href="/interview"
+          onClick={() => {
             markWelcomeDone();
-            router.push('/interview');
           }}
         />
       </VStack>
